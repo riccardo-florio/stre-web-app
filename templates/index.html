@@ -6,12 +6,83 @@
 </head>
 <body>
     <h1>Cerca contenuti</h1>
-    {% if error %}
-    <p style="color:red">{{ error }}</p>
-    {% endif %}
-    <form method="post">
-        <input type="text" name="query" placeholder="Titolo">
-        <input type="submit" value="Cerca">
-    </form>
+    <input type="text" id="query" placeholder="Titolo">
+    <button id="search">Cerca</button>
+    <div id="results"></div>
+    <div id="preview"></div>
+<script>
+const resultsDiv = document.getElementById('results');
+const previewDiv = document.getElementById('preview');
+
+document.getElementById('search').onclick = async () => {
+    const q = document.getElementById('query').value.trim();
+    if(!q) return;
+    const res = await fetch('/api/search', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({query: q})
+    });
+    if(!res.ok){alert('Errore nella ricerca');return;}
+    const data = await res.json();
+    resultsDiv.innerHTML = '';
+    previewDiv.innerHTML = '';
+    Object.entries(data).forEach(([name, info]) => {
+        const a = document.createElement('a');
+        const year = info.release_date ? info.release_date.split('-')[0] : '?';
+        a.textContent = `${name} (${year})`;
+        a.href = '#';
+        a.onclick = async (e) => {
+            e.preventDefault();
+            const resp = await fetch(`/api/preview/${info.url.split('/').pop()}`);
+            const details = await resp.json();
+            renderPreview(details);
+        };
+        const div = document.createElement('div');
+        div.appendChild(a);
+        resultsDiv.appendChild(div);
+    });
+};
+
+function renderPreview(data){
+    previewDiv.innerHTML = '';
+    const h2 = document.createElement('h2');
+    h2.textContent = data.name;
+    previewDiv.appendChild(h2);
+    const prog = document.createElement('progress');
+    prog.id = 'progress';
+    prog.max = 100;
+    prog.value = 0;
+    previewDiv.appendChild(prog);
+    if(data.type === 'movie'){
+        const btn = document.createElement('button');
+        btn.textContent = 'Download';
+        btn.onclick = () => startDownload(data.id);
+        previewDiv.appendChild(btn);
+    }else{
+        data.episodeList.forEach(ep => {
+            const btn = document.createElement('button');
+            btn.textContent = `Scarica S${ep.season}E${ep.episode}`;
+            btn.onclick = () => startDownload(data.id, ep.id);
+            previewDiv.appendChild(btn);
+            previewDiv.appendChild(document.createElement('br'));
+        });
+    }
+}
+
+function startDownload(id, ep){
+    const prog = document.getElementById('progress');
+    prog.value = 0;
+    const url = `/api/download/${id}` + (ep ? `?e=${ep}` : '');
+    const es = new EventSource(url);
+    es.onmessage = (ev) => {
+        if(ev.data === 'complete'){
+            prog.value = 100;
+            es.close();
+        }else{
+            prog.value = parseInt(ev.data);
+        }
+    };
+}
+</script>
 </body>
 </html>
