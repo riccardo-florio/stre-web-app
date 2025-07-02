@@ -6,12 +6,80 @@
 </head>
 <body>
     <h1>Cerca contenuti</h1>
-    {% if error %}
-    <p style="color:red">{{ error }}</p>
-    {% endif %}
-    <form method="post">
-        <input type="text" name="query" placeholder="Titolo">
+    <form id="search-form">
+        <input type="text" id="query" placeholder="Titolo">
         <input type="submit" value="Cerca">
     </form>
+    <ul id="results"></ul>
+    <div id="preview"></div>
+    <div id="progress" style="margin-top:1em;color:green"></div>
+<script>
+const domain = "{{ domain }}";
+
+document.getElementById('search-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const query = document.getElementById('query').value;
+    const res = await fetch('/api/search', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({query})
+    });
+    if (!res.ok) return;
+    const data = await res.json();
+    const list = document.getElementById('results');
+    list.innerHTML = '';
+    for (const [name, info] of Object.entries(data)) {
+        const li = document.createElement('li');
+        const a = document.createElement('a');
+        a.href = '#';
+        a.textContent = `${name} (${(info.release_date||'').split('-')[0] || '?'})`;
+        a.onclick = () => loadPreview(info.url.split('/').pop());
+        li.appendChild(a);
+        list.appendChild(li);
+    }
+});
+
+async function loadPreview(slug) {
+    const res = await fetch('/api/preview/' + slug);
+    if (!res.ok) return;
+    const data = await res.json();
+    const div = document.getElementById('preview');
+    div.innerHTML = `<h2>${data.name}</h2><p>Tipo: ${data.type}</p>`;
+    if (data.type === 'movie') {
+        const btn = document.createElement('button');
+        btn.textContent = 'Download';
+        btn.onclick = () => startDownload(data.id);
+        div.appendChild(btn);
+    } else {
+        const ul = document.createElement('ul');
+        for (const ep of data.episodeList) {
+            const li = document.createElement('li');
+            li.textContent = `S${ep.season}E${ep.episode} - ${ep.name} `;
+            const btn = document.createElement('button');
+            btn.textContent = 'Download';
+            btn.onclick = () => startDownload(data.id, ep.id);
+            li.appendChild(btn);
+            ul.appendChild(li);
+        }
+        div.appendChild(ul);
+    }
+}
+
+function startDownload(id, ep) {
+    const url = '/api/download/' + id + (ep ? '?e=' + ep : '');
+    const evt = new EventSource(url);
+    const p = document.getElementById('progress');
+    p.textContent = 'Download in corso...';
+    evt.onmessage = ev => {
+        const data = JSON.parse(ev.data);
+        if (data.status === 'finished') {
+            p.textContent = 'Download completato: ' + data.filename;
+            evt.close();
+        } else {
+            p.textContent = `Progresso: ${data.progress} Velocità: ${data.speed} ETA: ${data.eta}`;
+        }
+    };
+}
+</script>
 </body>
 </html>
