@@ -1,0 +1,20 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Risultati per {{ query }}</title>
+</head>
+<body>
+    <h1>Risultati per "{{ query }}"</h1>
+    <ul>
+    {% for name, info in results.items() %}
+        <li>
+            <a href="{{ url_for('preview', slug=info['url'].split('/')[-1]) }}">
+                {{ name }} ({{ info.get('release_date', '').split('-')[0] or '?' }})
+            </a>
+        </li>
+    {% endfor %}
+    </ul>
+    <a href="{{ url_for('index') }}">Nuova ricerca</a>
+</body>
+</html>
