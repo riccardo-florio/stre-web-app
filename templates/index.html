@@ -6,12 +6,71 @@
 </head>
 <body>
     <h1>Cerca contenuti</h1>
-    {% if error %}
-    <p style="color:red">{{ error }}</p>
-    {% endif %}
-    <form method="post">
+    <form id="search-form">
         <input type="text" name="query" placeholder="Titolo">
         <input type="submit" value="Cerca">
     </form>
+    <div id="results"></div>
+    <div id="preview"></div>
+    <div id="progress"></div>
+
+<script>
+const form = document.getElementById('search-form');
+const results = document.getElementById('results');
+const preview = document.getElementById('preview');
+const progress = document.getElementById('progress');
+
+form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const query = form.query.value.trim();
+    if (!query) return;
+    const res = await fetch('/api/search?query=' + encodeURIComponent(query));
+    const data = await res.json();
+    results.innerHTML = '<ul>' + Object.entries(data).map(([name, info]) => {
+        const year = info.release_date ? info.release_date.split('-')[0] : '?';
+        const slug = info.url.split('/').pop();
+        return `<li><a href="#" data-slug="${slug}">${name} (${year})</a></li>`;
+    }).join('') + '</ul>';
+    preview.innerHTML = '';
+    progress.textContent = '';
+});
+
+results.addEventListener('click', async (e) => {
+    if (e.target.tagName !== 'A') return;
+    e.preventDefault();
+    const slug = e.target.dataset.slug;
+    const res = await fetch('/api/preview/' + slug);
+    const data = await res.json();
+    if (data.type === 'movie') {
+        preview.innerHTML = `<h2>${data.name}</h2>` +
+            `<button data-id="${data.id}">Download</button>`;
+    } else {
+        preview.innerHTML = `<h2>${data.name}</h2><ul>` +
+            data.episodeList.map(ep =>
+                `<li>S${ep.season}E${ep.episode} - ${ep.name} ` +
+                `<button data-id="${data.id}" data-episode="${ep.id}">Download</button></li>`
+            ).join('') +
+            '</ul>';
+    }
+    progress.textContent = '';
+});
+
+preview.addEventListener('click', (e) => {
+    if (e.target.tagName !== 'BUTTON') return;
+    const id = e.target.dataset.id;
+    const episode = e.target.dataset.episode;
+    const url = '/api/download/' + id + (episode ? '?e=' + episode : '');
+    progress.textContent = '0%';
+    const sse = new EventSource(url);
+    sse.onmessage = (ev) => {
+        if (ev.data === 'done') {
+            progress.textContent = 'Completato';
+            sse.close();
+        } else {
+            progress.textContent = ev.data + '%';
+        }
+    };
+});
+</script>
 </body>
 </html>

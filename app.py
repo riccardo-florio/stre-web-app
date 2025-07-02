@@ -1,4 +1,6 @@
-from flask import Flask, request, render_template, url_for, redirect
+from flask import Flask, request, render_template, url_for, redirect, jsonify, Response, stream_with_context
+import threading
+import queue
 from scuapi import API
 from utils.get_available_domains import get_available_domains
 from utils.download_sc_video import download_sc_video
@@ -21,14 +23,8 @@ if not DOMAIN:
 api = API(domain=DOMAIN)
 
 
-@app.route("/", methods=["GET", "POST"])
+@app.route("/")
 def index():
-    if request.method == "POST":
-        query = request.form.get("query", "").strip()
-        if not query:
-            return render_template("index.html", error="Inserisci una query."), 400
-        results = api.search(query)
-        return render_template("results.html", query=query, results=results)
     return render_template("index.html")
 
 
@@ -36,6 +32,54 @@ def index():
 def preview(slug):
     data = api.preview(slug)
     return render_template("preview.html", data=data, domain=DOMAIN)
+
+
+@app.route("/api/search")
+def api_search():
+    query = request.args.get("query", "").strip()
+    if not query:
+        return jsonify({"error": "missing query"}), 400
+    results = api.search(query)
+    return jsonify(results)
+
+
+@app.route("/api/preview/<slug>")
+def api_preview(slug):
+    data = api.preview(slug)
+    return jsonify(data)
+
+
+@app.route("/api/download/<content_id>")
+def api_download(content_id):
+    episode_id = request.args.get("e")
+    watch_url = f"https://{DOMAIN}/it/watch/{content_id}"
+    if episode_id:
+        watch_url += f"?e={episode_id}"
+
+    q = queue.Queue()
+
+    def progress_hook(d):
+        q.put(d)
+
+    def run():
+        download_sc_video(watch_url, progress_callback=progress_hook)
+        q.put({"status": "done"})
+
+    threading.Thread(target=run).start()
+
+    def event_stream():
+        while True:
+            info = q.get()
+            if info.get("status") == "done":
+                yield "data: done\n\n"
+                break
+            if info.get("status") == "downloading":
+                total = info.get("total_bytes") or info.get("total_bytes_estimate")
+                if total:
+                    pct = int(info.get("downloaded_bytes", 0) / total * 100)
+                    yield f"data: {pct}\n\n"
+
+    return Response(stream_with_context(event_stream()), mimetype="text/event-stream")
 
 
 @app.route("/download/<content_id>")
