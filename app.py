@@ -1,7 +1,7 @@
-from flask import Flask, request, render_template, url_for, redirect
+from flask import Flask, request, render_template, jsonify, Response, stream_with_context
 from scuapi import API
 from utils.get_available_domains import get_available_domains
-from utils.download_sc_video import download_sc_video
+from utils.download_sc_video import download_sc_video, download_sc_video_progress
 
 app = Flask(__name__)
 
@@ -21,21 +21,44 @@ if not DOMAIN:
 api = API(domain=DOMAIN)
 
 
-@app.route("/", methods=["GET", "POST"])
+@app.route("/")
 def index():
-    if request.method == "POST":
-        query = request.form.get("query", "").strip()
-        if not query:
-            return render_template("index.html", error="Inserisci una query."), 400
-        results = api.search(query)
-        return render_template("results.html", query=query, results=results)
-    return render_template("index.html")
+    return render_template("index.html", domain=DOMAIN)
 
 
 @app.route("/preview/<slug>")
 def preview(slug):
     data = api.preview(slug)
     return render_template("preview.html", data=data, domain=DOMAIN)
+
+
+@app.route("/api/search", methods=["POST"])
+def api_search():
+    query = request.form.get("query", "").strip()
+    if not query:
+        return jsonify({"error": "Missing query"}), 400
+    results = api.search(query)
+    return jsonify(results)
+
+
+@app.route("/api/preview/<slug>")
+def api_preview(slug):
+    data = api.preview(slug)
+    return jsonify(data)
+
+
+@app.route("/api/download/<content_id>")
+def api_download(content_id):
+    episode_id = request.args.get("e")
+    watch_url = f"https://{DOMAIN}/it/watch/{content_id}"
+    if episode_id:
+        watch_url += f"?e={episode_id}"
+
+    def generate():
+        for progress in download_sc_video_progress(watch_url):
+            yield f"data:{progress}\n\n"
+
+    return Response(stream_with_context(generate()), mimetype="text/event-stream")
 
 
 @app.route("/download/<content_id>")

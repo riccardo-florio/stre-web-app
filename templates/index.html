@@ -6,12 +6,92 @@
 </head>
 <body>
     <h1>Cerca contenuti</h1>
-    {% if error %}
-    <p style="color:red">{{ error }}</p>
-    {% endif %}
-    <form method="post">
+    <form id="search-form">
         <input type="text" name="query" placeholder="Titolo">
         <input type="submit" value="Cerca">
     </form>
+    <div id="results"></div>
+    <div id="preview"></div>
+    <div id="download-progress"></div>
+
+    <script>
+    const DOMAIN = "{{ domain }}";
+    const form = document.getElementById('search-form');
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const data = new FormData(form);
+        const res = await fetch('/api/search', {method: 'POST', body: data});
+        const results = await res.json();
+        showResults(results);
+    });
+
+    function showResults(results) {
+        const container = document.getElementById('results');
+        container.innerHTML = '';
+        const ul = document.createElement('ul');
+        Object.entries(results).forEach(([name, info]) => {
+            const li = document.createElement('li');
+            const a = document.createElement('a');
+            a.href = '#';
+            a.textContent = `${name} (${(info.release_date || '?').split('-')[0]})`;
+            a.addEventListener('click', () => loadPreview(info.url.split('/').pop()));
+            li.appendChild(a);
+            ul.appendChild(li);
+        });
+        container.appendChild(ul);
+    }
+
+    async function loadPreview(slug) {
+        const res = await fetch('/api/preview/' + slug);
+        const data = await res.json();
+        const container = document.getElementById('preview');
+        container.innerHTML = `<h2>${data.name}</h2><p>Tipo: ${data.type}</p>`;
+        if (data.type === 'movie') {
+            const watch = document.createElement('a');
+            watch.href = `https://${DOMAIN}/it/watch/${data.id}`;
+            watch.target = '_blank';
+            watch.textContent = 'Guarda';
+            const dl = document.createElement('button');
+            dl.textContent = 'Download';
+            dl.addEventListener('click', () => startDownload(data.id));
+            container.appendChild(watch);
+            container.appendChild(document.createTextNode(' '));
+            container.appendChild(dl);
+        } else {
+            const ul = document.createElement('ul');
+            data.episodeList.forEach(ep => {
+                const li = document.createElement('li');
+                li.textContent = `S${ep.season}E${ep.episode} - ${ep.name} `;
+                const watch = document.createElement('a');
+                watch.href = `https://${DOMAIN}/it/watch/${data.id}?e=${ep.id}`;
+                watch.target = '_blank';
+                watch.textContent = 'Guarda';
+                const dl = document.createElement('button');
+                dl.textContent = 'Download';
+                dl.addEventListener('click', () => startDownload(data.id, ep.id));
+                li.appendChild(watch);
+                li.appendChild(document.createTextNode(' '));
+                li.appendChild(dl);
+                ul.appendChild(li);
+            });
+            container.appendChild(ul);
+        }
+    }
+
+    function startDownload(id, ep=null) {
+        const progressDiv = document.getElementById('download-progress');
+        progressDiv.textContent = 'Download in corso...';
+        const url = '/api/download/' + id + (ep ? ('?e=' + ep) : '');
+        const evt = new EventSource(url);
+        evt.onmessage = (ev) => {
+            if (ev.data === 'done') {
+                progressDiv.textContent = 'Download completato!';
+                evt.close();
+            } else {
+                progressDiv.textContent = 'Progresso: ' + ev.data;
+            }
+        };
+    }
+    </script>
 </body>
 </html>
