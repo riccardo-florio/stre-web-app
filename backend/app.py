@@ -1,6 +1,7 @@
-from flask import Flask, send_from_directory, jsonify
+from flask import Flask, send_from_directory, jsonify, Response
+import json
 from pathlib import Path
-from utils.app_functions import get_stre_domain, search
+from utils.app_functions import get_stre_domain, search, download
 from scuapi import API
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -23,7 +24,15 @@ def get_main_domain():
 @app.route("/api/search/<query>")
 def search_query(query):
     results = search(sc, query)
-    return jsonify(results)
+    return Response(
+        json.dumps(results, ensure_ascii=False, sort_keys=False),
+        content_type="application/json"
+    )
+
+@app.route("/api/download/<domain>/<id>")
+def download_link(domain, id):
+    download(domain, id)
+    return
 
 if __name__ == "__main__":
     app.run(debug=True)
