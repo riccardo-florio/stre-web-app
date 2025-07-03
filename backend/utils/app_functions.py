@@ -32,6 +32,6 @@ def search(sc, query):
     results = sc.search(query)
     return results
 
-def download_with_socket(domain, id, socketio, sid=None):
+def download_with_socket(domain, id, socketio):
     link = f'https://{domain}/it/watch/{id}'
-    download_sc_video(link, socketio=socketio, sid=sid)
+    download_sc_video(link, socketio=socketio)
