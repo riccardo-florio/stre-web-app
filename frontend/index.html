@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Stre Downloader App</title>
+
+    <!-- CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=search" />
+</head>
+
+<body class="bg-gray-50 p-10 flex justify-center h-screen">
+    <!-- contenitore principale -->
+    <div
+        class="max-w-screen-xl h-full w-full bg-white rounded-[5rem] shadow border border-gray-200 flex items-center justify-center">
+        
+        <form class="flex flex-col items-center">
+            <h1 class="text-3xl mb-6">Cosa vuoi scaricare?</h1>
+            <div class="flex items-center gap-2">
+                <input type="text" placeholder="Titolo del film / serie tv"
+                    class="border-2 border-gray-200 rounded-full px-5 py-3 outline-none w-[20rem]">
+
+                <button type="submit"
+                    class="flex items-center justify-center bg-blue-500 hover:bg-blue-600 text-white p-4 rounded-full transition">
+                    <span class="material-symbols-rounded text-[20px]">
+                        search
+                    </span>
+                </button>
+            </div>
+            <span id="stre-url" class="mt-3">Recuper url in corso...</span>
+        </form>
+
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/app.js"></script>
+</body>
+
+</html>
