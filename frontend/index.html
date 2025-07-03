@@ -39,7 +39,8 @@
         <!-- elenco risultati -->
         <div id="search-results" class="h-full max-w-screen-sm w-full flex hidden flex-col">
             <div class="flex items-center gap-5 mb-5 border-b">
-                <button onclick="searchResultToHome()" class="flex items-center justify-center hover:bg-gray-100 p-4 rounded-full transition">
+                <button onclick="searchResultToHome()"
+                    class="flex items-center justify-center hover:bg-gray-100 p-4 rounded-full transition">
                     <span class="material-symbols-rounded text-2xl">
                         arrow_back
                     </span>
@@ -55,17 +56,30 @@
         <!-- Download -->
         <div id="download-tab" class="h-full max-w-screen-sm w-full flex hidden flex-col">
             <div class="flex items-center gap-5 mb-5 border-b">
-                <button onclick="downloadToSearchResult()" class="flex items-center justify-center hover:bg-gray-100 p-4 rounded-full transition">
+                <button onclick="downloadToSearchResult()"
+                    class="flex items-center justify-center hover:bg-gray-100 p-4 rounded-full transition">
                     <span class="material-symbols-rounded text-2xl">
                         arrow_back
                     </span>
                 </button>
                 <span class="text-2xl">Download</span>
             </div>
-            <button id="download-btn" class="bg-blue-500 rounded-[0.5em] text-white px-4 py-2 font-medium">Avvia Download</button>
+            <button id="download-btn" class="bg-blue-500 rounded-[0.5em] text-white px-4 py-2 font-medium">
+                Avvia Download
+            </button>
+
+            <div id="download-progress-container" class="mt-4 hidden">
+                <div class="h-6 bg-gray-200 rounded-full w-full overflow-hidden">
+                    <div id="download-progress-bar" class="bg-green-500 h-full rounded-full w-0"></div>
+                </div>
+                <span id="download-progress-text" class="mt-2 block text-sm text-gray-700">0%</span>
+            </div>
+
         </div>
 
     </div>
+
+    <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
 
     <script src="js/api.js"></script>
     <script src="js/ui.js"></script>
