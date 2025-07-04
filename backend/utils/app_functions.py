@@ -4,6 +4,10 @@ import asyncio
 import threading
 from queue import Queue, Empty
 import humanize
+import socket
+
+# 👇 Nuovo dizionario globale per gestire le cancellazioni
+cancel_flags = {}
 
 def check_connection(domain, port=80):
     try:
@@ -14,11 +18,11 @@ def check_connection(domain, port=80):
 
 def get_stre_domain():
     domains = get_available_domains()
-    
+
     if not domains:
         print("Errore: nessun dominio disponibile trovato.")
         return
-    
+
     domain = next(
         (d for d in domains if d.startswith("streamingcommunity.") or d.startswith("streamingunity.")),
         None
@@ -39,13 +43,21 @@ def download_with_socket(domain, filmid, socketio, sid):
     url = f'https://{domain}/it/watch/{filmid}'
     queue = Queue()
 
-    # Lancia il download in un thread
-    thread = threading.Thread(target=download_sc_video, args=(url, queue))
+    # 👇 Crea e registra l'evento di cancellazione
+    cancel_event = threading.Event()
+    cancel_flags[sid] = cancel_event
+
+    # 👇 Lancia il download in un thread
+    thread = threading.Thread(target=download_sc_video, args=(url, queue, cancel_event))
     thread.start()
 
-    # Esegui un loop asincrono per leggere dalla coda
+    # 👇 Esegui un loop asincrono per leggere dalla coda
     async def emit_updates():
         while thread.is_alive() or not queue.empty():
+            if cancel_event.is_set():
+                socketio.emit('download_cancelled', {'status': 'cancelled'}, to=sid)
+                break
+
             try:
                 d = queue.get(timeout=0.1)
                 if d['status'] == 'downloading':
@@ -58,17 +70,14 @@ def download_with_socket(domain, filmid, socketio, sid):
                         percent = round(downloaded / total * 100, 2)
                         progress_data = {'percent': percent}
 
-                        # ETA
                         if eta_seconds is not None:
                             minutes = eta_seconds // 60
                             seconds = eta_seconds % 60
                             progress_data['eta'] = f"{int(minutes)}:{int(seconds):02d}"
 
-                        # Velocità
                         if speed:
                             progress_data['speed'] = humanize.naturalsize(speed, binary=True) + "/s"
 
-                        # Dati scaricati / totali
                         progress_data['downloaded'] = humanize.naturalsize(downloaded, binary=True)
                         progress_data['total'] = humanize.naturalsize(total, binary=True)
 
@@ -76,7 +85,18 @@ def download_with_socket(domain, filmid, socketio, sid):
 
                 elif d['status'] == 'finished':
                     socketio.emit('download_finished', {'status': 'done'}, to=sid)
+                    break
+
             except Empty:
                 await asyncio.sleep(0.1)
 
+        # 👇 Pulisci il flag dopo la fine
+        cancel_flags.pop(sid, None)
+
     return emit_updates()
+
+# 👇 Funzione per segnare un download come "da annullare"
+def cancel_download(sid):
+    if sid in cancel_flags:
+        cancel_flags[sid].set()
+        print(f"[INFO] Richiesta di annullamento per socket {sid}")

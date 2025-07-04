@@ -1,8 +1,9 @@
+socket = null;
 let socketid = undefined;
 let filmId = null;
 
 window.onload = () => {
-    const socket = io();
+    socket = io();
     socket.connect("http://127.0.0.1:5000");
 
     socket.on("connect", () => {
@@ -11,7 +12,7 @@ window.onload = () => {
         console.log("Socket id: " + socketid);
     })
 
-    /* Gestione dello stato del download */
+    // Gestione dello stato del download
     socket.on('download_progress', data => {
         updateDownloadProgress(
             data.percent,
@@ -21,6 +22,12 @@ window.onload = () => {
             data.speed
         );
     });
+
+    // Gestione dell'annullamento del download
+    socket.on("download_cancelled", () => {
+        updateDownloadProgress(0);
+        document.getElementById("progress-span").innerText = "❌ Annullato";
+    });
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -29,6 +36,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const form = document.querySelector('form');
     const downloadBtn = document.getElementById('download-btn');
+    const cancelDownloadBtn = document.getElementById('cancel-download-btn');
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -60,5 +68,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     downloadBtn.addEventListener('click', async (e) => {
         fetch(`/api/download/${mainUrl}/${filmId}/${socketid}`);
+    })
+
+    cancelDownloadBtn.addEventListener('click', async (e) => {
+        socket.emit("cancel_download");
     })
 });

@@ -1,9 +1,9 @@
-from flask import Flask, send_from_directory, jsonify, Response
+from flask import Flask, send_from_directory, jsonify, Response, request
 from asyncio import sleep
 from flask_socketio import SocketIO
 import json
 from pathlib import Path
-from utils.app_functions import get_stre_domain, search, download_with_socket
+from utils.app_functions import get_stre_domain, search, download_with_socket, cancel_download
 from scuapi import API
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -34,7 +34,14 @@ def search_query(query):
 
 @app.route("/api/download/<domain>/<filmid>/<socketid>")
 async def download_link(domain, filmid, socketid):
-    return await download_with_socket(domain, filmid, socketio, sid=socketid)
+    await download_with_socket(domain, filmid, socketio, sid=socketid)
+    return jsonify({"status": "started"})  # 👈 Risposta valida
+
+@socketio.on("cancel_download")
+def handle_cancel_download():
+    sid = request.sid
+    cancel_download(sid)
+    emit("download_cancelled", {"status": "cancelled"}, to=sid)
 
 if __name__ == "__main__":
     socketio.run(app, debug=True)
