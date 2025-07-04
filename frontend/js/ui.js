@@ -15,8 +15,8 @@ function populateSearchResults(results, query, mainUrl) {
 
     const resultsCardsContainer = document.getElementById('search-cards-container');
 
-    if (!results) {
-        resultsCardsContainer.innerHTML = "Nessun titolo corrisponde alla tua ricerca."
+    if (!results || Object.keys(results).length === 0) {
+        resultsCardsContainer.innerHTML = "Nessun titolo corrisponde alla tua ricerca.";
         return;
     }
 

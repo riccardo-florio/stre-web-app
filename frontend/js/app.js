@@ -67,7 +67,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     downloadBtn.addEventListener('click', async (e) => {
-        fetch(`/api/download/${mainUrl}/${filmId}/${socketid}`);
+        socket.emit("start_download", {
+            domain: mainUrl,
+            filmid: filmId
+        });
+
     })
 
     cancelDownloadBtn.addEventListener('click', async (e) => {

@@ -5,6 +5,7 @@ import threading
 from queue import Queue, Empty
 import humanize
 import socket
+import time
 
 # 👇 Nuovo dizionario globale per gestire le cancellazioni
 cancel_flags = {}
@@ -42,24 +43,25 @@ def search(sc, query):
 def download_with_socket(domain, filmid, socketio, sid):
     url = f'https://{domain}/it/watch/{filmid}'
     queue = Queue()
+    cancel_event = threading.Event()  # 👈 nuovo event per cancellazione
 
-    # 👇 Crea e registra l'evento di cancellazione
-    cancel_event = threading.Event()
+    # Salva il flag di cancellazione per questo socket
     cancel_flags[sid] = cancel_event
 
-    # 👇 Lancia il download in un thread
+    # Lancia il download in un thread
     thread = threading.Thread(target=download_sc_video, args=(url, queue, cancel_event))
     thread.start()
 
-    # 👇 Esegui un loop asincrono per leggere dalla coda
-    async def emit_updates():
+    def emit_updates():
         while thread.is_alive() or not queue.empty():
-            if cancel_event.is_set():
-                socketio.emit('download_cancelled', {'status': 'cancelled'}, to=sid)
-                break
-
             try:
                 d = queue.get(timeout=0.1)
+
+                if cancel_event.is_set():
+                    socketio.emit('download_cancelled', {'status': 'cancelled'}, to=sid)
+                    print(f"[INFO] Download annullato per {sid}")
+                    break
+
                 if d['status'] == 'downloading':
                     total = d.get('total_bytes') or d.get('total_bytes_estimate')
                     downloaded = d.get('downloaded_bytes', 0)
@@ -85,18 +87,16 @@ def download_with_socket(domain, filmid, socketio, sid):
 
                 elif d['status'] == 'finished':
                     socketio.emit('download_finished', {'status': 'done'}, to=sid)
-                    break
 
             except Empty:
-                await asyncio.sleep(0.1)
+                time.sleep(0.1)
 
-        # 👇 Pulisci il flag dopo la fine
-        cancel_flags.pop(sid, None)
+    threading.Thread(target=emit_updates).start()
 
-    return emit_updates()
 
 # 👇 Funzione per segnare un download come "da annullare"
 def cancel_download(sid):
     if sid in cancel_flags:
         cancel_flags[sid].set()
         print(f"[INFO] Richiesta di annullamento per socket {sid}")
+

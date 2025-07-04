@@ -11,12 +11,11 @@ def download_hook(queue, cancel_event, d):
     queue.put(d)
 
 def download_sc_video(url, queue, cancel_event: threading.Event, output_path="downloads/%(title)s/%(title)s.%(ext)s"):
-    # Hook parziale che riceve anche l'evento di annullamento
     hook = partial(download_hook, queue, cancel_event)
 
     ydl_opts = {
         'outtmpl': output_path,
-        #'format': 'best',
+        # 'format': 'best',  # Puoi scommentare se vuoi forzare il formato migliore
         'quiet': True,
         'noplaylist': True,
         'merge_output_format': 'mp4',
@@ -28,3 +27,4 @@ def download_sc_video(url, queue, cancel_event: threading.Event, output_path="do
             ydl.download([url])
         except Exception as e:
             print(f"[YT-DLP] Download interrotto: {e}")
+            queue.put({'status': 'cancelled'})  # 👈 utile per inviare info al socket

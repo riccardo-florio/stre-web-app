@@ -107,7 +107,9 @@ socket.on('download_progress', data => {
 
 ## TODO
 
-- sistemare API per migliorare la gestione del socket
-- implementare gestione accessi
+- gestione download completato
+- gestione download interrotto dal server
+- sistemare ui
+- implementare gestione accessi multipli
 - implementare download multipli
 

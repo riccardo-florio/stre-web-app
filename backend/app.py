@@ -1,6 +1,6 @@
 from flask import Flask, send_from_directory, jsonify, Response, request
 from asyncio import sleep
-from flask_socketio import SocketIO
+from flask_socketio import SocketIO, emit
 import json
 from pathlib import Path
 from utils.app_functions import get_stre_domain, search, download_with_socket, cancel_download
@@ -32,10 +32,14 @@ def search_query(query):
         content_type="application/json"
     )
 
-@app.route("/api/download/<domain>/<filmid>/<socketid>")
-async def download_link(domain, filmid, socketid):
-    await download_with_socket(domain, filmid, socketio, sid=socketid)
-    return jsonify({"status": "started"})  # 👈 Risposta valida
+@socketio.on("start_download")
+def handle_start_download(data):
+    domain = data.get("domain")
+    filmid = data.get("filmid")
+    sid = request.sid
+    print(f"[INFO] Avvio download per {filmid} dal dominio {domain} (SID: {sid})")
+    # Avvia il download in un thread
+    socketio.start_background_task(download_with_socket, domain, filmid, socketio, sid)
 
 @socketio.on("cancel_download")
 def handle_cancel_download():
