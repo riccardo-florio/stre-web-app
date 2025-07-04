@@ -3,4 +3,6 @@ requests
 yt_dlp
 pycryptodomex
 https://github.com/Blu-Tiger/StreamingCommunity-yt-dlp-plugin/archive/master.zip
-flask
+flask[async]
+flask-socketio
+humanize

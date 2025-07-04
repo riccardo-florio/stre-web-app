@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Stre Downloader App</title>
+
+    <!-- CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+</head>
+
+<body class="bg-gray-50 p-10 flex justify-center h-screen">
+    <!-- contenitore principale -->
+    <div
+        class="max-w-screen-xl h-full w-full bg-white rounded-[5rem] p-10 shadow border border-gray-200 flex items-center justify-center">
+
+        <!-- form di ricerca -->
+        <form class="flex flex-col items-center">
+            <h1 class="text-3xl mb-6">Cosa vuoi scaricare?</h1>
+            <div class="flex items-center gap-2">
+                <input type="text" placeholder="Titolo del film / serie tv"
+                    class="border-2 border-gray-200 rounded-full px-5 py-3 outline-none w-[20rem]">
+
+                <button type="submit"
+                    class="flex items-center justify-center bg-blue-500 hover:bg-blue-600 text-white p-4 rounded-full transition">
+                    <span class="material-symbols-rounded text-[20px]">
+                        search
+                    </span>
+                </button>
+            </div>
+            <span id="stre-url" class="mt-3">Recuper url in corso...</span>
+        </form>
+
+        <!-- elenco risultati -->
+        <div id="search-results" class="h-full max-w-screen-sm w-full flex hidden flex-col">
+            <div class="flex items-center gap-5 mb-5 border-b">
+                <button onclick="searchResultToHome()"
+                    class="flex items-center justify-center hover:bg-gray-100 p-4 rounded-full transition">
+                    <span class="material-symbols-rounded text-2xl">
+                        arrow_back
+                    </span>
+                </button>
+                <span id="search-query-title" class="text-2xl">Risultati per: john wick</span>
+            </div>
+            <!-- result cards container -->
+            <div class="w-full flex-1 overflow-y-auto">
+                <div id="search-cards-container" class="flex flex-col gap-5 w-full"></div>
+            </div>
+        </div>
+
+        <!-- Download -->
+        <div id="download-tab" class="h-full max-w-screen-sm w-full flex hidden flex-col">
+            <div class="flex items-center gap-5 mb-5 border-b">
+                <button onclick="downloadToSearchResult()"
+                    class="flex items-center justify-center hover:bg-gray-100 p-4 rounded-full transition">
+                    <span class="material-symbols-rounded text-2xl">
+                        arrow_back
+                    </span>
+                </button>
+                <span class="text-2xl">Download</span>
+            </div>
+            <button id="download-btn" class="bg-blue-500 rounded-[0.5em] text-white px-4 py-2 font-medium">
+                Avvia Download
+            </button>
+            <div class="my-2 w-full h-2.5 bg-gray-200 rounded-full overflow-hidden">
+                <div id="progress-bar" class="bg-blue-500 h-full w-0 rounded-full transition-all duration-200"></div>
+            </div>
+            <div class="flex justify-between text-sm text-gray-600">
+                <span id="progress-span">0%</span>
+                <span id="progress-eta">ETA: --:--</span>
+            </div>
+            <div class="text-sm text-gray-600 mt-1 flex justify-between">
+                <span id="progress-data">0 / 0</span>
+                <span id="progress-speed">Velocità: --</span>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"
+        integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA=="
+        crossorigin="anonymous"></script>
+    <script src="js/api.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/app.js"></script>
+</body>
+
+</html>
