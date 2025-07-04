@@ -1,7 +1,9 @@
 from flask import Flask, send_from_directory, jsonify, Response
+from asyncio import sleep
+from flask_socketio import SocketIO
 import json
 from pathlib import Path
-from utils.app_functions import get_stre_domain, search, download
+from utils.app_functions import get_stre_domain, search, download_with_socket
 from scuapi import API
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -12,6 +14,7 @@ domain = get_stre_domain()
 sc = API(domain)
 
 app = Flask(__name__, static_folder=str(FRONTEND_DIR), static_url_path="")
+socketio = SocketIO(app)
 
 @app.route("/")
 def home():
@@ -29,10 +32,9 @@ def search_query(query):
         content_type="application/json"
     )
 
-@app.route("/api/download/<domain>/<id>")
-def download_link(domain, id):
-    download(domain, id)
-    return
+@app.route("/api/download/<domain>/<filmid>/<socketid>")
+async def download_link(domain, filmid, socketid):
+    return await download_with_socket(domain, filmid, socketio, sid=socketid)
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    socketio.run(app, debug=True)

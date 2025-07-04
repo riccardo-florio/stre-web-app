@@ -1,33 +1,21 @@
-import yt_dlp
+from yt_dlp import YoutubeDL
+from functools import partial
+from queue import Queue
 
-def download_hook(d):
-    if d['status'] == 'downloading':
-        total = d.get('total_bytes') or d.get('total_bytes_estimate')
-        downloaded = d.get('downloaded_bytes', 0)
+def download_hook(queue, d):
+    queue.put(d)
 
-        if total:
-            percent = downloaded / total * 100
-            print(f"\r📥 Download: {percent:.2f}%", end="")
+def download_sc_video(url, queue, output_path = "downloads/%(title)s/%(title)s.%(ext)s"):
+    hook = partial(download_hook, queue)
 
-    elif d['status'] == 'finished':
-        print('\n✅ Download completato.')
-
-def download_sc_video(watch_url, output_path="downloads/%(title)s.%(ext)s"):
-    """
-    Scarica un video da StreamingCommunity usando yt-dlp con il plugin installato.
-
-    Args:
-        watch_url (str): L'URL del tipo https://.../it/watch/<id>?e=<episode_id>
-        output_path (str): Percorso output. Può usare i template yt-dlp.
-    """
     ydl_opts = {
         'outtmpl': output_path,
         'format': 'best',
-        'quiet': True,  # silenzia log di yt_dlp
+        'quiet': True,
         'noplaylist': True,
         'merge_output_format': 'mp4',
-        'progress_hooks': [download_hook],
+        'progress_hooks': [hook],
     }
 
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        ydl.download([watch_url])
+    with YoutubeDL(ydl_opts) as ydl:
+        ydl.download([url])

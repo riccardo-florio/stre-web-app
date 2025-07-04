@@ -9,3 +9,7 @@ async function fetchSearch(query) {
     const data = await res.json();
     return data;
 }
+
+function fetchDownload(domain, id) {
+    fetch(`/api/download/${domain}/${id}`);    
+}
