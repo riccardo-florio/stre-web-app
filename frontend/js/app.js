@@ -1,5 +1,6 @@
-socket = null;
+let socket = null;
 let socketid = undefined;
+let mainUrl = null;
 let filmId = null;
 
 window.onload = () => {
@@ -28,10 +29,16 @@ window.onload = () => {
         updateDownloadProgress(0);
         document.getElementById("progress-span").innerText = "❌ Annullato";
     });
+
+    // Gestione download completato
+    socket.on("download_finished", () => {
+        updateDownloadProgress(0);
+        document.getElementById("progress-span").innerText = "✔️ Completato";
+    })
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-    const mainUrl = await fetchUrl();
+    mainUrl = await fetchUrl();
     populateUrl(mainUrl);
 
     const form = document.querySelector('form');
@@ -51,6 +58,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const encodedQuery = encodeURIComponent(query);
 
+        startSearchLoading();
+
         try {
             const response = await fetch(`/api/search/${encodedQuery}`);
             const results = await response.json();
@@ -64,6 +73,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.error("Errore nella ricerca:", err);
             populateSearchResultError();
         }
+
+        stopSearchLoading();
     });
 
     downloadBtn.addEventListener('click', async (e) => {

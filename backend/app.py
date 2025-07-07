@@ -3,7 +3,7 @@ from asyncio import sleep
 from flask_socketio import SocketIO, emit
 import json
 from pathlib import Path
-from utils.app_functions import get_stre_domain, search, download_with_socket, cancel_download
+from utils.app_functions import get_stre_domain, search, get_info, download_with_socket, cancel_download
 from scuapi import API
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -31,6 +31,11 @@ def search_query(query):
         json.dumps(results, ensure_ascii=False, sort_keys=False),
         content_type="application/json"
     )
+
+@app.route("/api/getinfo/<slug>")
+def get_title_info(slug):
+    results = get_info(sc, slug)
+    return jsonify(results)
 
 @socketio.on("start_download")
 def handle_start_download(data):

@@ -17,69 +17,89 @@
 <body class="bg-gray-50 p-10 flex justify-center h-screen">
     <!-- contenitore principale -->
     <div
-        class="max-w-screen-xl h-full w-full bg-white rounded-[5rem] p-10 shadow border border-gray-200 flex items-center justify-center">
+        class="max-w-screen-xl h-full w-full bg-white rounded-[5rem] p-10 shadow border border-gray-200 overflow-hidden">
 
-        <!-- form di ricerca -->
-        <form class="flex flex-col items-center">
-            <h1 class="text-3xl mb-6">Cosa vuoi scaricare?</h1>
-            <div class="flex items-center gap-2">
-                <input type="text" placeholder="Titolo del film / serie tv"
-                    class="border-2 border-gray-200 rounded-full px-5 py-3 outline-none w-[20rem]">
+        <!-- sliding container -->
+        <div id="sliding-container" class="w-full h-[300%] transition-all duration-700">
 
-                <button type="submit"
-                    class="flex items-center justify-center bg-blue-500 hover:bg-blue-600 text-white p-4 rounded-full transition">
-                    <span class="material-symbols-rounded text-[20px]">
-                        search
-                    </span>
-                </button>
-            </div>
-            <span id="stre-url" class="mt-3">Recuper url in corso...</span>
-        </form>
+            <!-- form di ricerca -->
+            <form class="h-1/3 w-full flex items-center justify-center transition-all duration-700">
+                <div class="flex flex-col items-center">
+                    <h1 class="text-4xl mb-10">Cosa vuoi scaricare?</h1>
+                    <div class="flex items-center gap-2 border-2 border-gray-200 rounded-full p-2 pl-8">
+                        <input type="text" placeholder="Titolo del film / serie tv" autofocus class="outline-none w-96">
+                        <button type="submit" id="search-button"
+                            class="flex items-center justify-center bg-blue-500 hover:bg-blue-600 text-white p-4 rounded-full transition">
+                            <span class="material-symbols-rounded text-[20px]">
+                                search
+                            </span>
+                        </button>
+                    </div>
+                    <span id="stre-url" class="mt-3 text-gray-700">Recuper url in corso...</span>
+                </div>
+            </form>
 
-        <!-- elenco risultati -->
-        <div id="search-results" class="h-full max-w-screen-sm w-full flex hidden flex-col">
-            <div class="flex items-center gap-5 mb-5 border-b">
-                <button onclick="searchResultToHome()"
-                    class="flex items-center justify-center hover:bg-gray-100 p-4 rounded-full transition">
-                    <span class="material-symbols-rounded text-2xl">
-                        arrow_back
-                    </span>
-                </button>
-                <span id="search-query-title" class="text-2xl">Risultati per: john wick</span>
+            <!-- elenco risultati -->
+            <div id="search-results"
+                class="h-1/3 w-full flex items-center justify-center opacity-0 transition-all duration-700">
+                <div class="h-full max-w-[650px] w-full flex flex-col">
+                    <div class="flex items-center gap-5 mb-5 pb-2 border-b">
+                        <button onclick="searchResultToHome()"
+                            class="flex items-center justify-center hover:bg-gray-100 p-4 w-14 h-14 rounded-full transition">
+                            <span class="material-symbols-rounded text-2xl">
+                                arrow_back
+                            </span>
+                        </button>
+                        <span id="search-query-title" class="text-2xl">Risultati per: john wick</span>
+                    </div>
+                    <!-- result cards container -->
+                    <div class="w-full flex-1 overflow-y-auto">
+                        <div id="search-cards-container" class="flex flex-col gap-5 w-full"></div>
+                    </div>
+                </div>
             </div>
-            <!-- result cards container -->
-            <div class="w-full flex-1 overflow-y-auto">
-                <div id="search-cards-container" class="flex flex-col gap-5 w-full"></div>
-            </div>
-        </div>
 
-        <!-- Download -->
-        <div id="download-tab" class="h-full max-w-screen-sm w-full flex hidden flex-col">
-            <div class="flex items-center gap-5 mb-5 border-b">
-                <button onclick="downloadToSearchResult()"
-                    class="flex items-center justify-center hover:bg-gray-100 p-4 rounded-full transition">
-                    <span class="material-symbols-rounded text-2xl">
-                        arrow_back
-                    </span>
-                </button>
-                <span class="text-2xl">Download</span>
-            </div>
-            <button id="download-btn" class="bg-blue-500 rounded-[0.5em] text-white px-4 py-2 font-medium">
-                Avvia Download
-            </button>
-            <button id="cancel-download-btn" class="bg-red-600 rounded-[0.5em] text-white px-4 py-2 font-medium">
-                Annulla Download
-            </button>
-            <div class="my-2 w-full h-2.5 bg-gray-200 rounded-full overflow-hidden">
-                <div id="progress-bar" class="bg-blue-500 h-full w-0 rounded-full transition-all duration-200"></div>
-            </div>
-            <div class="flex justify-between text-sm text-gray-600">
-                <span id="progress-span">0%</span>
-                <span id="progress-eta">ETA: --:--</span>
-            </div>
-            <div class="text-sm text-gray-600 mt-1 flex justify-between">
-                <span id="progress-data">0 / 0</span>
-                <span id="progress-speed">Velocità: --</span>
+            <!-- Download -->
+            <div id="download-tab"
+                class="h-1/3 w-full flex items-center justify-center opacity-0 transition-all duration-700">
+                <div class="h-full max-w-screen-sm w-full flex flex-col">
+                    <div class="flex items-center gap-5 mb-5 pb-2 border-b">
+                        <button onclick="downloadToSearchResult()"
+                            class="flex items-center justify-center hover:bg-gray-100 p-4 w-14 h-14 rounded-full transition">
+                            <span class="material-symbols-rounded text-2xl">
+                                arrow_back
+                            </span>
+                        </button>
+                        <span id="download-title" class="text-2xl">Info su </span>
+                    </div>
+                    <div class="rounded-2xl overflow-hidden relative">
+                        <img id="choose-cover">
+                        <div class="text-white bg-gradient-to-t from-black via-black/80 to-transparent absolute bottom-0 left-0 h-2/3 w-full p-10 flex flex-col-reverse">
+                            <span id="choose-genres" class="mt-2"></span>
+                            <p id="choose-plot" class="line-clamp-3"></p>
+                            <span id="choose-info" class="mb-2"></span>
+                        </div>
+                    </div>
+                    <button id="download-btn" class="bg-blue-500 rounded-[0.5em] text-white px-4 py-2 font-medium">
+                        Avvia Download
+                    </button>
+                    <button id="cancel-download-btn"
+                        class="bg-red-600 rounded-[0.5em] text-white px-4 py-2 font-medium">
+                        Annulla Download
+                    </button>
+                    <div class="my-2 w-full h-2.5 bg-gray-200 rounded-full overflow-hidden">
+                        <div id="progress-bar" class="bg-blue-500 h-full w-0 rounded-full transition-all duration-200">
+                        </div>
+                    </div>
+                    <div class="flex justify-between text-sm text-gray-600">
+                        <span id="progress-span">0%</span>
+                        <span id="progress-eta">ETA: --:--</span>
+                    </div>
+                    <div class="text-sm text-gray-600 mt-1 flex justify-between">
+                        <span id="progress-data">0 / 0</span>
+                        <span id="progress-speed">Velocità: --</span>
+                    </div>
+                </div>
             </div>
 
         </div>

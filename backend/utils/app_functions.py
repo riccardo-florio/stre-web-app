@@ -19,15 +19,17 @@ def check_connection(domain, port=80):
 
 def get_stre_domain():
     domains = get_available_domains()
+    print(domains)
 
     if not domains:
         print("Errore: nessun dominio disponibile trovato.")
         return
 
     domain = next(
-        (d for d in domains if d.startswith("streamingcommunity.") or d.startswith("streamingunity.")),
+        (d for d in domains if "streamingcommunity" in d.lower() or "streamingunity" in d.lower()),
         None
     )
+
 
     if not domain:
         print("Errore: nessun dominio di StreamingCommunity valido trovato.")
@@ -38,6 +40,10 @@ def get_stre_domain():
 
 def search(sc, query):
     results = sc.search(query)
+    return results
+
+def get_info(sc, slug):
+    results = sc.preview(slug)
     return results
 
 def download_with_socket(domain, filmid, socketio, sid):

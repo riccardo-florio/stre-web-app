@@ -107,8 +107,9 @@ socket.on('download_progress', data => {
 
 ## TODO
 
-- gestione download completato
 - gestione download interrotto dal server
+- gestione serie tv
+- verifica se il contenuto è già stato scaricato
 - sistemare ui
 - implementare gestione accessi multipli
 - implementare download multipli

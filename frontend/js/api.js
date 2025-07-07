@@ -10,6 +10,8 @@ async function fetchSearch(query) {
     return data;
 }
 
-function fetchDownload(domain, id) {
-    fetch(`/api/download/${domain}/${id}`);    
+async function fetchInfo(slug) {
+    const res = await fetch(`/api/getinfo/${slug}`);
+    const data = await res.json();
+    return data;
 }
