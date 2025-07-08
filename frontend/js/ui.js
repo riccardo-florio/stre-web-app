@@ -78,10 +78,37 @@ async function populateDownloadSection(slug, title) {
     document.getElementById('choose-genres').innerHTML = `Genere: ${genresString}`;
     
     if (data.type == "tv") {
-        document.getElementById('choose-episodes').classList.remove('hidden');
+        const container = document.getElementById('choose-episodes');
+        container.classList.remove('hidden');
         let extendedData = await fetchExtendedInfo(completeSlug);
         console.log('info', extendedData)
-        
+
+        container.innerHTML = '';
+        const episodesBySeason = {};
+        extendedData.episodeList.forEach(ep => {
+            if (!episodesBySeason[ep.season]) {
+                episodesBySeason[ep.season] = [];
+            }
+            episodesBySeason[ep.season].push(ep);
+        });
+
+        Object.keys(episodesBySeason).sort((a, b) => a - b).forEach(season => {
+            const header = document.createElement('h3');
+            header.className = 'font-semibold mt-4';
+            header.textContent = 'Stagione ' + season;
+            container.appendChild(header);
+
+            const ul = document.createElement('ul');
+            ul.className = 'pl-4 mb-2 list-disc';
+            episodesBySeason[season].forEach(ep => {
+                const li = document.createElement('li');
+                li.innerHTML = `<a href="${ep.url}" target="_blank" class="text-blue-600 hover:underline">Ep. ${ep.episode} - ${ep.name}</a>`;
+                ul.appendChild(li);
+            });
+            container.appendChild(ul);
+        });
+    } else {
+        document.getElementById('choose-episodes').classList.add('hidden');
     }
 }
 
