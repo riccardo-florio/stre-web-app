@@ -78,12 +78,13 @@ async function populateDownloadSection(slug, title) {
     document.getElementById('choose-genres').innerHTML = `Genere: ${genresString}`;
     
     if (data.type == "tv") {
-        const container = document.getElementById('choose-episodes');
-        container.classList.remove('hidden');
-        let extendedData = await fetchExtendedInfo(completeSlug);
-        console.log('info', extendedData)
+        const wrapper = document.getElementById('choose-episodes');
+        const select = document.getElementById('season-select');
+        const epContainer = document.getElementById('episodes-container');
+        wrapper.classList.remove('hidden');
 
-        container.innerHTML = '';
+        let extendedData = await fetchExtendedInfo(completeSlug);
+
         const episodesBySeason = {};
         extendedData.episodeList.forEach(ep => {
             if (!episodesBySeason[ep.season]) {
@@ -92,21 +93,52 @@ async function populateDownloadSection(slug, title) {
             episodesBySeason[ep.season].push(ep);
         });
 
+        select.innerHTML = '';
         Object.keys(episodesBySeason).sort((a, b) => a - b).forEach(season => {
-            const header = document.createElement('h3');
-            header.className = 'font-semibold mt-4';
-            header.textContent = 'Stagione ' + season;
-            container.appendChild(header);
-
-            const ul = document.createElement('ul');
-            ul.className = 'pl-4 mb-2 list-disc';
-            episodesBySeason[season].forEach(ep => {
-                const li = document.createElement('li');
-                li.innerHTML = `<a href="${ep.url}" target="_blank" class="text-blue-600 hover:underline">Ep. ${ep.episode} - ${ep.name}</a>`;
-                ul.appendChild(li);
-            });
-            container.appendChild(ul);
+            const opt = document.createElement('option');
+            opt.value = season;
+            opt.textContent = 'Stagione ' + season;
+            select.appendChild(opt);
         });
+
+        function renderSeason(season) {
+            epContainer.innerHTML = '';
+            episodesBySeason[season].forEach(ep => {
+                const card = document.createElement('div');
+                card.className = 'bg-white rounded-lg shadow overflow-hidden flex flex-col';
+                const img = document.createElement('img');
+                if (ep.images && ep.images.length) {
+                    img.src = `https://cdn.${mainUrl}/images/${ep.images[0].filename}`;
+                }
+                img.alt = ep.name;
+                img.className = 'h-40 w-full object-cover';
+                card.appendChild(img);
+
+                const body = document.createElement('div');
+                body.className = 'p-2 flex flex-col gap-1';
+                const titleEl = document.createElement('h4');
+                titleEl.className = 'font-semibold text-sm';
+                titleEl.textContent = `E${ep.episode} - ${ep.name}`;
+                body.appendChild(titleEl);
+                const desc = document.createElement('p');
+                desc.className = 'text-xs line-clamp-3';
+                desc.textContent = ep.description || '';
+                body.appendChild(desc);
+                const link = document.createElement('a');
+                link.href = ep.url;
+                link.target = '_blank';
+                link.className = 'text-blue-600 text-xs hover:underline mt-auto';
+                link.textContent = 'Guarda';
+                body.appendChild(link);
+
+                card.appendChild(body);
+                epContainer.appendChild(card);
+            });
+        }
+
+        select.onchange = () => renderSeason(select.value);
+        // render first season by default
+        renderSeason(select.value || Object.keys(episodesBySeason)[0]);
     } else {
         document.getElementById('choose-episodes').classList.add('hidden');
     }
