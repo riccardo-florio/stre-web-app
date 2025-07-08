@@ -72,32 +72,43 @@
                         </button>
                         <span id="download-title" class="text-2xl">Info su </span>
                     </div>
-                    <div class="rounded-2xl overflow-hidden relative">
-                        <img id="choose-cover">
-                        <div class="text-white bg-gradient-to-t from-black via-black/80 to-transparent absolute bottom-0 left-0 h-2/3 w-full p-10 flex flex-col-reverse">
-                            <span id="choose-genres" class="mt-2"></span>
-                            <p id="choose-plot" class="line-clamp-3"></p>
-                            <span id="choose-info" class="mb-2"></span>
+                    <div class="overflow-y-auto">
+                        <div class="flex flex-col gap-2">
+                            <div class="rounded-2xl overflow-hidden relative">
+                                <img id="choose-cover">
+                                <div
+                                    class="text-white bg-gradient-to-t from-black via-black/80 to-transparent absolute bottom-0 left-0 h-2/3 w-full p-10 flex flex-col-reverse">
+                                    <span id="choose-genres" class="mt-2"></span>
+                                    <p id="choose-plot" class="line-clamp-3"></p>
+                                    <span id="choose-info" class="mb-2"></span>
+                                </div>
+                            </div>
+                            <div id="choose-episodes" class="hidden">
+                                Episodi
+                                
+                            </div>
+                            <button id="download-btn"
+                                class="bg-blue-500 rounded-[0.5em] text-white px-4 py-2 font-medium">
+                                Avvia Download
+                            </button>
+                            <button id="cancel-download-btn"
+                                class="bg-red-600 rounded-[0.5em] text-white px-4 py-2 font-medium">
+                                Annulla Download
+                            </button>
+                            <div class="my-2 w-full h-2.5 bg-gray-200 rounded-full overflow-hidden">
+                                <div id="progress-bar"
+                                    class="bg-blue-500 h-full w-0 rounded-full transition-all duration-200">
+                                </div>
+                            </div>
+                            <div class="flex justify-between text-sm text-gray-600">
+                                <span id="progress-span">0%</span>
+                                <span id="progress-eta">ETA: --:--</span>
+                            </div>
+                            <div class="text-sm text-gray-600 mt-1 flex justify-between">
+                                <span id="progress-data">0 / 0</span>
+                                <span id="progress-speed">Velocità: --</span>
+                            </div>
                         </div>
-                    </div>
-                    <button id="download-btn" class="bg-blue-500 rounded-[0.5em] text-white px-4 py-2 font-medium">
-                        Avvia Download
-                    </button>
-                    <button id="cancel-download-btn"
-                        class="bg-red-600 rounded-[0.5em] text-white px-4 py-2 font-medium">
-                        Annulla Download
-                    </button>
-                    <div class="my-2 w-full h-2.5 bg-gray-200 rounded-full overflow-hidden">
-                        <div id="progress-bar" class="bg-blue-500 h-full w-0 rounded-full transition-all duration-200">
-                        </div>
-                    </div>
-                    <div class="flex justify-between text-sm text-gray-600">
-                        <span id="progress-span">0%</span>
-                        <span id="progress-eta">ETA: --:--</span>
-                    </div>
-                    <div class="text-sm text-gray-600 mt-1 flex justify-between">
-                        <span id="progress-data">0 / 0</span>
-                        <span id="progress-speed">Velocità: --</span>
                     </div>
                 </div>
             </div>

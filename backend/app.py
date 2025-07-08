@@ -3,8 +3,9 @@ from asyncio import sleep
 from flask_socketio import SocketIO, emit
 import json
 from pathlib import Path
-from utils.app_functions import get_stre_domain, search, get_info, download_with_socket, cancel_download
+from utils.app_functions import get_stre_domain, search, get_info, get_extended_info, download_with_socket, cancel_download
 from scuapi import API
+from utils.fixed_api import API as FixedAPI
 
 BASE_DIR = Path(__file__).resolve().parent
 FRONTEND_DIR = BASE_DIR.parent / "frontend"
@@ -35,6 +36,12 @@ def search_query(query):
 @app.route("/api/getinfo/<slug>")
 def get_title_info(slug):
     results = get_info(sc, slug)
+    return jsonify(results)
+
+@app.route("/api/get-extended-info/<slug>")
+def get_full_info(slug):
+    new_sc = FixedAPI(domain)
+    results = get_extended_info(new_sc, slug)
     return jsonify(results)
 
 @socketio.on("start_download")

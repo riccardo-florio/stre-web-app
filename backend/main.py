@@ -1,5 +1,6 @@
 import sys, socket
 from scuapi import API
+from utils.fixed_api import API as FixedAPI
 from utils.get_available_domains import get_available_domains
 from utils.download_sc_video import download_sc_video
 
@@ -30,7 +31,7 @@ def main():
 
     # ✅ selezione automatica del primo dominio valido
     domain = next(
-        (d for d in domains if d.startswith("streamingcommunity.") or d.startswith("streamingunity.")),
+        (d for d in domains if "streamingcommunity" in d.lower() or "streamingunity" in d.lower()),
         None
     )
 
@@ -57,7 +58,7 @@ def main():
     id = selected["id"]
     slug = selected["url"].split("/")[-1]  # esempio: "1234-titolo-del-film"
     print(f"\nCaricamento dettagli per: {selected['name']}")
-    data = api.preview(slug)
+    data = FixedAPI(domain).load(slug)
     print(f"\nTipo: {data['type']}")
 
     if data["type"] == "movie":

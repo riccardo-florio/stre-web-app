@@ -15,3 +15,9 @@ async function fetchInfo(slug) {
     const data = await res.json();
     return data;
 }
+
+async function fetchExtendedInfo(slug) {
+    const res = await fetch(`/api/get-extended-info/${slug}`);
+    const data = await res.json();
+    return data;
+}

@@ -64,7 +64,7 @@ function populateSearchResultError() {
 async function populateDownloadSection(slug, title) {
     let completeSlug = `${filmId}-${slug}`;
     let data = await fetchInfo(completeSlug);
-    console.log(data);
+    console.log('preview', data);
 
     const coverUrl = `https://cdn.${mainUrl}/images/${data.images[2].filename}`;
     const uppercaseType =  data.type.charAt(0).toUpperCase() + data.type.slice(1);
@@ -73,8 +73,16 @@ async function populateDownloadSection(slug, title) {
     document.getElementById('download-title').innerHTML = 'Info su ' + title;
     document.getElementById('choose-cover').src = coverUrl;
     document.getElementById('choose-plot').innerHTML = data.plot;
+    document.getElementById('choose-plot').title = data.plot;
     document.getElementById('choose-info').innerHTML = `${uppercaseType} - ${data.release_date.split("-")[0]} - ${data.runtime} min`;
     document.getElementById('choose-genres').innerHTML = `Genere: ${genresString}`;
+    
+    if (data.type == "tv") {
+        document.getElementById('choose-episodes').classList.remove('hidden');
+        let extendedData = await fetchExtendedInfo(completeSlug);
+        console.log('info', extendedData)
+        
+    }
 }
 
 function updateDownloadProgress(percent, eta = null, downloaded = null, total = null, speed = null) {

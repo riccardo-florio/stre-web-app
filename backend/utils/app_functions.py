@@ -46,6 +46,10 @@ def get_info(sc, slug):
     results = sc.preview(slug)
     return results
 
+def get_extended_info(sc, slug):
+    results = sc.load(slug)
+    return results
+
 def download_with_socket(domain, filmid, socketio, sid):
     url = f'https://{domain}/it/watch/{filmid}'
     queue = Queue()
