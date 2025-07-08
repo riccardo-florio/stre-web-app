@@ -103,9 +103,10 @@ async function populateDownloadSection(slug, title) {
 
         function renderSeason(season) {
             epContainer.innerHTML = '';
+            epContainer.scrollLeft = 0;
             episodesBySeason[season].forEach(ep => {
                 const card = document.createElement('div');
-                card.className = 'bg-white rounded-lg shadow overflow-hidden flex flex-col';
+                card.className = 'bg-white rounded-lg shadow overflow-hidden flex flex-col w-40 sm:w-48 flex-none';
                 const img = document.createElement('img');
                 if (ep.images && ep.images.length) {
                     img.src = `https://cdn.${mainUrl}/images/${ep.images[0].filename}`;
