@@ -112,7 +112,7 @@ async function populateDownloadSection(slug, title) {
                     img.src = `https://cdn.${mainUrl}/images/${ep.images[0].filename}`;
                 }
                 img.alt = ep.name;
-                img.className = 'h-40 w-full object-cover';
+                img.className = 'w-full object-cover';
                 card.appendChild(img);
 
                 const body = document.createElement('div');
@@ -125,12 +125,16 @@ async function populateDownloadSection(slug, title) {
                 desc.className = 'text-xs line-clamp-3';
                 desc.textContent = ep.description || '';
                 body.appendChild(desc);
-                const link = document.createElement('a');
-                link.href = ep.url;
-                link.target = '_blank';
-                link.className = 'text-blue-600 text-xs hover:underline mt-auto';
-                link.textContent = 'Guarda';
-                body.appendChild(link);
+                const btn = document.createElement('button');
+                btn.className = 'bg-blue-500 text-white rounded px-2 py-1 text-xs mt-auto';
+                btn.textContent = 'Scarica';
+                btn.onclick = () => {
+                    socket.emit('start_download', {
+                        domain: mainUrl,
+                        filmid: ep.id
+                    });
+                };
+                body.appendChild(btn);
 
                 card.appendChild(body);
                 epContainer.appendChild(card);
