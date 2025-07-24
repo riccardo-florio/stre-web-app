@@ -34,21 +34,12 @@ window.onload = () => {
     socket.on("download_finished", () => {
         updateDownloadProgress(0);
         document.getElementById("progress-span").innerText = "✔️ Completato";
-    });
-
-    // Gestione errori di download
-    socket.on("download_error", (data) => {
-        updateDownloadProgress(0);
-        const msg = data && data.message ? data.message : "Errore";
-        document.getElementById("progress-span").innerText = `❌ ${msg}`;
-        alert("Download non riuscito. Prova ad usare un dominio personalizzato.");
-    });
+    })
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-    const domainData = await fetchUrl();
-    mainUrl = domainData.domain;
-    populateUrl(domainData);
+    mainUrl = await fetchUrl();
+    populateUrl(mainUrl);
 
     const form = document.querySelector('form');
     const downloadBtn = document.getElementById('download-btn');
@@ -70,7 +61,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         startSearchLoading();
 
         try {
-            const results = await fetchSearch(encodedQuery, mainUrl);
+            const response = await fetch(`/api/search/${encodedQuery}`);
+            const results = await response.json();
 
             //console.log(results);
 

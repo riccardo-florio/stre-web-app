@@ -23,7 +23,7 @@ def get_stre_domain():
 
     if not domains:
         print("Errore: nessun dominio disponibile trovato.")
-        return {"domain": None, "reachable": False}
+        return
 
     domain = next(
         (d for d in domains if "streamingcommunity" in d.lower() or "streamingunity" in d.lower()),
@@ -32,12 +32,10 @@ def get_stre_domain():
 
     if not domain:
         print("Errore: nessun dominio di StreamingCommunity valido trovato.")
-        return {"domain": None, "reachable": False}
+        return
 
-    reachable = check_connection(domain)
     print(f"[INFO] Dominio selezionato automaticamente: {domain}")
-    print(f"[INFO] Raggiungibile: {reachable}")
-    return {"domain": domain, "reachable": reachable}
+    return domain
 
 def search(sc, query):
     results = sc.search(query)
@@ -98,9 +96,6 @@ def download_with_socket(domain, filmid, socketio, sid):
 
                 elif d['status'] == 'finished':
                     socketio.emit('download_finished', {'status': 'done'}, to=sid)
-                elif d['status'] == 'error':
-                    socketio.emit('download_error', {'status': 'error', 'message': d.get('message')}, to=sid)
-                    break
 
             except Empty:
                 time.sleep(0.1)
