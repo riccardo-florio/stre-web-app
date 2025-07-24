@@ -24,3 +24,9 @@ async function fetchExtendedInfo(slug, domain = null) {
     const data = await res.json();
     return data;
 }
+
+async function checkDomain(domain) {
+    const res = await fetch(`/api/check-domain/${domain}`);
+    const data = await res.json();
+    return data;
+}

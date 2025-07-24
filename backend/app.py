@@ -3,7 +3,15 @@ from asyncio import sleep
 from flask_socketio import SocketIO, emit
 import json
 from pathlib import Path
-from utils.app_functions import get_stre_domain, search, get_info, get_extended_info, download_with_socket, cancel_download
+from utils.app_functions import (
+    get_stre_domain,
+    search,
+    get_info,
+    get_extended_info,
+    download_with_socket,
+    cancel_download,
+    check_connection,
+)
 from scuapi import API
 from utils.fixed_api import API as FixedAPI
 
@@ -56,6 +64,11 @@ def get_full_info(slug):
     new_sc = FixedAPI(use_domain)
     results = get_extended_info(new_sc, slug)
     return jsonify(results)
+
+@app.route("/api/check-domain/<domain>")
+def check_domain_route(domain):
+    reachable = check_connection(domain)
+    return jsonify({"domain": domain, "reachable": reachable})
 
 @socketio.on("start_download")
 def handle_start_download(data):
