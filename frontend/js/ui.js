@@ -7,31 +7,35 @@ function populateUrl(data) {
         return;
     }
 
+    let domainHtml = "";
+
     if (data.reachable) {
         streUrl.classList.remove("text-red-600");
-        streUrl.innerHTML = `<a href="https://${data.domain}" target="_blank" class="text-blue-600">${data.domain}</a>`;
+        domainHtml = `<a href="https://${data.domain}" target="_blank" class="text-blue-600">${data.domain}</a>`;
     } else {
         streUrl.classList.add("text-red-600");
-        streUrl.innerHTML = `Dominio non raggiungibile: ${data.domain}<div class="mt-3 flex gap-2"><input id="custom-url-input" type="text" placeholder="streamingcommunity.esempio" class="border p-1 rounded text-gray-800"><button id="custom-url-btn" class="bg-blue-500 text-white px-3 py-1 rounded">Usa</button></div>`;
-        document.getElementById("custom-url-btn").addEventListener("click", async () => {
-            const val = document.getElementById("custom-url-input").value.trim();
-            if (val) {
-                try {
-                    const check = await checkDomain(val);
-                    if (check.reachable) {
-                        mainUrl = val;
-                        streUrl.classList.remove("text-red-600");
-                        streUrl.innerHTML = `<a href="https://${val}" target="_blank" class="text-blue-600">${val}</a>`;
-                    } else {
-                        alert("Dominio non raggiungibile");
-                    }
-                } catch (err) {
-                    console.error("Errore verifica dominio", err);
-                    alert("Impossibile verificare il dominio");
-                }
-            }
-        });
+        domainHtml = `Dominio non raggiungibile: ${data.domain}`;
     }
+
+    streUrl.innerHTML = `${domainHtml}<div class="mt-3 flex gap-2"><input id="custom-url-input" type="text" placeholder="streamingcommunity.esempio" class="border p-1 rounded text-gray-800"><button id="custom-url-btn" class="bg-blue-500 text-white px-3 py-1 rounded">Usa</button></div>`;
+
+    document.getElementById("custom-url-btn").addEventListener("click", async () => {
+        const val = document.getElementById("custom-url-input").value.trim();
+        if (val) {
+            try {
+                const check = await checkDomain(val);
+                if (check.reachable) {
+                    mainUrl = val;
+                    populateUrl({ domain: val, reachable: true });
+                } else {
+                    alert("Dominio non raggiungibile");
+                }
+            } catch (err) {
+                console.error("Errore verifica dominio", err);
+                alert("Impossibile verificare il dominio");
+            }
+        }
+    });
 }
 
 function populateSearchResults(results, query, mainUrl) {
