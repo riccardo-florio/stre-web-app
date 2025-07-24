@@ -78,10 +78,74 @@ async function populateDownloadSection(slug, title) {
     document.getElementById('choose-genres').innerHTML = `Genere: ${genresString}`;
     
     if (data.type == "tv") {
-        document.getElementById('choose-episodes').classList.remove('hidden');
+        const wrapper = document.getElementById('choose-episodes');
+        const select = document.getElementById('season-select');
+        const epContainer = document.getElementById('episodes-container');
+        wrapper.classList.remove('hidden');
+
         let extendedData = await fetchExtendedInfo(completeSlug);
-        console.log('info', extendedData)
-        
+
+        const episodesBySeason = {};
+        extendedData.episodeList.forEach(ep => {
+            if (!episodesBySeason[ep.season]) {
+                episodesBySeason[ep.season] = [];
+            }
+            episodesBySeason[ep.season].push(ep);
+        });
+
+        select.innerHTML = '';
+        Object.keys(episodesBySeason).sort((a, b) => a - b).forEach(season => {
+            const opt = document.createElement('option');
+            opt.value = season;
+            opt.textContent = 'Stagione ' + season;
+            select.appendChild(opt);
+        });
+
+        function renderSeason(season) {
+            epContainer.innerHTML = '';
+            epContainer.scrollLeft = 0;
+            episodesBySeason[season].forEach(ep => {
+                const card = document.createElement('div');
+                card.className = 'bg-white rounded-lg shadow overflow-hidden flex flex-col w-40 sm:w-48 flex-none';
+                const img = document.createElement('img');
+                if (ep.images && ep.images.length) {
+                    img.src = `https://cdn.${mainUrl}/images/${ep.images[0].filename}`;
+                }
+                img.alt = ep.name;
+                img.className = 'w-full object-cover';
+                card.appendChild(img);
+
+                const body = document.createElement('div');
+                body.className = 'p-2 flex flex-col gap-1';
+                const titleEl = document.createElement('h4');
+                titleEl.className = 'font-semibold text-sm';
+                titleEl.textContent = `E${ep.episode} - ${ep.name}`;
+                body.appendChild(titleEl);
+                const desc = document.createElement('p');
+                desc.className = 'text-xs line-clamp-3';
+                desc.textContent = ep.description || '';
+                body.appendChild(desc);
+                const btn = document.createElement('button');
+                btn.className = 'bg-blue-500 text-white rounded px-2 py-1 text-xs mt-auto';
+                btn.textContent = 'Scarica';
+                btn.onclick = () => {
+                    socket.emit('start_download', {
+                        domain: mainUrl,
+                        filmid: ep.id
+                    });
+                };
+                body.appendChild(btn);
+
+                card.appendChild(body);
+                epContainer.appendChild(card);
+            });
+        }
+
+        select.onchange = () => renderSeason(select.value);
+        // render first season by default
+        renderSeason(select.value || Object.keys(episodesBySeason)[0]);
+    } else {
+        document.getElementById('choose-episodes').classList.add('hidden');
     }
 }
 
