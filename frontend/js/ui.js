@@ -12,7 +12,7 @@ function populateUrl(data) {
         streUrl.innerHTML = `<a href="https://${data.domain}" target="_blank" class="text-blue-600">${data.domain}</a>`;
     } else {
         streUrl.classList.add("text-red-600");
-        streUrl.innerHTML = `Dominio non raggiungibile: ${data.domain}<div class="mt-2 flex gap-2"><input id="custom-url-input" type="text" placeholder="Inserisci dominio" class="border p-1 rounded"><button id="custom-url-btn" class="bg-blue-500 text-white px-3 py-1 rounded">Usa</button></div>`;
+        streUrl.innerHTML = `Dominio non raggiungibile: ${data.domain}<div class="mt-3 flex gap-2"><input id="custom-url-input" type="text" placeholder="Inserisci dominio" class="border p-1 rounded text-gray-800"><button id="custom-url-btn" class="bg-blue-500 text-white px-3 py-1 rounded">Usa</button></div>`;
         document.getElementById("custom-url-btn").addEventListener("click", () => {
             const val = document.getElementById("custom-url-input").value.trim();
             if (val) {
