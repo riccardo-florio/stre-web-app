@@ -98,6 +98,9 @@ def download_with_socket(domain, filmid, socketio, sid):
 
                 elif d['status'] == 'finished':
                     socketio.emit('download_finished', {'status': 'done'}, to=sid)
+                elif d['status'] == 'error':
+                    socketio.emit('download_error', {'status': 'error', 'message': d.get('message')}, to=sid)
+                    break
 
             except Empty:
                 time.sleep(0.1)

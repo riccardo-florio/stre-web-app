@@ -27,4 +27,4 @@ def download_sc_video(url, queue, cancel_event: threading.Event, output_path="do
             ydl.download([url])
         except Exception as e:
             print(f"[YT-DLP] Download interrotto: {e}")
-            queue.put({'status': 'cancelled'})  # 👈 utile per inviare info al socket
+            queue.put({'status': 'error', 'message': str(e)})

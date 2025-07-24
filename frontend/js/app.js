@@ -34,7 +34,15 @@ window.onload = () => {
     socket.on("download_finished", () => {
         updateDownloadProgress(0);
         document.getElementById("progress-span").innerText = "✔️ Completato";
-    })
+    });
+
+    // Gestione errori di download
+    socket.on("download_error", (data) => {
+        updateDownloadProgress(0);
+        const msg = data && data.message ? data.message : "Errore";
+        document.getElementById("progress-span").innerText = `❌ ${msg}`;
+        alert("Download non riuscito. Prova ad usare un dominio personalizzato.");
+    });
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
