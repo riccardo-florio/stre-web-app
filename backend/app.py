@@ -11,8 +11,9 @@ BASE_DIR = Path(__file__).resolve().parent
 FRONTEND_DIR = BASE_DIR.parent / "frontend"
 
 # Inizializza dominio e API subito
-domain = get_stre_domain()
-sc = API(domain)
+domain_info = get_stre_domain()
+domain = domain_info.get("domain")
+sc = API(domain) if domain else None
 
 app = Flask(__name__, static_folder=str(FRONTEND_DIR), static_url_path="")
 socketio = SocketIO(app)
@@ -23,11 +24,15 @@ def home():
 
 @app.route("/api/get-stre-domain")
 def get_main_domain():
-    return jsonify(domain)
+    return jsonify(domain_info)
 
 @app.route("/api/search/<query>")
 def search_query(query):
-    results = search(sc, query)
+    domain_param = request.args.get("domain")
+    api = API(domain_param) if domain_param else sc
+    if api is None:
+        return jsonify({})
+    results = search(api, query)
     return Response(
         json.dumps(results, ensure_ascii=False, sort_keys=False),
         content_type="application/json"
@@ -35,12 +40,20 @@ def search_query(query):
 
 @app.route("/api/getinfo/<slug>")
 def get_title_info(slug):
-    results = get_info(sc, slug)
+    domain_param = request.args.get("domain")
+    api = API(domain_param) if domain_param else sc
+    if api is None:
+        return jsonify({})
+    results = get_info(api, slug)
     return jsonify(results)
 
 @app.route("/api/get-extended-info/<slug>")
 def get_full_info(slug):
-    new_sc = FixedAPI(domain)
+    domain_param = request.args.get("domain")
+    use_domain = domain_param if domain_param else domain
+    if use_domain is None:
+        return jsonify({})
+    new_sc = FixedAPI(use_domain)
     results = get_extended_info(new_sc, slug)
     return jsonify(results)
 

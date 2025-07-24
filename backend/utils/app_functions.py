@@ -23,20 +23,21 @@ def get_stre_domain():
 
     if not domains:
         print("Errore: nessun dominio disponibile trovato.")
-        return
+        return {"domain": None, "reachable": False}
 
     domain = next(
         (d for d in domains if "streamingcommunity" in d.lower() or "streamingunity" in d.lower()),
-        None
+        None,
     )
-
 
     if not domain:
         print("Errore: nessun dominio di StreamingCommunity valido trovato.")
-        return
+        return {"domain": None, "reachable": False}
 
+    reachable = check_connection(domain)
     print(f"[INFO] Dominio selezionato automaticamente: {domain}")
-    return domain
+    print(f"[INFO] Raggiungibile: {reachable}")
+    return {"domain": domain, "reachable": reachable}
 
 def search(sc, query):
     results = sc.search(query)

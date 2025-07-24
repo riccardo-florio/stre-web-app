@@ -1,11 +1,26 @@
-function populateUrl(url) {
-    streUrl = document.getElementById("stre-url");
-    //console.log(url)
-    if (url == null) {
+function populateUrl(data) {
+    const streUrl = document.getElementById("stre-url");
+
+    if (!data || !data.domain) {
         streUrl.classList.add("text-red-600");
         streUrl.innerHTML = "Nessun link trovato per StreamingCommunity";
+        return;
+    }
+
+    if (data.reachable) {
+        streUrl.classList.remove("text-red-600");
+        streUrl.innerHTML = `<a href="https://${data.domain}" target="_blank" class="text-blue-600">${data.domain}</a>`;
     } else {
-        streUrl.innerHTML = `<a href="https://${url}" target="_blank" class="text-blue-600">${url}</a>`
+        streUrl.classList.add("text-red-600");
+        streUrl.innerHTML = `Dominio non raggiungibile: ${data.domain}<div class="mt-2 flex gap-2"><input id="custom-url-input" type="text" placeholder="Inserisci dominio" class="border p-1 rounded"><button id="custom-url-btn" class="bg-blue-500 text-white px-3 py-1 rounded">Usa</button></div>`;
+        document.getElementById("custom-url-btn").addEventListener("click", () => {
+            const val = document.getElementById("custom-url-input").value.trim();
+            if (val) {
+                mainUrl = val;
+                streUrl.classList.remove("text-red-600");
+                streUrl.innerHTML = `<a href="https://${val}" target="_blank" class="text-blue-600">${val}</a>`;
+            }
+        });
     }
 }
 
@@ -63,7 +78,7 @@ function populateSearchResultError() {
 
 async function populateDownloadSection(slug, title) {
     let completeSlug = `${filmId}-${slug}`;
-    let data = await fetchInfo(completeSlug);
+    let data = await fetchInfo(completeSlug, mainUrl);
     console.log('preview', data);
 
     const coverUrl = `https://cdn.${mainUrl}/images/${data.images[2].filename}`;
@@ -83,7 +98,7 @@ async function populateDownloadSection(slug, title) {
         const epContainer = document.getElementById('episodes-container');
         wrapper.classList.remove('hidden');
 
-        let extendedData = await fetchExtendedInfo(completeSlug);
+        let extendedData = await fetchExtendedInfo(completeSlug, mainUrl);
 
         const episodesBySeason = {};
         extendedData.episodeList.forEach(ep => {

@@ -38,8 +38,9 @@ window.onload = () => {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-    mainUrl = await fetchUrl();
-    populateUrl(mainUrl);
+    const domainData = await fetchUrl();
+    mainUrl = domainData.domain;
+    populateUrl(domainData);
 
     const form = document.querySelector('form');
     const downloadBtn = document.getElementById('download-btn');
@@ -61,8 +62,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         startSearchLoading();
 
         try {
-            const response = await fetch(`/api/search/${encodedQuery}`);
-            const results = await response.json();
+            const results = await fetchSearch(encodedQuery, mainUrl);
 
             //console.log(results);
 
