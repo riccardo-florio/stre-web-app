@@ -20,6 +20,9 @@ Il progetto è diviso in:
    ```bash
    pip install -r requirements.txt
    ```
+   Il plugin di yt-dlp per StreamingCommunity è già incluso
+   nella cartella `yt_dlp_plugins`, quindi non è necessario
+   installare la versione separata dal repository GitHub.
 
 ## Avvio del server
 
