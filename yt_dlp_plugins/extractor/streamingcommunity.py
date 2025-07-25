@@ -8,7 +8,7 @@ from yt_dlp.extractor.common import InfoExtractor
 class StreamingCommunityIE(InfoExtractor):
     _VALID_URL = (
         r"https?://(?:[\w.-]+\.)?"
-        r"(?:stream(?:ing)?communityz?|stream(?:ing)?unity)"
+        r"(?:stream(?:ing)?community[a-z]?|stream(?:ing)?unity)"
         r"\.[\w.-]+/(?:\w+/)*(?:watch|titles)/(?P<id>\d+)(?:\?e=\d+)?"
     )
 

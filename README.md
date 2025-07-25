@@ -23,6 +23,9 @@ Il progetto è diviso in:
    Il plugin di yt-dlp per StreamingCommunity è già incluso
    nella cartella `yt_dlp_plugins`, quindi non è necessario
    installare la versione separata dal repository GitHub.
+   Questo plugin riconosce domini come `streamingcommunity` o
+   `streamingcommunityX` (con una lettera finale variabile) e
+   anche le varianti `streamingunity`.
 
 ## Avvio del server
 
