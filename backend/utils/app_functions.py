@@ -79,7 +79,7 @@ def download_with_socket(
             else:
                 safe_ep = sanitize(episode_name)
             output_path = (
-                f'downloads/SerieTV/{safe_series}/stagione{season}/{safe_ep}.%(ext)s'
+                f'downloads/SerieTV/{safe_series}/Stagione {season}/{safe_ep}.%(ext)s'
             )
         else:
             output_path = 'downloads/%(title)s/%(title)s.%(ext)s'
