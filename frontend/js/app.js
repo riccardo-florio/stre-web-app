@@ -2,6 +2,7 @@ let socket = null;
 let socketid = undefined;
 let mainUrl = null;
 let filmId = null;
+let filmTitle = null;
 
 window.onload = () => {
     socket = io();
@@ -80,7 +81,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     downloadBtn.addEventListener('click', async (e) => {
         socket.emit("start_download", {
             domain: mainUrl,
-            filmid: filmId
+            filmid: filmId,
+            title: filmTitle
         });
 
     })

@@ -132,7 +132,10 @@ async function populateDownloadSection(slug, title) {
                     socket.emit('start_download', {
                         domain: mainUrl,
                         filmid: filmId,
-                        episodeid: ep.id
+                        episodeid: ep.id,
+                        series: filmTitle,
+                        season: ep.season,
+                        episode_name: ep.name
                     });
                 };
                 body.appendChild(btn);
@@ -246,6 +249,7 @@ function searchResultToHome() {
 
 function searchResultToDownload(id, slug, title) {
     filmId = id;
+    filmTitle = title;
 
     populateDownloadSection(slug, title)
 

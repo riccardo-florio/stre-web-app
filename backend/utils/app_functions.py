@@ -6,9 +6,15 @@ from queue import Queue, Empty
 import humanize
 import socket
 import time
+import re
 
 # 👇 Nuovo dizionario globale per gestire le cancellazioni
 cancel_flags = {}
+
+
+def sanitize(name: str) -> str:
+    """Remove characters that are not safe for file paths."""
+    return re.sub(r'[\\/*?:"<>|]', '', name).strip()
 
 def check_connection(domain, port=80):
     try:
@@ -50,10 +56,34 @@ def get_extended_info(sc, slug):
     results = sc.load(slug)
     return results
 
-def download_with_socket(domain, filmid, socketio, sid, episodeid=None):
+def download_with_socket(
+    domain,
+    filmid,
+    socketio,
+    sid,
+    episodeid=None,
+    title=None,
+    series=None,
+    season=None,
+    episode_name=None,
+):
     url = f'https://{domain}/it/watch/{filmid}'
     if episodeid:
         url += f'?e={episodeid}'
+        if series and season and episode_name:
+            safe_series = sanitize(series)
+            safe_ep = sanitize(episode_name)
+            output_path = (
+                f'downloads/SerieTV/{safe_series}/stagione{season}/{safe_ep}.%(ext)s'
+            )
+        else:
+            output_path = 'downloads/%(title)s/%(title)s.%(ext)s'
+    else:
+        if title:
+            safe_title = sanitize(title)
+            output_path = f'downloads/Film/{safe_title}/{safe_title}.%(ext)s'
+        else:
+            output_path = 'downloads/%(title)s/%(title)s.%(ext)s'
     queue = Queue()
     cancel_event = threading.Event()  # 👈 nuovo event per cancellazione
 
@@ -61,7 +91,10 @@ def download_with_socket(domain, filmid, socketio, sid, episodeid=None):
     cancel_flags[sid] = cancel_event
 
     # Lancia il download in un thread
-    thread = threading.Thread(target=download_sc_video, args=(url, queue, cancel_event))
+    thread = threading.Thread(
+        target=download_sc_video,
+        args=(url, queue, cancel_event, output_path),
+    )
     thread.start()
 
     def emit_updates():
