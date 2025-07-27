@@ -77,11 +77,14 @@ async function populateDownloadSection(slug, title) {
     document.getElementById('choose-info').innerHTML = `${uppercaseType} - ${data.release_date.split("-")[0]} - ${data.runtime} min`;
     document.getElementById('choose-genres').innerHTML = `Genere: ${genresString}`;
     
+    const downloadBtn = document.getElementById('download-btn');
+
     if (data.type == "tv") {
         const wrapper = document.getElementById('choose-episodes');
         const select = document.getElementById('season-select');
         const epContainer = document.getElementById('episodes-container');
         wrapper.classList.remove('hidden');
+        downloadBtn.classList.add('hidden');
 
         let extendedData = await fetchExtendedInfo(completeSlug);
 
@@ -138,6 +141,7 @@ async function populateDownloadSection(slug, title) {
                         episode_name: ep.name,
                         episode: ep.episode
                     });
+                    createDownloadItem(`${filmTitle} - S${ep.season}E${ep.episode} - ${ep.name}`);
                 };
                 body.appendChild(btn);
 
@@ -151,6 +155,7 @@ async function populateDownloadSection(slug, title) {
         renderSeason(select.value || Object.keys(episodesBySeason)[0]);
     } else {
         document.getElementById('choose-episodes').classList.add('hidden');
+        downloadBtn.classList.remove('hidden');
     }
 }
 
