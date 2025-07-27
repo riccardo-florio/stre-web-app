@@ -3,6 +3,8 @@ from functools import partial
 from queue import Queue
 import threading
 
+from utils.ffmpeg_utils import ensure_ffmpeg
+
 def download_hook(queue, cancel_event, d):
     # Se l'annullamento è stato richiesto, interrompi con un'eccezione
     if cancel_event.is_set():
@@ -11,6 +13,13 @@ def download_hook(queue, cancel_event, d):
     queue.put(d)
 
 def download_sc_video(url, queue, cancel_event: threading.Event, output_path="downloads/%(title)s/%(title)s.%(ext)s"):
+    if not ensure_ffmpeg():
+        queue.put({
+            'status': 'error',
+            'message': 'ffmpeg non disponibile'
+        })
+        return
+
     hook = partial(download_hook, queue, cancel_event)
 
     ydl_opts = {
