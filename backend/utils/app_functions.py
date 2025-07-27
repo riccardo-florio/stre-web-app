@@ -7,6 +7,7 @@ import humanize
 import socket
 import time
 import re
+import os
 
 # 👇 Nuovo dizionario globale per gestire le cancellazioni
 cancel_flags = {}
@@ -84,6 +85,11 @@ def download_with_socket(
             output_path = f'downloads/Film/{safe_title}/{safe_title}.%(ext)s'
         else:
             output_path = 'downloads/%(title)s/%(title)s.%(ext)s'
+
+    final_path = output_path.replace('%(ext)s', 'mp4')
+    if os.path.exists(final_path):
+        socketio.emit('download_exists', {'status': 'exists'}, to=sid)
+        return
     queue = Queue()
     cancel_event = threading.Event()  # 👈 nuovo event per cancellazione
 

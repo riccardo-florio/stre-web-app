@@ -25,6 +25,10 @@ window.onload = () => {
         );
     });
 
+    socket.on('download_exists', () => {
+        document.getElementById('progress-span').innerText = '⚠️ Già presente';
+    });
+
     // Gestione dell'annullamento del download
     socket.on("download_cancelled", () => {
         updateDownloadProgress(0);
