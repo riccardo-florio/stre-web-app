@@ -2,6 +2,7 @@ let socket = null;
 let socketid = undefined;
 let mainUrl = null;
 let filmId = null;
+let filmTitle = null;
 
 window.onload = () => {
     socket = io();
@@ -22,6 +23,10 @@ window.onload = () => {
             data.total,
             data.speed
         );
+    });
+
+    socket.on('download_exists', () => {
+        document.getElementById('progress-span').innerText = '⚠️ Già presente';
     });
 
     // Gestione dell'annullamento del download
@@ -80,7 +85,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     downloadBtn.addEventListener('click', async (e) => {
         socket.emit("start_download", {
             domain: mainUrl,
-            filmid: filmId
+            filmid: filmId,
+            title: filmTitle
         });
 
     })

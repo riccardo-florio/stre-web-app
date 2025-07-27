@@ -49,10 +49,27 @@ def handle_start_download(data):
     domain = data.get("domain")
     filmid = data.get("filmid")
     episodeid = data.get("episodeid")
+    title = data.get("title")
+    series = data.get("series")
+    season = data.get("season")
+    episode_name = data.get("episode_name")
+    episode_number = data.get("episode")
     sid = request.sid
     print(f"[INFO] Avvio download per {filmid} dal dominio {domain} (SID: {sid})")
     # Avvia il download in un thread
-    socketio.start_background_task(download_with_socket, domain, filmid, socketio, sid, episodeid)
+    socketio.start_background_task(
+        download_with_socket,
+        domain,
+        filmid,
+        socketio,
+        sid,
+        episodeid,
+        title,
+        series,
+        season,
+        episode_name,
+        episode_number,
+    )
 
 @socketio.on("cancel_download")
 def handle_cancel_download():
