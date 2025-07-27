@@ -19,8 +19,8 @@ def install_ffmpeg() -> bool:
     system = platform.system()
     try:
         if system == "Linux":
-            subprocess.run(["apt-get", "update", "-y"], check=True)
-            subprocess.run(["apt-get", "install", "-y", "ffmpeg"], check=True)
+            subprocess.run(["sudo", "apt-get", "update", "-y"], check=True)
+            subprocess.run(["sudo", "apt-get", "install", "-y", "ffmpeg"], check=True)
             return True
         if system == "Darwin":
             subprocess.run(["brew", "install", "ffmpeg"], check=True)
