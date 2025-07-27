@@ -67,13 +67,17 @@ def download_with_socket(
     series=None,
     season=None,
     episode_name=None,
+    episode=None,
 ):
     url = f'https://{domain}/it/watch/{filmid}'
     if episodeid:
         url += f'?e={episodeid}'
         if series and season and episode_name:
             safe_series = sanitize(series)
-            safe_ep = sanitize(episode_name)
+            if episode is not None:
+                safe_ep = sanitize(f"E{episode} - {episode_name}")
+            else:
+                safe_ep = sanitize(episode_name)
             output_path = (
                 f'downloads/SerieTV/{safe_series}/stagione{season}/{safe_ep}.%(ext)s'
             )

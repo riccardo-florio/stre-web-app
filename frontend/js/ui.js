@@ -135,7 +135,8 @@ async function populateDownloadSection(slug, title) {
                         episodeid: ep.id,
                         series: filmTitle,
                         season: ep.season,
-                        episode_name: ep.name
+                        episode_name: ep.name,
+                        episode: ep.episode
                     });
                 };
                 body.appendChild(btn);

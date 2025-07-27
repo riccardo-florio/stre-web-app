@@ -53,6 +53,7 @@ def handle_start_download(data):
     series = data.get("series")
     season = data.get("season")
     episode_name = data.get("episode_name")
+    episode_number = data.get("episode")
     sid = request.sid
     print(f"[INFO] Avvio download per {filmid} dal dominio {domain} (SID: {sid})")
     # Avvia il download in un thread
@@ -67,6 +68,7 @@ def handle_start_download(data):
         series,
         season,
         episode_name,
+        episode_number,
     )
 
 @socketio.on("cancel_download")
