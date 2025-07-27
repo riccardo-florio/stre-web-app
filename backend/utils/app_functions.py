@@ -93,6 +93,7 @@ def download_with_socket(
     final_path = output_path.replace('%(ext)s', 'mp4')
     if os.path.exists(final_path):
         socketio.emit('download_exists', {'status': 'exists'}, to=sid)
+        print('[INFO] Download non avviato: file gia esistente.')
         return
     queue = Queue()
     cancel_event = threading.Event()  # 👈 nuovo event per cancellazione
