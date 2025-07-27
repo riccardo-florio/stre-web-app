@@ -155,18 +155,69 @@ async function populateDownloadSection(slug, title) {
 }
 
 function updateDownloadProgress(percent, eta = null, downloaded = null, total = null, speed = null) {
-    document.getElementById('progress-span').innerHTML = percent + '%';
-    document.getElementById('progress-bar').style.width = percent + '%';
+    if (!currentDownload) return;
+    currentDownload.percentSpan.innerHTML = percent + '%';
+    currentDownload.bar.style.width = percent + '%';
 
     if (eta) {
-        document.getElementById('progress-eta').innerHTML = 'ETA: ' + eta;
+        currentDownload.etaSpan.innerHTML = 'ETA: ' + eta;
     }
     if (downloaded && total) {
-        document.getElementById('progress-data').innerHTML = `${downloaded} / ${total}`;
+        currentDownload.dataSpan.innerHTML = `${downloaded} / ${total}`;
     }
     if (speed) {
-        document.getElementById('progress-speed').innerHTML = `Velocità: ${speed}`;
+        currentDownload.speedSpan.innerHTML = `Velocità: ${speed}`;
     }
+}
+
+function createDownloadItem(title) {
+    const container = document.getElementById('downloads-container');
+    const wrapper = document.createElement('div');
+    wrapper.className = 'border-b pb-4 mb-4';
+
+    const header = document.createElement('div');
+    header.className = 'flex justify-between items-center mb-2';
+    const titleSpan = document.createElement('span');
+    titleSpan.className = 'font-semibold';
+    titleSpan.textContent = title;
+    const cancelBtn = document.createElement('button');
+    cancelBtn.className = 'bg-red-600 rounded-[0.5em] text-white px-4 py-2 font-medium';
+    cancelBtn.textContent = 'Annulla Download';
+    cancelBtn.onclick = () => { socket.emit('cancel_download'); };
+    header.appendChild(titleSpan);
+    header.appendChild(cancelBtn);
+    wrapper.appendChild(header);
+
+    const barWrap = document.createElement('div');
+    barWrap.className = 'my-2 w-full h-2.5 bg-gray-200 rounded-full overflow-hidden';
+    const bar = document.createElement('div');
+    bar.className = 'bg-blue-500 h-full w-0 rounded-full transition-all duration-200';
+    barWrap.appendChild(bar);
+    wrapper.appendChild(barWrap);
+
+    const line1 = document.createElement('div');
+    line1.className = 'flex justify-between text-sm text-gray-600';
+    const percentSpan = document.createElement('span');
+    percentSpan.textContent = '0%';
+    const etaSpan = document.createElement('span');
+    etaSpan.textContent = 'ETA: --:--';
+    line1.appendChild(percentSpan);
+    line1.appendChild(etaSpan);
+    wrapper.appendChild(line1);
+
+    const line2 = document.createElement('div');
+    line2.className = 'text-sm text-gray-600 mt-1 flex justify-between';
+    const dataSpan = document.createElement('span');
+    dataSpan.textContent = '0 / 0';
+    const speedSpan = document.createElement('span');
+    speedSpan.textContent = 'Velocità: --';
+    line2.appendChild(dataSpan);
+    line2.appendChild(speedSpan);
+    wrapper.appendChild(line2);
+
+    container.appendChild(wrapper);
+
+    currentDownload = { bar, percentSpan, etaSpan, dataSpan, speedSpan };
 }
 
 function startSearchLoading() {
@@ -225,8 +276,9 @@ function stopSearchLoading() {
 
 const form = document.querySelector('form');
 const searchResults = document.getElementById('search-results');
-const downloadTab = document.getElementById('download-tab');
+const infoTab = document.getElementById('info-tab');
 const slidingContainer = document.getElementById('sliding-container');
+let currentDownload = null;
 
 function homeToSearchResult() {
     slidingContainer.classList.remove('translate-y-0');
@@ -235,7 +287,7 @@ function homeToSearchResult() {
 
     form.classList.add('opacity-0');
     searchResults.classList.remove('opacity-0');
-    downloadTab.classList.add('opacity-0');
+    infoTab.classList.add('opacity-0');
 }
 
 function searchResultToHome() {
@@ -245,7 +297,7 @@ function searchResultToHome() {
 
     form.classList.remove('opacity-0');
     searchResults.classList.add('opacity-0');
-    downloadTab.classList.add('opacity-0');
+    infoTab.classList.add('opacity-0');
 }
 
 function searchResultToDownload(id, slug, title) {
@@ -260,7 +312,7 @@ function searchResultToDownload(id, slug, title) {
 
     form.classList.add('opacity-0');
     searchResults.classList.add('opacity-0');
-    downloadTab.classList.remove('opacity-0');
+    infoTab.classList.remove('opacity-0');
 }
 
 function downloadToSearchResult() {
@@ -270,5 +322,5 @@ function downloadToSearchResult() {
 
     form.classList.add('opacity-0');
     searchResults.classList.remove('opacity-0');
-    downloadTab.classList.add('opacity-0');
+    infoTab.classList.add('opacity-0');
 }
