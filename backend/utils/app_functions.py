@@ -50,8 +50,10 @@ def get_extended_info(sc, slug):
     results = sc.load(slug)
     return results
 
-def download_with_socket(domain, filmid, socketio, sid):
+def download_with_socket(domain, filmid, socketio, sid, episodeid=None):
     url = f'https://{domain}/it/watch/{filmid}'
+    if episodeid:
+        url += f'?e={episodeid}'
     queue = Queue()
     cancel_event = threading.Event()  # 👈 nuovo event per cancellazione
 

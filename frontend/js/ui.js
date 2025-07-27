@@ -131,7 +131,8 @@ async function populateDownloadSection(slug, title) {
                 btn.onclick = () => {
                     socket.emit('start_download', {
                         domain: mainUrl,
-                        filmid: ep.id
+                        filmid: filmId,
+                        episodeid: ep.id
                     });
                 };
                 body.appendChild(btn);
