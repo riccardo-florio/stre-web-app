@@ -161,6 +161,12 @@ async function populateDownloadSection(slug, title) {
 
 function updateDownloadProgress(percent, eta = null, downloaded = null, total = null, speed = null) {
     if (!currentDownload) return;
+
+    if (currentDownload.loading) {
+        currentDownload.loading = false;
+        currentDownload.bar.classList.remove('animate-pulse');
+    }
+
     currentDownload.percentSpan.innerHTML = percent + '%';
     currentDownload.bar.style.width = percent + '%';
 
@@ -196,14 +202,14 @@ function createDownloadItem(title) {
     const barWrap = document.createElement('div');
     barWrap.className = 'my-2 w-full h-2.5 bg-gray-200 rounded-full overflow-hidden';
     const bar = document.createElement('div');
-    bar.className = 'bg-blue-500 h-full w-0 rounded-full transition-all duration-200';
+    bar.className = 'bg-blue-500 h-full w-full rounded-full animate-pulse';
     barWrap.appendChild(bar);
     wrapper.appendChild(barWrap);
 
     const line1 = document.createElement('div');
     line1.className = 'flex justify-between text-sm text-gray-600';
     const percentSpan = document.createElement('span');
-    percentSpan.textContent = '0%';
+    percentSpan.textContent = 'Caricamento in corso...';
     const etaSpan = document.createElement('span');
     etaSpan.textContent = 'ETA: --:--';
     line1.appendChild(percentSpan);
@@ -222,7 +228,7 @@ function createDownloadItem(title) {
 
     container.appendChild(wrapper);
 
-    currentDownload = { bar, percentSpan, etaSpan, dataSpan, speedSpan };
+    currentDownload = { bar, percentSpan, etaSpan, dataSpan, speedSpan, loading: true };
 }
 
 function startSearchLoading() {
