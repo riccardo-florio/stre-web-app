@@ -187,7 +187,7 @@ function createDownloadItem(title) {
     titleSpan.textContent = title;
     const cancelBtn = document.createElement('button');
     cancelBtn.className = 'bg-red-600 rounded-[0.5em] text-white px-4 py-2 font-medium';
-    cancelBtn.textContent = 'Annulla Download';
+    cancelBtn.textContent = 'Annulla';
     cancelBtn.onclick = () => { socket.emit('cancel_download'); };
     header.appendChild(titleSpan);
     header.appendChild(cancelBtn);
