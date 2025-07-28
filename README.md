@@ -62,7 +62,7 @@ def search_query(query):
     )
 ```
 
-Il download è gestito in un thread separato e gli aggiornamenti vengono inviati al frontend tramite websocket:
+Il download è gestito in un thread separato e gli aggiornamenti vengono inviati al frontend tramite websocket. Ogni download è identificato da un ID univoco incluso nei vari eventi:
 
 ```python
 # backend/utils/app_functions.py
@@ -72,7 +72,7 @@ thread.start()
 if total:
     percent = round(downloaded / total * 100, 2)
     progress_data = {'percent': percent}
-    socketio.emit('download_progress', progress_data)
+    socketio.emit('download_progress', {**progress_data, 'id': download_id})
 ```
 
 In questo modo l'avanzamento viene inviato a tutti gli utenti connessi.
@@ -85,10 +85,11 @@ Sul frontend viene aperta una connessione a SocketIO per ricevere i progressi:
 // frontend/js/app.js
 const socket = io();
 socket.on('download_started', data => {
-    createDownloadItem(data.title);
+    createDownloadItem(data.id, data.title);
 });
 socket.on('download_progress', data => {
     updateDownloadProgress(
+        data.id,
         data.percent,
         data.eta,
         data.downloaded,
@@ -115,5 +116,4 @@ socket.on('download_progress', data => {
 ## TODO
 
 - gestione download interrotto dal server
-- implementare download multipli
 
