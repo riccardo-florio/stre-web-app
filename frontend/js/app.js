@@ -42,6 +42,10 @@ window.onload = () => {
         updateDownloadProgress(0);
         if (currentDownload) {
             currentDownload.percentSpan.innerText = "❌ Annullato";
+            if (currentDownload.cancelBtn) {
+                currentDownload.cancelBtn.disabled = true;
+                currentDownload.cancelBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            }
         }
     });
 

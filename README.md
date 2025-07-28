@@ -115,6 +115,5 @@ socket.on('download_progress', data => {
 ## TODO
 
 - gestione download interrotto dal server
-- implementare gestione accessi multipli
 - implementare download multipli
 

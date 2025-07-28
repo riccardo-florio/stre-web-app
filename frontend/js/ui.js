@@ -229,7 +229,7 @@ function createDownloadItem(title) {
     container.appendChild(wrapper);
     container.scrollTop = container.scrollHeight;
 
-    currentDownload = { bar, percentSpan, etaSpan, dataSpan, speedSpan, loading: true };
+    currentDownload = { bar, percentSpan, etaSpan, dataSpan, speedSpan, cancelBtn, loading: true };
 }
 
 function startSearchLoading() {
