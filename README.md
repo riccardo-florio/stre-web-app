@@ -77,11 +77,16 @@ if total:
 
 In questo modo l'avanzamento viene inviato in broadcast e tutti gli utenti connessi possono visualizzarlo.
 
+Quando un nuovo utente apre l'app, il backend verifica se c'è un download attivo e invia subito un evento `download_started` seguito dall'ultimo `download_progress` disponibile, così ogni client vede lo stato corrente anche se si collega a download già avviato.
+
 Sul frontend viene aperta una connessione a SocketIO per ricevere i progressi:
 
 ```javascript
 // frontend/js/app.js
 const socket = io();
+socket.on('download_started', data => {
+    createDownloadItem(data.title);
+});
 socket.on('download_progress', data => {
     updateDownloadProgress(
         data.percent,

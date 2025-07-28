@@ -3,7 +3,15 @@ from asyncio import sleep
 from flask_socketio import SocketIO, emit
 import json
 from pathlib import Path
-from utils.app_functions import get_stre_domain, search, get_info, get_extended_info, download_with_socket, cancel_download
+from utils.app_functions import (
+    get_stre_domain,
+    search,
+    get_info,
+    get_extended_info,
+    download_with_socket,
+    cancel_download,
+    get_download_state,
+)
 from scuapi import API
 from utils.fixed_api import API as FixedAPI
 
@@ -16,6 +24,14 @@ sc = API(domain)
 
 app = Flask(__name__, static_folder=str(FRONTEND_DIR), static_url_path="")
 socketio = SocketIO(app)
+
+@socketio.on("connect")
+def handle_connect():
+    sid = request.sid
+    state = get_download_state()
+    if state.get("downloading") and state.get("progress"):
+        emit("download_started", {"title": state.get("title")}, to=sid)
+        emit("download_progress", state.get("progress"), to=sid)
 
 @app.route("/")
 def home():

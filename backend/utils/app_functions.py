@@ -12,6 +12,17 @@ import os
 # 👇 Nuovo dizionario globale per gestire le cancellazioni
 cancel_flags = {}
 
+# Stato condiviso del download
+download_state = {
+    "downloading": False,
+    "progress": None,
+    "title": None,
+}
+
+def get_download_state():
+    """Ritorna lo stato corrente del download."""
+    return download_state
+
 
 def sanitize(name: str) -> str:
     """Remove characters that are not safe for file paths."""
@@ -93,6 +104,9 @@ def download_with_socket(
     final_path = output_path.replace('%(ext)s', 'mp4')
     if os.path.exists(final_path):
         socketio.emit('download_exists', {'status': 'exists'}, broadcast=True)
+        download_state["downloading"] = False
+        download_state["progress"] = None
+        download_state["title"] = None
         print('[INFO] Download non avviato: file gia esistente.')
         return
     queue = Queue()
@@ -108,6 +122,23 @@ def download_with_socket(
     )
     thread.start()
 
+    # Prepara titolo da inviare in broadcast
+    display_title = None
+    if episodeid and series and season and episode_name:
+        if episode is not None:
+            display_title = f"{series} - S{season}E{episode} - {episode_name}"
+        else:
+            display_title = f"{series} - {episode_name}"
+    elif title:
+        display_title = title
+
+    download_state["downloading"] = True
+    download_state["progress"] = None
+    download_state["title"] = display_title
+
+    if display_title:
+        socketio.emit('download_started', {'title': display_title}, broadcast=True)
+
     def emit_updates():
         while thread.is_alive() or not queue.empty():
             try:
@@ -115,6 +146,9 @@ def download_with_socket(
 
                 if cancel_event.is_set():
                     socketio.emit('download_cancelled', {'status': 'cancelled'}, broadcast=True)
+                    download_state["downloading"] = False
+                    download_state["progress"] = None
+                    download_state["title"] = None
                     print(f"[INFO] Download annullato per {sid}")
                     break
 
@@ -139,10 +173,14 @@ def download_with_socket(
                         progress_data['downloaded'] = humanize.naturalsize(downloaded, binary=True)
                         progress_data['total'] = humanize.naturalsize(total, binary=True)
 
+                        download_state["progress"] = progress_data
                         socketio.emit('download_progress', progress_data, broadcast=True)
 
                 elif d['status'] == 'finished':
                     socketio.emit('download_finished', {'status': 'done'}, broadcast=True)
+                    download_state["downloading"] = False
+                    download_state["progress"] = None
+                    download_state["title"] = None
 
             except Empty:
                 time.sleep(0.1)
@@ -155,4 +193,8 @@ def cancel_download(sid):
     if sid in cancel_flags:
         cancel_flags[sid].set()
         print(f"[INFO] Richiesta di annullamento per socket {sid}")
+        download_state["downloading"] = False
+        download_state["progress"] = None
+        download_state["title"] = None
+
 

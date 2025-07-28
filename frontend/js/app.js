@@ -14,6 +14,12 @@ window.onload = () => {
         console.log("Socket id: " + socketid);
     })
 
+    socket.on('download_started', data => {
+        if (data.title && !currentDownload) {
+            createDownloadItem(data.title);
+        }
+    });
+
     // Gestione dello stato del download
     socket.on('download_progress', data => {
         updateDownloadProgress(
