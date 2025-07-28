@@ -54,6 +54,10 @@ window.onload = () => {
         updateDownloadProgress(0);
         if (currentDownload) {
             currentDownload.percentSpan.innerText = "✔️ Completato";
+            if (currentDownload.cancelBtn) {
+                currentDownload.cancelBtn.disabled = true;
+                currentDownload.cancelBtn.classList.add('opacity-50');
+            }
         }
     })
 }
