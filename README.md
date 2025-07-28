@@ -72,10 +72,10 @@ thread.start()
 if total:
     percent = round(downloaded / total * 100, 2)
     progress_data = {'percent': percent}
-    socketio.emit('download_progress', progress_data, broadcast=True)
+    socketio.emit('download_progress', progress_data)
 ```
 
-In questo modo l'avanzamento viene inviato in broadcast e tutti gli utenti connessi possono visualizzarlo.
+In questo modo l'avanzamento viene inviato a tutti gli utenti connessi.
 
 Quando un nuovo utente apre l'app, il backend verifica se c'è un download attivo e invia subito un evento `download_started` seguito dall'ultimo `download_progress` disponibile, così ogni client vede lo stato corrente anche se si collega a download già avviato.
 

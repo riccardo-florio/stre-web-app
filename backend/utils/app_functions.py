@@ -103,7 +103,7 @@ def download_with_socket(
 
     final_path = output_path.replace('%(ext)s', 'mp4')
     if os.path.exists(final_path):
-        socketio.emit('download_exists', {'status': 'exists'}, broadcast=True)
+        socketio.emit('download_exists', {'status': 'exists'})
         download_state["downloading"] = False
         download_state["progress"] = None
         download_state["title"] = None
@@ -137,7 +137,7 @@ def download_with_socket(
     download_state["title"] = display_title
 
     if display_title:
-        socketio.emit('download_started', {'title': display_title}, broadcast=True)
+        socketio.emit('download_started', {'title': display_title})
 
     def emit_updates():
         while thread.is_alive() or not queue.empty():
@@ -145,7 +145,7 @@ def download_with_socket(
                 d = queue.get(timeout=0.1)
 
                 if cancel_event.is_set():
-                    socketio.emit('download_cancelled', {'status': 'cancelled'}, broadcast=True)
+                    socketio.emit('download_cancelled', {'status': 'cancelled'})
                     download_state["downloading"] = False
                     download_state["progress"] = None
                     download_state["title"] = None
@@ -174,10 +174,10 @@ def download_with_socket(
                         progress_data['total'] = humanize.naturalsize(total, binary=True)
 
                         download_state["progress"] = progress_data
-                        socketio.emit('download_progress', progress_data, broadcast=True)
+                        socketio.emit('download_progress', progress_data)
 
                 elif d['status'] == 'finished':
-                    socketio.emit('download_finished', {'status': 'done'}, broadcast=True)
+                    socketio.emit('download_finished', {'status': 'done'})
                     download_state["downloading"] = False
                     download_state["progress"] = None
                     download_state["title"] = None
