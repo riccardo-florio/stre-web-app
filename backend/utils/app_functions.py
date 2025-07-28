@@ -70,7 +70,6 @@ def download_with_socket(
     domain,
     filmid,
     socketio,
-    sid,
     download_id,
     episodeid=None,
     title=None,
@@ -143,7 +142,7 @@ def download_with_socket(
                     socketio.emit('download_cancelled', {'status': 'cancelled', 'id': download_id})
                     download_states.pop(download_id, None)
                     cancel_flags.pop(download_id, None)
-                    print(f"[INFO] Download annullato per {sid}")
+                    print(f"[INFO] Download annullato: {download_id}")
                     break
 
                 if d['status'] == 'downloading':

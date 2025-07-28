@@ -30,8 +30,16 @@ socketio = SocketIO(app)
 def handle_connect():
     sid = request.sid
     states = get_download_state()
+    emit("active_downloads", {
+        dl_id: {
+            "title": state.get("title"),
+            "progress": state.get("progress"),
+        }
+        for dl_id, state in states.items()
+    }, to=sid)
     for dl_id, state in states.items():
-        emit("download_started", {"title": state.get("title"), "id": dl_id}, to=sid)
+        if state.get("title"):
+            emit("download_started", {"title": state.get("title"), "id": dl_id}, to=sid)
         if state.get("progress"):
             emit("download_progress", {**state.get("progress"), "id": dl_id}, to=sid)
 
@@ -80,7 +88,6 @@ def handle_start_download(data):
         domain,
         filmid,
         socketio,
-        sid,
         download_id,
         episodeid,
         title,

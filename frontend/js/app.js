@@ -14,6 +14,24 @@ window.onload = () => {
         console.log("Socket id: " + socketid);
     })
 
+    socket.on('active_downloads', data => {
+        for (const [id, info] of Object.entries(data)) {
+            if (info.title && !downloads[id]) {
+                createDownloadItem(id, info.title);
+            }
+            if (info.progress) {
+                updateDownloadProgress(
+                    id,
+                    info.progress.percent || 0,
+                    info.progress.eta,
+                    info.progress.downloaded,
+                    info.progress.total,
+                    info.progress.speed
+                );
+            }
+        }
+    });
+
     socket.on('download_started', data => {
         if (data.title && !downloads[data.id]) {
             createDownloadItem(data.id, data.title);
