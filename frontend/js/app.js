@@ -26,19 +26,25 @@ window.onload = () => {
     });
 
     socket.on('download_exists', () => {
-        document.getElementById('progress-span').innerText = '⚠️ Già presente';
+        if (currentDownload) {
+            currentDownload.percentSpan.innerText = '⚠️ Già presente';
+        }
     });
 
     // Gestione dell'annullamento del download
     socket.on("download_cancelled", () => {
         updateDownloadProgress(0);
-        document.getElementById("progress-span").innerText = "❌ Annullato";
+        if (currentDownload) {
+            currentDownload.percentSpan.innerText = "❌ Annullato";
+        }
     });
 
     // Gestione download completato
     socket.on("download_finished", () => {
         updateDownloadProgress(0);
-        document.getElementById("progress-span").innerText = "✔️ Completato";
+        if (currentDownload) {
+            currentDownload.percentSpan.innerText = "✔️ Completato";
+        }
     })
 }
 
@@ -48,7 +54,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const form = document.querySelector('form');
     const downloadBtn = document.getElementById('download-btn');
-    const cancelDownloadBtn = document.getElementById('cancel-download-btn');
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -88,10 +93,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             filmid: filmId,
             title: filmTitle
         });
-
-    })
-
-    cancelDownloadBtn.addEventListener('click', async (e) => {
-        socket.emit("cancel_download");
-    })
+        createDownloadItem(filmTitle);
+    });
 });
