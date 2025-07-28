@@ -227,6 +227,7 @@ function createDownloadItem(title) {
     wrapper.appendChild(line2);
 
     container.appendChild(wrapper);
+    container.scrollTop = 0;
 
     currentDownload = { bar, percentSpan, etaSpan, dataSpan, speedSpan, loading: true };
 }
