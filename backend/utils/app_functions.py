@@ -92,7 +92,7 @@ def download_with_socket(
 
     final_path = output_path.replace('%(ext)s', 'mp4')
     if os.path.exists(final_path):
-        socketio.emit('download_exists', {'status': 'exists'}, to=sid)
+        socketio.emit('download_exists', {'status': 'exists'}, broadcast=True)
         print('[INFO] Download non avviato: file gia esistente.')
         return
     queue = Queue()
@@ -114,7 +114,7 @@ def download_with_socket(
                 d = queue.get(timeout=0.1)
 
                 if cancel_event.is_set():
-                    socketio.emit('download_cancelled', {'status': 'cancelled'}, to=sid)
+                    socketio.emit('download_cancelled', {'status': 'cancelled'}, broadcast=True)
                     print(f"[INFO] Download annullato per {sid}")
                     break
 
@@ -139,10 +139,10 @@ def download_with_socket(
                         progress_data['downloaded'] = humanize.naturalsize(downloaded, binary=True)
                         progress_data['total'] = humanize.naturalsize(total, binary=True)
 
-                        socketio.emit('download_progress', progress_data, to=sid)
+                        socketio.emit('download_progress', progress_data, broadcast=True)
 
                 elif d['status'] == 'finished':
-                    socketio.emit('download_finished', {'status': 'done'}, to=sid)
+                    socketio.emit('download_finished', {'status': 'done'}, broadcast=True)
 
             except Empty:
                 time.sleep(0.1)

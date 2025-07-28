@@ -75,7 +75,7 @@ def handle_start_download(data):
 def handle_cancel_download():
     sid = request.sid
     cancel_download(sid)
-    emit("download_cancelled", {"status": "cancelled"}, to=sid)
+    emit("download_cancelled", {"status": "cancelled"}, broadcast=True)
 
 if __name__ == "__main__":
     socketio.run(app, debug=True)

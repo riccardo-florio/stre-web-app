@@ -72,8 +72,10 @@ thread.start()
 if total:
     percent = round(downloaded / total * 100, 2)
     progress_data = {'percent': percent}
-    socketio.emit('download_progress', progress_data, to=sid)
+    socketio.emit('download_progress', progress_data, broadcast=True)
 ```
+
+In questo modo l'avanzamento viene inviato in broadcast e tutti gli utenti connessi possono visualizzarlo.
 
 Sul frontend viene aperta una connessione a SocketIO per ricevere i progressi:
 
