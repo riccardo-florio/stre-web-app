@@ -3,6 +3,7 @@ from asyncio import sleep
 from flask_socketio import SocketIO, emit
 import json
 from pathlib import Path
+from uuid import uuid4
 from utils.app_functions import (
     get_stre_domain,
     search,
@@ -28,10 +29,19 @@ socketio = SocketIO(app)
 @socketio.on("connect")
 def handle_connect():
     sid = request.sid
-    state = get_download_state()
-    if state.get("downloading") and state.get("progress"):
-        emit("download_started", {"title": state.get("title")}, to=sid)
-        emit("download_progress", state.get("progress"), to=sid)
+    states = get_download_state()
+    emit("active_downloads", {
+        dl_id: {
+            "title": state.get("title"),
+            "progress": state.get("progress"),
+        }
+        for dl_id, state in states.items()
+    }, to=sid)
+    for dl_id, state in states.items():
+        if state.get("title"):
+            emit("download_started", {"title": state.get("title"), "id": dl_id}, to=sid)
+        if state.get("progress"):
+            emit("download_progress", {**state.get("progress"), "id": dl_id}, to=sid)
 
 @app.route("/")
 def home():
@@ -72,13 +82,13 @@ def handle_start_download(data):
     episode_number = data.get("episode")
     sid = request.sid
     print(f"[INFO] Avvio download per {filmid} dal dominio {domain} (SID: {sid})")
-    # Avvia il download in un thread
+    download_id = str(uuid4())
     socketio.start_background_task(
         download_with_socket,
         domain,
         filmid,
         socketio,
-        sid,
+        download_id,
         episodeid,
         title,
         series,
@@ -88,10 +98,10 @@ def handle_start_download(data):
     )
 
 @socketio.on("cancel_download")
-def handle_cancel_download():
-    sid = request.sid
-    cancel_download(sid)
-    emit("download_cancelled", {"status": "cancelled"})
+def handle_cancel_download(data):
+    download_id = data.get("id")
+    cancel_download(download_id)
+    emit("download_cancelled", {"status": "cancelled", "id": download_id})
 
 if __name__ == "__main__":
     socketio.run(app, debug=True)
