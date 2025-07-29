@@ -2,8 +2,11 @@ from yt_dlp import YoutubeDL
 from functools import partial
 from queue import Queue
 import threading
+import os
 
 from utils.ffmpeg_utils import ensure_ffmpeg
+
+DOWNLOAD_DIR = os.environ.get("DOWNLOAD_DIR", "downloads")
 
 def download_hook(queue, cancel_event, d):
     # Se l'annullamento è stato richiesto, interrompi con un'eccezione
@@ -12,7 +15,14 @@ def download_hook(queue, cancel_event, d):
 
     queue.put(d)
 
-def download_sc_video(url, queue, cancel_event: threading.Event, output_path="downloads/%(title)s/%(title)s.%(ext)s"):
+def download_sc_video(
+    url,
+    queue,
+    cancel_event: threading.Event,
+    output_path=None,
+):
+    if output_path is None:
+        output_path = f"{DOWNLOAD_DIR}/%(title)s/%(title)s.%(ext)s"
     if not ensure_ffmpeg():
         queue.put({
             'status': 'error',

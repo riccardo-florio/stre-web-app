@@ -1,8 +1,11 @@
 import sys, socket
+import os
 from scuapi import API
 from utils.fixed_api import API as FixedAPI
 from utils.get_available_domains import get_available_domains
 from utils.download_sc_video import download_sc_video
+
+DOWNLOAD_DIR = os.environ.get("DOWNLOAD_DIR", "downloads")
 
 def choose_result(results_dict):
     print("\n=== Risultati trovati ===")
@@ -66,7 +69,10 @@ def main():
         print(f"\n✅ Link del film: {link}")
         choose = input("Scaricare il film s/n? ")
         if (choose == "s"):
-            download_sc_video(link)
+            download_sc_video(
+                link,
+                output_path=f"{DOWNLOAD_DIR}/%(title)s/%(title)s.%(ext)s",
+            )
     else:
         print(f"\nSerie TV con {data['seasons_count']} stagioni.")
         episodes = data["episodeList"]

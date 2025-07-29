@@ -41,6 +41,21 @@ docker compose up --build
 
 Il servizio sarà raggiungibile su `http://localhost:5000` come nella modalità classica.
 
+Per cambiare la cartella in cui vengono salvati i file puoi impostare la variabile
+d'ambiente `DOWNLOAD_DIR` o modificare il volume nel `docker-compose.yml`.
+Nel file `docker-compose.yml` puoi ad esempio sostituire `./downloads` con un percorso sul tuo sistema.
+Esempio:
+
+```bash
+DOWNLOAD_DIR=/percorso/personalizzato docker compose up --build
+```
+
+Oppure, senza Docker:
+
+```bash
+DOWNLOAD_DIR=/percorso/personalizzato python backend/app.py
+```
+
 ## Come funziona
 
 Al lancio il backend recupera automaticamente il dominio valido di StreamingCommunity ed inizializza l'API:

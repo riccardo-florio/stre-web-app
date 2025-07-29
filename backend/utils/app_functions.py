@@ -9,6 +9,9 @@ import time
 import re
 import os
 
+# Directory predefinita per i download
+DOWNLOAD_DIR = os.environ.get("DOWNLOAD_DIR", "downloads")
+
 # 👇 Nuovo dizionario globale per gestire le cancellazioni
 cancel_flags = {}
 
@@ -88,16 +91,16 @@ def download_with_socket(
             else:
                 safe_ep = sanitize(episode_name)
             output_path = (
-                f'downloads/SerieTV/{safe_series}/Stagione {season}/{safe_ep}.%(ext)s'
+                f"{DOWNLOAD_DIR}/SerieTV/{safe_series}/Stagione {season}/{safe_ep}.%(ext)s"
             )
         else:
-            output_path = 'downloads/%(title)s/%(title)s.%(ext)s'
+            output_path = f"{DOWNLOAD_DIR}/%(title)s/%(title)s.%(ext)s"
     else:
         if title:
             safe_title = sanitize(title)
-            output_path = f'downloads/Film/{safe_title}/{safe_title}.%(ext)s'
+            output_path = f"{DOWNLOAD_DIR}/Film/{safe_title}/{safe_title}.%(ext)s"
         else:
-            output_path = 'downloads/%(title)s/%(title)s.%(ext)s'
+            output_path = f"{DOWNLOAD_DIR}/%(title)s/%(title)s.%(ext)s"
 
     # Prepara il titolo da comunicare sia in caso di download che quando il
     # contenuto è già presente
