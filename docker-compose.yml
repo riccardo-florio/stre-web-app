@@ -6,5 +6,3 @@ services:
       - "5000:5000"
     volumes:
       - ${HOST_DOWNLOAD_DIR:-./downloads}:/app/downloads
-    environment:
-      - DOWNLOAD_DIR=/app/downloads

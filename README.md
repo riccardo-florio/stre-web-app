@@ -50,12 +50,6 @@ Esempio:
 HOST_DOWNLOAD_DIR=/percorso/personalizzato docker compose up --build
 ```
 
-Oppure, senza Docker:
-
-```bash
-DOWNLOAD_DIR=/percorso/personalizzato python backend/app.py
-```
-
 ## Come funziona
 
 Al lancio il backend recupera automaticamente il dominio valido di StreamingCommunity ed inizializza l'API:
