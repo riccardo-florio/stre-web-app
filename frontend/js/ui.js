@@ -349,7 +349,14 @@ function searchResultToDownload(id, slug, title, updateHistory = true) {
     }
 }
 
-function downloadToSearchResult(updateHistory = true) {
+async function downloadToSearchResult(updateHistory = true) {
+    if (!lastSearchQuery && filmTitle) {
+        // No previous search results in this session. Use the film title
+        // to fetch them so the list is populated when returning.
+        await searchAndShowResults(filmTitle, updateHistory);
+        return;
+    }
+
     slidingContainer.classList.remove('translate-y-0');
     slidingContainer.classList.add('-translate-y-1/3');
     slidingContainer.classList.remove('-translate-y-2/3');
