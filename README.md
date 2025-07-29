@@ -31,6 +31,16 @@ python backend/app.py
 
 Il server partirà sulla porta `5000`. Aprendo `http://localhost:5000` si accede all'interfaccia web.
 
+## Avvio con Docker
+
+In alternativa è possibile eseguire l'applicazione tramite Docker. Dopo aver clonato la repository basta lanciare:
+
+```bash
+docker compose up --build
+```
+
+Il servizio sarà raggiungibile su `http://localhost:5000` come nella modalità classica.
+
 ## Come funziona
 
 Al lancio il backend recupera automaticamente il dominio valido di StreamingCommunity ed inizializza l'API:
