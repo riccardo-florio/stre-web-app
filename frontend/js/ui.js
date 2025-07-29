@@ -229,7 +229,8 @@ function createDownloadItem(id, title) {
     container.appendChild(wrapper);
     container.scrollTop = container.scrollHeight;
 
-    downloads[id] = { bar, percentSpan, etaSpan, dataSpan, speedSpan, cancelBtn, loading: true };
+    downloads[id] = { bar, percentSpan, etaSpan, dataSpan, speedSpan, cancelBtn, loading: true, active: true };
+    updateNoDownloadsMessage();
 }
 
 function startSearchLoading() {
@@ -291,6 +292,16 @@ const searchResults = document.getElementById('search-results');
 const infoTab = document.getElementById('info-tab');
 const slidingContainer = document.getElementById('sliding-container');
 const downloads = {};
+
+function updateNoDownloadsMessage() {
+    const msg = document.getElementById('no-download-msg');
+    const hasActive = Object.values(downloads).some(d => d.active);
+    if (hasActive) {
+        msg.classList.add('hidden');
+    } else {
+        msg.classList.remove('hidden');
+    }
+}
 
 function homeToSearchResult() {
     slidingContainer.classList.remove('translate-y-0');
