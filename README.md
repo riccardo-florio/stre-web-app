@@ -42,13 +42,8 @@ docker compose up --build
 Il servizio sarà raggiungibile su `http://localhost:5000` come nella modalità classica.
 
 Docker Compose carica automaticamente le variabili definite nel file `.env` presente nella repository.
-In questo file puoi impostare `HOST_DOWNLOAD_DIR` (di default `./downloads`) per scegliere dove salvare i file sul tuo computer.
-Puoi anche sovrascrivere la variabile al volo quando avvii il container (o modificare direttamente il volume nel `docker-compose.yml`).
-Esempio:
-
-```bash
-HOST_DOWNLOAD_DIR=/percorso/personalizzato docker compose up --build
-```
+Imposta il valore di `HOST_DOWNLOAD_DIR` in questo file per scegliere dove salvare i file sul tuo computer.
+Se lasci la variabile vuota verrà utilizzato il percorso predefinito `./downloads`.
 
 ## Come funziona
 
