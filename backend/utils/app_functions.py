@@ -99,10 +99,23 @@ def download_with_socket(
         else:
             output_path = 'downloads/%(title)s/%(title)s.%(ext)s'
 
+    # Prepara il titolo da comunicare sia in caso di download che quando il
+    # contenuto è già presente
+    display_title = None
+    if episodeid and series and season and episode_name:
+        if episode is not None:
+            display_title = f"{series} - S{season}E{episode} - {episode_name}"
+        else:
+            display_title = f"{series} - {episode_name}"
+    elif title:
+        display_title = title
+
     final_path = output_path.replace('%(ext)s', 'mp4')
     if os.path.exists(final_path):
-        socketio.emit('download_exists', {'status': 'exists', 'id': download_id})
-        download_states.pop(download_id, None)
+        socketio.emit(
+            'download_exists',
+            {'status': 'exists', 'id': download_id, 'title': display_title},
+        )
         print('[INFO] Download non avviato: file gia esistente.')
         return
     queue = Queue()
@@ -118,17 +131,12 @@ def download_with_socket(
     )
     thread.start()
 
-    # Prepara titolo da inviare in broadcast
-    display_title = None
-    if episodeid and series and season and episode_name:
-        if episode is not None:
-            display_title = f"{series} - S{season}E{episode} - {episode_name}"
-        else:
-            display_title = f"{series} - {episode_name}"
-    elif title:
-        display_title = title
-
-    download_states[download_id] = {"downloading": True, "progress": None, "title": display_title}
+    # Salva lo stato iniziale del download
+    download_states[download_id] = {
+        "downloading": True,
+        "progress": None,
+        "title": display_title,
+    }
 
     if display_title:
         socketio.emit('download_started', {'title': display_title, 'id': download_id})

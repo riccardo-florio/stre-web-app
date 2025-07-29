@@ -31,6 +31,20 @@ python backend/app.py
 
 Il server partirà sulla porta `5000`. Aprendo `http://localhost:5000` si accede all'interfaccia web.
 
+## Avvio con Docker
+
+In alternativa è possibile eseguire l'applicazione tramite Docker. Dopo aver clonato la repository basta lanciare:
+
+```bash
+docker compose up --build
+```
+
+Il servizio sarà raggiungibile su `http://localhost:5000` come nella modalità classica.
+
+Docker Compose carica automaticamente le variabili definite nel file `.env` presente nella repository.
+Imposta il valore di `HOST_DOWNLOAD_DIR` in questo file per scegliere dove salvare i file sul tuo computer.
+Se lasci la variabile vuota verrà utilizzato il percorso predefinito `./downloads`.
+
 ## Come funziona
 
 Al lancio il backend recupera automaticamente il dominio valido di StreamingCommunity ed inizializza l'API:
@@ -97,6 +111,11 @@ socket.on('download_progress', data => {
         data.speed
     );
 });
+
+// se il contenuto è già presente viene emesso un evento dedicato
+socket.on('download_exists', data => {
+    alert(`${data.title} è già stato scaricato.`);
+});
 ```
 
 ## Utilizzo
@@ -105,6 +124,7 @@ socket.on('download_progress', data => {
 2. Inserire il titolo da cercare e avviare la ricerca.
 3. Dalla lista dei risultati è possibile avviare il download o aprire il link diretto sul sito.
 4. Durante il download verrà mostrato l'avanzamento in tempo reale.
+5. Se il contenuto è già presente nel percorso di destinazione verrà mostrato un avviso e il download non partirà.
 
 ## Struttura dei file
 

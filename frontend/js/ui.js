@@ -31,26 +31,26 @@ function populateSearchResults(results, query, mainUrl) {
         const year = data.last_air_date ? data.last_air_date.split("-")[0] : "?";
 
         const card = `
-                    <div class="border rounded-[2em] flex gap-10 items-center shadow overflow-hidden h-56 p-4 pr-6 bg-white">
-                        <img src="${imgUrl}" alt="${title}" class="h-48 aspect-video object-contain rounded-2xl">
-                        <div class="flex flex-col justify-between h-full flex-1">
-                            <div class="flex flex-col">
-                                <span 
-                                    class="font-semibold text-xl line-clamp-1 mb-4" 
-                                    title="${title}">
-                                    ${title}
-                                </span>
-                                <span>Valutazione: <span class="font-semibold">${data.score || "?"}</span></span>
-                                <span>Tipo: <span class="font-semibold">${data.type === "movie" ? "Movie" : "Serie TV"}</span></span>
-                                <span>Uscita: <span class="font-semibold">${year}</span></span>
-                            </div>
-                            <div class="mt-4 grid grid-cols-2 gap-3 w-full">
-                                <a href="https://${mainUrl}/it/watch/${data.id}" target="_blank" class="bg-gray-200 rounded-[0.5em] text-gray-800 px-4 py-2 font-medium text-center">Guarda</a>
-                                <button onClick="searchResultToDownload(${data.id}, '${data.slug}', '${title}')" class="bg-blue-500 rounded-[0.5em] text-white px-4 py-2 font-medium">Info</button>
-                            </div>
-                        </div>
-                    </div>
-                `;
+            <div class="border rounded-[2em] flex flex-col sm:flex-row gap-6 sm:gap-10 shadow overflow-hidden p-4 sm:pr-6 bg-white">
+                <img src="${imgUrl}" alt="${title}" class="w-full sm:w-auto sm:h-48 aspect-video object-contain rounded-2xl mx-auto" />
+                <div class="flex flex-col justify-between flex-1">
+                <div class="flex flex-col mt-4 sm:mt-0">
+                    <span class="font-semibold text-xl line-clamp-1 mb-2 sm:mb-4" title="${title}">
+                    ${title}
+                    </span>
+                    <span>Valutazione: <span class="font-semibold">${data.score || "?"}</span></span>
+                    <span>Tipo: <span class="font-semibold">${data.type === "movie" ? "Movie" : "Serie TV"}</span></span>
+                    <span>Uscita: <span class="font-semibold">${year}</span></span>
+                </div>
+                <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
+                    <a href="https://${mainUrl}/it/watch/${data.id}" target="_blank"
+                    class="bg-gray-200 rounded-[0.5em] text-gray-800 px-4 py-2 font-medium text-center">Guarda</a>
+                    <button onClick="searchResultToDownload(${data.id}, '${data.slug}', '${title}')"
+                    class="bg-blue-500 rounded-[0.5em] text-white px-4 py-2 font-medium">Info</button>
+                </div>
+                </div>
+            </div>
+        `;
 
         resultsCardsContainer.innerHTML += card;
     }
@@ -67,7 +67,7 @@ async function populateDownloadSection(slug, title) {
     console.log('preview', data);
 
     const coverUrl = `https://cdn.${mainUrl}/images/${data.images[2].filename}`;
-    const uppercaseType =  data.type.charAt(0).toUpperCase() + data.type.slice(1);
+    const uppercaseType = data.type.charAt(0).toUpperCase() + data.type.slice(1);
     const genresString = data.genres.map(g => g.name).join(", ");
 
     document.getElementById('download-title').innerHTML = 'Info su ' + title;
@@ -76,7 +76,7 @@ async function populateDownloadSection(slug, title) {
     document.getElementById('choose-plot').title = data.plot;
     document.getElementById('choose-info').innerHTML = `${uppercaseType} - ${data.release_date.split("-")[0]} - ${data.runtime} min`;
     document.getElementById('choose-genres').innerHTML = `Genere: ${genresString}`;
-    
+
     const downloadBtn = document.getElementById('download-btn');
 
     if (data.type == "tv") {
@@ -229,7 +229,8 @@ function createDownloadItem(id, title) {
     container.appendChild(wrapper);
     container.scrollTop = container.scrollHeight;
 
-    downloads[id] = { bar, percentSpan, etaSpan, dataSpan, speedSpan, cancelBtn, loading: true };
+    downloads[id] = { bar, percentSpan, etaSpan, dataSpan, speedSpan, cancelBtn, loading: true, active: true };
+    updateNoDownloadsMessage();
 }
 
 function startSearchLoading() {
@@ -292,7 +293,17 @@ const infoTab = document.getElementById('info-tab');
 const slidingContainer = document.getElementById('sliding-container');
 const downloads = {};
 
-function homeToSearchResult() {
+function updateNoDownloadsMessage() {
+    const msg = document.getElementById('no-download-msg');
+    const hasActive = Object.values(downloads).some(d => d.active);
+    if (hasActive) {
+        msg.classList.add('hidden');
+    } else {
+        msg.classList.remove('hidden');
+    }
+}
+
+function homeToSearchResult(query = null, updateHistory = true) {
     slidingContainer.classList.remove('translate-y-0');
     slidingContainer.classList.add('-translate-y-1/3');
     slidingContainer.classList.remove('-translate-y-2/3');
@@ -300,9 +311,13 @@ function homeToSearchResult() {
     form.classList.add('opacity-0');
     searchResults.classList.remove('opacity-0');
     infoTab.classList.add('opacity-0');
+    if (updateHistory) {
+        const url = query ? `#search?q=${encodeURIComponent(query)}` : '#search';
+        history.pushState({ page: 'search', query }, '', url);
+    }
 }
 
-function searchResultToHome() {
+function searchResultToHome(updateHistory = true) {
     slidingContainer.classList.add('translate-y-0');
     slidingContainer.classList.remove('-translate-y-1/3');
     slidingContainer.classList.remove('-translate-y-2/3');
@@ -310,9 +325,12 @@ function searchResultToHome() {
     form.classList.remove('opacity-0');
     searchResults.classList.add('opacity-0');
     infoTab.classList.add('opacity-0');
+    if (updateHistory) {
+        history.pushState({ page: 'home' }, '', '#home');
+    }
 }
 
-function searchResultToDownload(id, slug, title) {
+function searchResultToDownload(id, slug, title, updateHistory = true) {
     filmId = id;
     filmTitle = title;
 
@@ -325,9 +343,20 @@ function searchResultToDownload(id, slug, title) {
     form.classList.add('opacity-0');
     searchResults.classList.add('opacity-0');
     infoTab.classList.remove('opacity-0');
+    if (updateHistory) {
+        const url = `#download?id=${id}&slug=${encodeURIComponent(slug)}&title=${encodeURIComponent(title)}`;
+        history.pushState({ page: 'download', filmId: id, slug: slug, title: title }, '', url);
+    }
 }
 
-function downloadToSearchResult() {
+async function downloadToSearchResult(updateHistory = true) {
+    if (!lastSearchQuery && filmTitle) {
+        // No previous search results in this session. Use the film title
+        // to fetch them so the list is populated when returning.
+        await searchAndShowResults(filmTitle, updateHistory);
+        return;
+    }
+
     slidingContainer.classList.remove('translate-y-0');
     slidingContainer.classList.add('-translate-y-1/3');
     slidingContainer.classList.remove('-translate-y-2/3');
@@ -335,4 +364,8 @@ function downloadToSearchResult() {
     form.classList.add('opacity-0');
     searchResults.classList.remove('opacity-0');
     infoTab.classList.add('opacity-0');
+    if (updateHistory) {
+        const url = lastSearchQuery ? `#search?q=${encodeURIComponent(lastSearchQuery)}` : '#search';
+        history.pushState({ page: 'search', query: lastSearchQuery }, '', url);
+    }
 }
