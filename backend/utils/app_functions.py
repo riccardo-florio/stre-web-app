@@ -166,13 +166,15 @@ def download_with_socket(
                         progress_data['downloaded'] = humanize.naturalsize(downloaded, binary=True)
                         progress_data['total'] = humanize.naturalsize(total, binary=True)
 
-                        download_states[download_id]["progress"] = progress_data
+                        if download_id in download_states:
+                            download_states[download_id]["progress"] = progress_data
                         socketio.emit('download_progress', {**progress_data, 'id': download_id})
 
                 elif d['status'] == 'finished':
                     socketio.emit('download_finished', {'status': 'done', 'id': download_id})
                     download_states.pop(download_id, None)
                     cancel_flags.pop(download_id, None)
+                    break
 
             except Empty:
                 time.sleep(0.1)
