@@ -143,3 +143,22 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     });
 });
+
+window.addEventListener('load', () => {
+    history.replaceState({ page: 'home' }, '', '#home');
+});
+
+window.addEventListener('popstate', (event) => {
+    const state = event.state || { page: 'home' };
+    if (state.page === 'home') {
+        searchResultToHome(false);
+    } else if (state.page === 'search') {
+        homeToSearchResult(false);
+    } else if (state.page === 'download') {
+        if (state.filmId && state.slug && state.title) {
+            searchResultToDownload(state.filmId, state.slug, state.title, false);
+        } else {
+            homeToSearchResult(false);
+        }
+    }
+});
