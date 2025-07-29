@@ -117,6 +117,19 @@ async function searchAndShowResults(query, updateHistory = true) {
 document.addEventListener('DOMContentLoaded', async () => {
     mainUrl = await fetchUrl();
     populateUrl(mainUrl);
+    if (mainUrl) {
+        const reachable = await checkDomainReachable(mainUrl);
+        if (!reachable) {
+            const el = document.getElementById('stre-url');
+            const link = el.querySelector('a');
+            if (link) {
+                link.classList.remove('text-blue-600');
+                link.classList.add('text-red-600');
+            } else {
+                el.classList.add('text-red-600');
+            }
+        }
+    }
     updateNoDownloadsMessage();
 
     const form = document.querySelector('form');
