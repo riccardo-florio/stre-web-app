@@ -303,7 +303,7 @@ function updateNoDownloadsMessage() {
     }
 }
 
-function homeToSearchResult() {
+function homeToSearchResult(query = null, updateHistory = true) {
     slidingContainer.classList.remove('translate-y-0');
     slidingContainer.classList.add('-translate-y-1/3');
     slidingContainer.classList.remove('-translate-y-2/3');
@@ -311,9 +311,13 @@ function homeToSearchResult() {
     form.classList.add('opacity-0');
     searchResults.classList.remove('opacity-0');
     infoTab.classList.add('opacity-0');
+    if (updateHistory) {
+        const url = query ? `#search?q=${encodeURIComponent(query)}` : '#search';
+        history.pushState({ page: 'search', query }, '', url);
+    }
 }
 
-function searchResultToHome() {
+function searchResultToHome(updateHistory = true) {
     slidingContainer.classList.add('translate-y-0');
     slidingContainer.classList.remove('-translate-y-1/3');
     slidingContainer.classList.remove('-translate-y-2/3');
@@ -321,9 +325,12 @@ function searchResultToHome() {
     form.classList.remove('opacity-0');
     searchResults.classList.add('opacity-0');
     infoTab.classList.add('opacity-0');
+    if (updateHistory) {
+        history.pushState({ page: 'home' }, '', '#home');
+    }
 }
 
-function searchResultToDownload(id, slug, title) {
+function searchResultToDownload(id, slug, title, updateHistory = true) {
     filmId = id;
     filmTitle = title;
 
@@ -336,9 +343,20 @@ function searchResultToDownload(id, slug, title) {
     form.classList.add('opacity-0');
     searchResults.classList.add('opacity-0');
     infoTab.classList.remove('opacity-0');
+    if (updateHistory) {
+        const url = `#download?id=${id}&slug=${encodeURIComponent(slug)}&title=${encodeURIComponent(title)}`;
+        history.pushState({ page: 'download', filmId: id, slug: slug, title: title }, '', url);
+    }
 }
 
-function downloadToSearchResult() {
+async function downloadToSearchResult(updateHistory = true) {
+    if (!lastSearchQuery && filmTitle) {
+        // No previous search results in this session. Use the film title
+        // to fetch them so the list is populated when returning.
+        await searchAndShowResults(filmTitle, updateHistory);
+        return;
+    }
+
     slidingContainer.classList.remove('translate-y-0');
     slidingContainer.classList.add('-translate-y-1/3');
     slidingContainer.classList.remove('-translate-y-2/3');
@@ -346,4 +364,8 @@ function downloadToSearchResult() {
     form.classList.add('opacity-0');
     searchResults.classList.remove('opacity-0');
     infoTab.classList.add('opacity-0');
+    if (updateHistory) {
+        const url = lastSearchQuery ? `#search?q=${encodeURIComponent(lastSearchQuery)}` : '#search';
+        history.pushState({ page: 'search', query: lastSearchQuery }, '', url);
+    }
 }
