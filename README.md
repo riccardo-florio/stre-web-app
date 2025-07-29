@@ -97,6 +97,11 @@ socket.on('download_progress', data => {
         data.speed
     );
 });
+
+// se il contenuto è già presente viene emesso un evento dedicato
+socket.on('download_exists', data => {
+    alert(`${data.title} è già stato scaricato.`);
+});
 ```
 
 ## Utilizzo
@@ -105,6 +110,7 @@ socket.on('download_progress', data => {
 2. Inserire il titolo da cercare e avviare la ricerca.
 3. Dalla lista dei risultati è possibile avviare il download o aprire il link diretto sul sito.
 4. Durante il download verrà mostrato l'avanzamento in tempo reale.
+5. Se il contenuto è già presente nel percorso di destinazione verrà mostrato un avviso e il download non partirà.
 
 ## Struttura dei file
 

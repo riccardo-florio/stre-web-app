@@ -51,9 +51,14 @@ window.onload = () => {
     });
 
     socket.on('download_exists', data => {
-        const item = downloads[data.id];
+        let item = downloads[data.id];
+        if (!item && data.title) {
+            createDownloadItem(data.id, data.title);
+            item = downloads[data.id];
+        }
         if (item) {
             item.percentSpan.innerText = '⚠️ Già presente';
+            item.bar.classList.remove('animate-pulse');
         }
     });
 
