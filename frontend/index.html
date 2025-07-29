@@ -76,9 +76,9 @@
                     <div class="overflow-y-auto">
                         <div class="flex flex-col gap-2">
                             <div class="rounded-2xl overflow-hidden relative">
-                                <img id="choose-cover">
+                                <img id="choose-cover" class="rounded-2xl lg:rounded-none">
                                 <div
-                                    class="text-white bg-gradient-to-t from-black via-black/80 to-transparent absolute bottom-0 left-0 h-2/3 w-full p-10 flex flex-col-reverse">
+                                    class="lg:text-white lg:bg-gradient-to-t from-black via-black/80 to-transparent lg:absolute bottom-0 left-0 h-2/3 w-full lg:p-10 my-4 lg:my-0 flex flex-col-reverse">
                                     <span id="choose-genres" class="mt-2"></span>
                                     <p id="choose-plot" class="line-clamp-3"></p>
                                     <span id="choose-info" class="mb-2"></span>
@@ -103,7 +103,7 @@
 
     <!-- Download -->
     <div id="download-tab"
-        class="bg-white min-w-96 h-[calc(100vh-2.5rem)] lg:h-full rounded-[2rem] lg:rounded-[3rem] py-9 px-10 shadow border border-gray-200 flex flex-col">
+        class="bg-white lg:min-w-96 h-[calc(100vh-2.5rem)] lg:h-full rounded-[2rem] lg:rounded-[3rem] py-9 px-10 shadow border border-gray-200 flex flex-col">
         <h2 class="text-2xl">Downloads</h2>
         <span id="no-download-msg" class="text-gray-800 mt-2">Nessun download in corso.</span>
         <div id="downloads-container" class="flex flex-col gap-4 overflow-y-auto mt-10"></div>
