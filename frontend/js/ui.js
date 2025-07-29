@@ -141,7 +141,6 @@ async function populateDownloadSection(slug, title) {
                         episode_name: ep.name,
                         episode: ep.episode
                     });
-                    createDownloadItem(`${filmTitle} - S${ep.season}E${ep.episode} - ${ep.name}`);
                 };
                 body.appendChild(btn);
 
@@ -159,29 +158,30 @@ async function populateDownloadSection(slug, title) {
     }
 }
 
-function updateDownloadProgress(percent, eta = null, downloaded = null, total = null, speed = null) {
-    if (!currentDownload) return;
+function updateDownloadProgress(id, percent, eta = null, downloaded = null, total = null, speed = null) {
+    const item = downloads[id];
+    if (!item) return;
 
-    if (currentDownload.loading) {
-        currentDownload.loading = false;
-        currentDownload.bar.classList.remove('animate-pulse');
+    if (item.loading) {
+        item.loading = false;
+        item.bar.classList.remove('animate-pulse');
     }
 
-    currentDownload.percentSpan.innerHTML = percent + '%';
-    currentDownload.bar.style.width = percent + '%';
+    item.percentSpan.innerHTML = percent + '%';
+    item.bar.style.width = percent + '%';
 
     if (eta) {
-        currentDownload.etaSpan.innerHTML = 'ETA: ' + eta;
+        item.etaSpan.innerHTML = 'ETA: ' + eta;
     }
     if (downloaded && total) {
-        currentDownload.dataSpan.innerHTML = `${downloaded} / ${total}`;
+        item.dataSpan.innerHTML = `${downloaded} / ${total}`;
     }
     if (speed) {
-        currentDownload.speedSpan.innerHTML = `Velocità: ${speed}`;
+        item.speedSpan.innerHTML = `Velocità: ${speed}`;
     }
 }
 
-function createDownloadItem(title) {
+function createDownloadItem(id, title) {
     const container = document.getElementById('downloads-container');
     const wrapper = document.createElement('div');
     wrapper.className = 'border-b pb-4 mb-4';
@@ -194,7 +194,7 @@ function createDownloadItem(title) {
     const cancelBtn = document.createElement('button');
     cancelBtn.className = 'bg-red-600 rounded-[0.5em] text-white px-4 py-2 font-medium';
     cancelBtn.textContent = 'Annulla';
-    cancelBtn.onclick = () => { socket.emit('cancel_download'); };
+    cancelBtn.onclick = () => { socket.emit('cancel_download', { id }); };
     header.appendChild(titleSpan);
     header.appendChild(cancelBtn);
     wrapper.appendChild(header);
@@ -229,7 +229,7 @@ function createDownloadItem(title) {
     container.appendChild(wrapper);
     container.scrollTop = container.scrollHeight;
 
-    currentDownload = { bar, percentSpan, etaSpan, dataSpan, speedSpan, loading: true };
+    downloads[id] = { bar, percentSpan, etaSpan, dataSpan, speedSpan, cancelBtn, loading: true };
 }
 
 function startSearchLoading() {
@@ -290,7 +290,7 @@ const form = document.querySelector('form');
 const searchResults = document.getElementById('search-results');
 const infoTab = document.getElementById('info-tab');
 const slidingContainer = document.getElementById('sliding-container');
-let currentDownload = null;
+const downloads = {};
 
 function homeToSearchResult() {
     slidingContainer.classList.remove('translate-y-0');

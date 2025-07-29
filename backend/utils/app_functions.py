@@ -12,6 +12,15 @@ import os
 # 👇 Nuovo dizionario globale per gestire le cancellazioni
 cancel_flags = {}
 
+# Stato condiviso dei download
+# Ogni download è identificato da un id e contiene
+# informazioni su progresso e titolo.
+download_states = {}
+
+def get_download_state():
+    """Ritorna lo stato corrente di tutti i download."""
+    return download_states
+
 
 def sanitize(name: str) -> str:
     """Remove characters that are not safe for file paths."""
@@ -61,7 +70,7 @@ def download_with_socket(
     domain,
     filmid,
     socketio,
-    sid,
+    download_id,
     episodeid=None,
     title=None,
     series=None,
@@ -92,14 +101,15 @@ def download_with_socket(
 
     final_path = output_path.replace('%(ext)s', 'mp4')
     if os.path.exists(final_path):
-        socketio.emit('download_exists', {'status': 'exists'}, to=sid)
+        socketio.emit('download_exists', {'status': 'exists', 'id': download_id})
+        download_states.pop(download_id, None)
         print('[INFO] Download non avviato: file gia esistente.')
         return
     queue = Queue()
     cancel_event = threading.Event()  # 👈 nuovo event per cancellazione
 
     # Salva il flag di cancellazione per questo socket
-    cancel_flags[sid] = cancel_event
+    cancel_flags[download_id] = cancel_event
 
     # Lancia il download in un thread
     thread = threading.Thread(
@@ -108,14 +118,31 @@ def download_with_socket(
     )
     thread.start()
 
+    # Prepara titolo da inviare in broadcast
+    display_title = None
+    if episodeid and series and season and episode_name:
+        if episode is not None:
+            display_title = f"{series} - S{season}E{episode} - {episode_name}"
+        else:
+            display_title = f"{series} - {episode_name}"
+    elif title:
+        display_title = title
+
+    download_states[download_id] = {"downloading": True, "progress": None, "title": display_title}
+
+    if display_title:
+        socketio.emit('download_started', {'title': display_title, 'id': download_id})
+
     def emit_updates():
         while thread.is_alive() or not queue.empty():
             try:
                 d = queue.get(timeout=0.1)
 
                 if cancel_event.is_set():
-                    socketio.emit('download_cancelled', {'status': 'cancelled'}, to=sid)
-                    print(f"[INFO] Download annullato per {sid}")
+                    socketio.emit('download_cancelled', {'status': 'cancelled', 'id': download_id})
+                    download_states.pop(download_id, None)
+                    cancel_flags.pop(download_id, None)
+                    print(f"[INFO] Download annullato: {download_id}")
                     break
 
                 if d['status'] == 'downloading':
@@ -139,10 +166,15 @@ def download_with_socket(
                         progress_data['downloaded'] = humanize.naturalsize(downloaded, binary=True)
                         progress_data['total'] = humanize.naturalsize(total, binary=True)
 
-                        socketio.emit('download_progress', progress_data, to=sid)
+                        if download_id in download_states:
+                            download_states[download_id]["progress"] = progress_data
+                        socketio.emit('download_progress', {**progress_data, 'id': download_id})
 
                 elif d['status'] == 'finished':
-                    socketio.emit('download_finished', {'status': 'done'}, to=sid)
+                    socketio.emit('download_finished', {'status': 'done', 'id': download_id})
+                    download_states.pop(download_id, None)
+                    cancel_flags.pop(download_id, None)
+                    break
 
             except Empty:
                 time.sleep(0.1)
@@ -151,8 +183,11 @@ def download_with_socket(
 
 
 # 👇 Funzione per segnare un download come "da annullare"
-def cancel_download(sid):
-    if sid in cancel_flags:
-        cancel_flags[sid].set()
-        print(f"[INFO] Richiesta di annullamento per socket {sid}")
+def cancel_download(download_id):
+    if download_id in cancel_flags:
+        cancel_flags[download_id].set()
+        print(f"[INFO] Richiesta di annullamento per download {download_id}")
+        download_states.pop(download_id, None)
+        cancel_flags.pop(download_id, None)
+
 
