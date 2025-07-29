@@ -59,6 +59,8 @@ window.onload = () => {
         if (item) {
             item.percentSpan.innerText = '⚠️ Già presente';
             item.bar.classList.remove('animate-pulse');
+            item.active = false;
+            updateNoDownloadsMessage();
         }
     });
 
@@ -72,6 +74,8 @@ window.onload = () => {
                 item.cancelBtn.disabled = true;
                 item.cancelBtn.classList.add('opacity-50');
             }
+            item.active = false;
+            updateNoDownloadsMessage();
         }
     });
 
@@ -85,6 +89,8 @@ window.onload = () => {
                 item.cancelBtn.disabled = true;
                 item.cancelBtn.classList.add('opacity-50');
             }
+            item.active = false;
+            updateNoDownloadsMessage();
         }
     })
 }
@@ -92,6 +98,7 @@ window.onload = () => {
 document.addEventListener('DOMContentLoaded', async () => {
     mainUrl = await fetchUrl();
     populateUrl(mainUrl);
+    updateNoDownloadsMessage();
 
     const form = document.querySelector('form');
     const downloadBtn = document.getElementById('download-btn');
