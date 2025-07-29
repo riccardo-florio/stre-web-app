@@ -110,4 +110,6 @@ def handle_cancel_download(data):
     emit("download_cancelled", {"status": "cancelled", "id": download_id})
 
 if __name__ == "__main__":
-    socketio.run(app, debug=True)
+    # Allow the built-in Werkzeug server when running inside Docker.
+    # Expose the server on all interfaces for external access.
+    socketio.run(app, debug=True, host="0.0.0.0", allow_unsafe_werkzeug=True)

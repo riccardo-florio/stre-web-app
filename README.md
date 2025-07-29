@@ -36,7 +36,7 @@ Il server partirà sulla porta `5000`. Aprendo `http://localhost:5000` si accede
 In alternativa è possibile eseguire l'applicazione tramite Docker. Dopo aver clonato la repository basta lanciare:
 
 ```bash
-docker compose up --build
+docker compose up --build -d
 ```
 
 Il servizio sarà raggiungibile su `http://localhost:5000` come nella modalità classica.
