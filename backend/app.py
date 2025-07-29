@@ -12,6 +12,7 @@ from utils.app_functions import (
     download_with_socket,
     cancel_download,
     get_download_state,
+    check_connection,
 )
 from scuapi import API
 from utils.fixed_api import API as FixedAPI
@@ -50,6 +51,11 @@ def home():
 @app.route("/api/get-stre-domain")
 def get_main_domain():
     return jsonify(domain)
+
+@app.route("/api/check-domain/<domain_to_check>")
+def check_domain(domain_to_check):
+    reachable = check_connection(domain_to_check)
+    return jsonify({"reachable": reachable})
 
 @app.route("/api/search/<query>")
 def search_query(query):

@@ -21,3 +21,14 @@ async function fetchExtendedInfo(slug) {
     const data = await res.json();
     return data;
 }
+
+async function checkDomainReachable(domain) {
+    try {
+        const res = await fetch(`/api/check-domain/${domain}`);
+        const data = await res.json();
+        return data.reachable;
+    } catch (err) {
+        console.error('Errore nel controllo del dominio', err);
+        return false;
+    }
+}
