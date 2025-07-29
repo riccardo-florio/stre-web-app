@@ -118,6 +118,24 @@ socket.on('download_exists', data => {
 });
 ```
 
+## Download multipli e gestione multiutente
+
+Ogni download viene eseguito in un **thread** dedicato così da poter avviare più
+scaricamenti in parallelo. Lo stato di ciascun download è conservato nel
+dizionario `download_states` e viene trasmesso a tutti i client tramite SocketIO.
+Quando un nuovo utente si collega il backend invia un evento `active_downloads`
+contenente l'elenco dei download in corso e, per ciascuno di essi, gli eventi
+`download_started` e `download_progress` con l'ultima percentuale nota.
+
+Dal frontend è possibile avviare più download contemporaneamente e annullarli
+premendo il pulsante **Annulla**: viene emesso l'evento `cancel_download` e il
+server interrompe il processo notificando tutti i client con
+`download_cancelled`.
+
+Grazie alla comunicazione broadcast via websocket ogni utente vede in tempo
+reale l'avanzamento di tutti i download attivi, anche quelli avviati da altre
+sessioni.
+
 ## Utilizzo
 
 1. Aprire la pagina `http://localhost:5000`.
