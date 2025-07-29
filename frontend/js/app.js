@@ -3,6 +3,7 @@ let socketid = undefined;
 let mainUrl = null;
 let filmId = null;
 let filmTitle = null;
+let lastSearchQuery = null;
 
 window.onload = () => {
     socket = io();
@@ -95,6 +96,24 @@ window.onload = () => {
     })
 }
 
+async function searchAndShowResults(query, updateHistory = true) {
+    if (!query) return;
+    const encodedQuery = encodeURIComponent(query);
+
+    startSearchLoading();
+    try {
+        const response = await fetch(`/api/search/${encodedQuery}`);
+        const results = await response.json();
+        lastSearchQuery = query;
+        homeToSearchResult(query, updateHistory);
+        populateSearchResults(results, query, mainUrl);
+    } catch (err) {
+        console.error("Errore nella ricerca:", err);
+        populateSearchResultError();
+    }
+    stopSearchLoading();
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
     mainUrl = await fetchUrl();
     populateUrl(mainUrl);
@@ -105,34 +124,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
-
         const input = form.querySelector('input[type="text"]');
         const query = input.value.trim();
-
         if (!query) {
             alert("Inserisci un titolo!");
             return;
         }
-
-        const encodedQuery = encodeURIComponent(query);
-
-        startSearchLoading();
-
-        try {
-            const response = await fetch(`/api/search/${encodedQuery}`);
-            const results = await response.json();
-
-            //console.log(results);
-
-            homeToSearchResult(); // cambia pagina
-            populateSearchResults(results, input.value, mainUrl);
-
-        } catch (err) {
-            console.error("Errore nella ricerca:", err);
-            populateSearchResultError();
-        }
-
-        stopSearchLoading();
+        searchAndShowResults(query);
     });
 
     downloadBtn.addEventListener('click', async (e) => {
@@ -142,23 +140,40 @@ document.addEventListener('DOMContentLoaded', async () => {
             title: filmTitle
         });
     });
+
+    handleNavigationFromURL();
 });
 
-window.addEventListener('load', () => {
-    history.replaceState({ page: 'home' }, '', '#home');
-});
+async function handleNavigationFromURL() {
+    const hash = location.hash || '#home';
+    const [page, queryString] = hash.slice(1).split('?');
+    const params = new URLSearchParams(queryString || '');
 
-window.addEventListener('popstate', (event) => {
-    const state = event.state || { page: 'home' };
-    if (state.page === 'home') {
-        searchResultToHome(false);
-    } else if (state.page === 'search') {
-        homeToSearchResult(false);
-    } else if (state.page === 'download') {
-        if (state.filmId && state.slug && state.title) {
-            searchResultToDownload(state.filmId, state.slug, state.title, false);
+    if (page === 'search') {
+        const q = params.get('q');
+        if (q) {
+            await searchAndShowResults(q, false);
         } else {
-            homeToSearchResult(false);
+            homeToSearchResult(null, false);
         }
+        history.replaceState({ page: 'search', query: q }, '', hash);
+    } else if (page === 'download') {
+        const id = params.get('id');
+        const slug = params.get('slug');
+        const title = params.get('title');
+        if (id && slug && title) {
+            searchResultToDownload(id, slug, title, false);
+            history.replaceState({ page: 'download', filmId: id, slug, title }, '', hash);
+        } else {
+            searchResultToHome(false);
+            history.replaceState({ page: 'home' }, '', '#home');
+        }
+    } else {
+        searchResultToHome(false);
+        history.replaceState({ page: 'home' }, '', '#home');
     }
+}
+
+window.addEventListener('popstate', () => {
+    handleNavigationFromURL();
 });

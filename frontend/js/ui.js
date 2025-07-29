@@ -303,7 +303,7 @@ function updateNoDownloadsMessage() {
     }
 }
 
-function homeToSearchResult(updateHistory = true) {
+function homeToSearchResult(query = null, updateHistory = true) {
     slidingContainer.classList.remove('translate-y-0');
     slidingContainer.classList.add('-translate-y-1/3');
     slidingContainer.classList.remove('-translate-y-2/3');
@@ -312,7 +312,8 @@ function homeToSearchResult(updateHistory = true) {
     searchResults.classList.remove('opacity-0');
     infoTab.classList.add('opacity-0');
     if (updateHistory) {
-        history.pushState({ page: 'search' }, '', '#search');
+        const url = query ? `#search?q=${encodeURIComponent(query)}` : '#search';
+        history.pushState({ page: 'search', query }, '', url);
     }
 }
 
@@ -343,7 +344,8 @@ function searchResultToDownload(id, slug, title, updateHistory = true) {
     searchResults.classList.add('opacity-0');
     infoTab.classList.remove('opacity-0');
     if (updateHistory) {
-        history.pushState({ page: 'download', filmId: id, slug: slug, title: title }, '', '#download');
+        const url = `#download?id=${id}&slug=${encodeURIComponent(slug)}&title=${encodeURIComponent(title)}`;
+        history.pushState({ page: 'download', filmId: id, slug: slug, title: title }, '', url);
     }
 }
 
@@ -356,6 +358,7 @@ function downloadToSearchResult(updateHistory = true) {
     searchResults.classList.remove('opacity-0');
     infoTab.classList.add('opacity-0');
     if (updateHistory) {
-        history.pushState({ page: 'search' }, '', '#search');
+        const url = lastSearchQuery ? `#search?q=${encodeURIComponent(lastSearchQuery)}` : '#search';
+        history.pushState({ page: 'search', query: lastSearchQuery }, '', url);
     }
 }
