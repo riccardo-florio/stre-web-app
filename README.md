@@ -154,4 +154,5 @@ sessioni.
 ## TODO
 
 - gestione download interrotto dal server
-
+- sistemare ui mobile
+- implementare cronologia (es. download completati, interrotti, ecc..)
