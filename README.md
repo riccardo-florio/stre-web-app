@@ -44,6 +44,8 @@ Il servizio sarà raggiungibile su `http://localhost:5000` come nella modalità 
 Docker Compose carica automaticamente le variabili definite nel file `.env` presente nella repository.
 Imposta il valore di `HOST_DOWNLOAD_DIR` in questo file per scegliere dove salvare i file sul tuo computer.
 Se lasci la variabile vuota verrà utilizzato il percorso predefinito `./downloads`.
+Puoi inoltre personalizzare la porta esposta all'host impostando `HOST_PORT`.
+Se non definita, la porta predefinita sarà `5000`.
 
 ## Come funziona
 
