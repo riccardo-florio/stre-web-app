@@ -300,11 +300,18 @@ const downloads = {};
 
 function updateNoDownloadsMessage() {
     const msg = document.getElementById('no-download-msg');
+    const indicator = document.getElementById('download-indicator');
     const hasActive = Object.values(downloads).some(d => d.active);
     if (hasActive) {
         msg.classList.add('hidden');
+        if (indicator) {
+            indicator.classList.remove('hidden');
+        }
     } else {
         msg.classList.remove('hidden');
+        if (indicator) {
+            indicator.classList.add('hidden');
+        }
     }
 }
 
