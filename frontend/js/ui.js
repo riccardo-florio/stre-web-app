@@ -1,3 +1,8 @@
+function toggleMobileMenu() {
+    document.getElementById('download-tab').classList.toggle('opacity-0');
+    document.getElementById('download-tab').classList.toggle('pointer-events-none');
+}
+
 function populateUrl(url) {
     streUrl = document.getElementById("stre-url");
     //console.log(url)
