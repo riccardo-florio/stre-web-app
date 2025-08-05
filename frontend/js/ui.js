@@ -1,3 +1,8 @@
+function toggleMobileMenu() {
+    document.getElementById('download-tab').classList.toggle('opacity-0');
+    document.getElementById('download-tab').classList.toggle('pointer-events-none');
+}
+
 function populateUrl(url) {
     streUrl = document.getElementById("stre-url");
     //console.log(url)
@@ -16,7 +21,7 @@ function populateSearchResults(results, query, mainUrl) {
     const resultsCardsContainer = document.getElementById('search-cards-container');
 
     if (!results || Object.keys(results).length === 0) {
-        resultsCardsContainer.innerHTML = "Nessun titolo corrisponde alla tua ricerca.";
+        resultsCardsContainer.innerHTML = "<p class=\"text-pretty\">Nessun titolo corrisponde alla tua ricerca.</p>";
         return;
     }
 
@@ -35,12 +40,12 @@ function populateSearchResults(results, query, mainUrl) {
                 <img src="${imgUrl}" alt="${title}" class="w-full sm:w-auto sm:h-48 aspect-video object-contain rounded-2xl mx-auto" />
                 <div class="flex flex-col justify-between flex-1">
                 <div class="flex flex-col mt-4 sm:mt-0">
-                    <span class="font-semibold text-xl line-clamp-1 mb-2 sm:mb-4" title="${title}">
+                    <span class="font-semibold text-xl line-clamp-1 mb-2 sm:mb-4 text-pretty" title="${title}">
                     ${title}
                     </span>
-                    <span>Valutazione: <span class="font-semibold">${data.score || "?"}</span></span>
-                    <span>Tipo: <span class="font-semibold">${data.type === "movie" ? "Movie" : "Serie TV"}</span></span>
-                    <span>Uscita: <span class="font-semibold">${year}</span></span>
+                    <span class="text-pretty">Valutazione: <span class="font-semibold">${data.score || "?"}</span></span>
+                    <span class="text-pretty">Tipo: <span class="font-semibold">${data.type === "movie" ? "Movie" : "Serie TV"}</span></span>
+                    <span class="text-pretty">Uscita: <span class="font-semibold">${year}</span></span>
                 </div>
                 <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
                     <a href="https://${mainUrl}/it/watch/${data.id}" target="_blank"
@@ -58,7 +63,7 @@ function populateSearchResults(results, query, mainUrl) {
 
 function populateSearchResultError() {
     const resultsCardsContainer = document.getElementById('search-cards-container');
-    resultsCardsContainer.innerHTML = `<p class="text-red-500">Errore nella ricerca. Riprova più tardi.</p>`;
+    resultsCardsContainer.innerHTML = `<p class="text-red-500 text-pretty">Errore nella ricerca. Riprova più tardi.</p>`;
 }
 
 async function populateDownloadSection(slug, title) {
@@ -189,7 +194,7 @@ function createDownloadItem(id, title) {
     const header = document.createElement('div');
     header.className = 'flex justify-between items-center mb-2';
     const titleSpan = document.createElement('span');
-    titleSpan.className = 'font-semibold';
+    titleSpan.className = 'font-semibold text-pretty';
     titleSpan.textContent = title;
     const cancelBtn = document.createElement('button');
     cancelBtn.className = 'bg-red-600 rounded-[0.5em] text-white px-4 py-2 font-medium';
@@ -295,11 +300,18 @@ const downloads = {};
 
 function updateNoDownloadsMessage() {
     const msg = document.getElementById('no-download-msg');
+    const indicator = document.getElementById('download-indicator');
     const hasActive = Object.values(downloads).some(d => d.active);
     if (hasActive) {
         msg.classList.add('hidden');
+        if (indicator) {
+            indicator.classList.remove('hidden');
+        }
     } else {
         msg.classList.remove('hidden');
+        if (indicator) {
+            indicator.classList.add('hidden');
+        }
     }
 }
 
