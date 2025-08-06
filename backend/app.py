@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 from uuid import uuid4
 from utils.app_functions import (
-    get_stre_domain,
+    refresh_stre_domain,
     search,
     get_info,
     get_extended_info,
@@ -20,9 +20,20 @@ from utils.fixed_api import API as FixedAPI
 BASE_DIR = Path(__file__).resolve().parent
 FRONTEND_DIR = BASE_DIR.parent / "frontend"
 
-# Inizializza dominio e API subito
-domain = get_stre_domain()
-sc = API(domain)
+# Wrapper per dominio e API aggiornabile
+
+
+class StreAPI:
+    def __init__(self):
+        self.domain = refresh_stre_domain()
+        self.sc = API(self.domain)
+
+    def refresh(self):
+        self.domain = refresh_stre_domain()
+        self.sc = API(self.domain)
+
+
+stre = StreAPI()
 
 app = Flask(__name__, static_folder=str(FRONTEND_DIR), static_url_path="")
 socketio = SocketIO(app)
@@ -50,7 +61,13 @@ def home():
 
 @app.route("/api/get-stre-domain")
 def get_main_domain():
-    return jsonify(domain)
+    return jsonify(stre.domain)
+
+
+@app.route("/api/refresh-domain", methods=["POST"])
+def refresh_domain():
+    stre.refresh()
+    return jsonify({"domain": stre.domain})
 
 @app.route("/api/check-domain/<domain_to_check>")
 def check_domain(domain_to_check):
@@ -59,7 +76,7 @@ def check_domain(domain_to_check):
 
 @app.route("/api/search/<query>")
 def search_query(query):
-    results = search(sc, query)
+    results = search(stre.sc, query)
     return Response(
         json.dumps(results, ensure_ascii=False, sort_keys=False),
         content_type="application/json"
@@ -67,12 +84,12 @@ def search_query(query):
 
 @app.route("/api/getinfo/<slug>")
 def get_title_info(slug):
-    results = get_info(sc, slug)
+    results = get_info(stre.sc, slug)
     return jsonify(results)
 
 @app.route("/api/get-extended-info/<slug>")
 def get_full_info(slug):
-    new_sc = FixedAPI(domain)
+    new_sc = FixedAPI(stre.domain)
     results = get_extended_info(new_sc, slug)
     return jsonify(results)
 
