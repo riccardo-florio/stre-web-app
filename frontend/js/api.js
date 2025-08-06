@@ -26,9 +26,30 @@ async function checkDomainReachable(domain) {
     try {
         const res = await fetch(`/api/check-domain/${domain}`);
         const data = await res.json();
-        return data.reachable;
+        if (data.reachable) {
+            return true;
+        }
     } catch (err) {
         console.error('Errore nel controllo del dominio', err);
-        return false;
     }
+
+    try {
+        await fetch('/api/refresh-domain', { method: 'POST' });
+        const newDomain = await fetchUrl();
+        if (newDomain) {
+            try {
+                const retry = await fetch(`/api/check-domain/${newDomain}`);
+                const retryData = await retry.json();
+                if (retryData.reachable) {
+                    window.mainUrl = newDomain;
+                    return true;
+                }
+            } catch (err) {
+                console.error('Errore nel controllo del nuovo dominio', err);
+            }
+        }
+    } catch (err) {
+        console.error('Errore nel refresh del dominio', err);
+    }
+    return false;
 }

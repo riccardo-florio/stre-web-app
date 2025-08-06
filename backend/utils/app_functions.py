@@ -17,6 +17,9 @@ cancel_flags = {}
 # informazioni su progresso e titolo.
 download_states = {}
 
+# Dominio corrente condiviso
+stre_domain = None
+
 def get_download_state():
     """Ritorna lo stato corrente di tutti i download."""
     return download_states
@@ -53,6 +56,15 @@ def get_stre_domain():
 
     print(f"[INFO] Dominio selezionato automaticamente: {domain}")
     return domain
+
+
+def refresh_stre_domain():
+    """Aggiorna e restituisce il dominio di StreamingCommunity."""
+    global stre_domain
+    new_domain = get_stre_domain()
+    if new_domain:
+        stre_domain = new_domain
+    return stre_domain
 
 def search(sc, query):
     results = sc.search(query)
