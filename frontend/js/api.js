@@ -37,8 +37,16 @@ async function checkDomainReachable(domain) {
         await fetch('/api/refresh-domain', { method: 'POST' });
         const newDomain = await fetchUrl();
         if (newDomain) {
-            window.mainUrl = newDomain;
-            return true;
+            try {
+                const retry = await fetch(`/api/check-domain/${newDomain}`);
+                const retryData = await retry.json();
+                if (retryData.reachable) {
+                    window.mainUrl = newDomain;
+                    return true;
+                }
+            } catch (err) {
+                console.error('Errore nel controllo del nuovo dominio', err);
+            }
         }
     } catch (err) {
         console.error('Errore nel refresh del dominio', err);
