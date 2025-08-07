@@ -5,7 +5,21 @@
     const progressBar = document.getElementById('player-progress');
     const fullscreenBtn = document.getElementById('fullscreen-btn');
     const closeBtn = document.getElementById('close-player');
+    const controls = document.getElementById('player-controls');
+    const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    let hideControlsTimeout = null;
     let hlsInstance = null;
+
+    function hideControls() {
+        controls.classList.add('opacity-0', 'pointer-events-none');
+    }
+
+    function showControls() {
+        controls.classList.remove('opacity-0', 'pointer-events-none');
+        if (!isTouch || video.paused) return;
+        clearTimeout(hideControlsTimeout);
+        hideControlsTimeout = setTimeout(hideControls, 3000);
+    }
 
     function showPlayer(src) {
         modal.classList.remove('hidden');
@@ -22,6 +36,7 @@
         if (modal.requestFullscreen) {
             modal.requestFullscreen();
         }
+        showControls();
     }
 
     function hidePlayer() {
@@ -29,6 +44,11 @@
         if (document.fullscreenElement) {
             document.exitFullscreen();
         }
+        if (screen.orientation && screen.orientation.unlock) {
+            try { screen.orientation.unlock(); } catch (_) { }
+        }
+        clearTimeout(hideControlsTimeout);
+        showControls();
         if (hlsInstance) {
             hlsInstance.destroy();
             hlsInstance = null;
@@ -79,16 +99,31 @@
     fullscreenBtn.addEventListener('click', toggleFullscreen);
     closeBtn.addEventListener('click', hidePlayer);
 
-    video.addEventListener('play', updatePlayButton);
-    video.addEventListener('pause', updatePlayButton);
+    video.addEventListener('play', () => {
+        updatePlayButton();
+        showControls();
+    });
+    video.addEventListener('pause', () => {
+        updatePlayButton();
+        showControls();
+    });
     video.addEventListener('timeupdate', updateProgress);
     video.addEventListener('loadedmetadata', updateProgress);
     progressBar.addEventListener('input', seekVideo);
 
-    document.addEventListener('fullscreenchange', updateFullscreenButton);
+    document.addEventListener('fullscreenchange', () => {
+        updateFullscreenButton();
+        if (isTouch && screen.orientation && screen.orientation.lock) {
+            if (document.fullscreenElement === modal) {
+                screen.orientation.lock('landscape').catch(() => { });
+            } else if (screen.orientation.unlock) {
+                try { screen.orientation.unlock(); } catch (_) { }
+            }
+        }
+    });
 
     // Enable double-tap seeking on touch devices only
-    if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+    if (isTouch) {
         let lastTap = 0;
         video.addEventListener('touchend', (e) => {
             const currentTime = Date.now();
@@ -104,6 +139,11 @@
             }
             lastTap = currentTime;
         });
+    }
+
+    if (isTouch) {
+        video.addEventListener('touchstart', showControls);
+        controls.addEventListener('touchstart', showControls);
     }
 
     document.addEventListener('keydown', (e) => {
