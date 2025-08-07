@@ -12,10 +12,12 @@
 
     function hideControls() {
         controls.classList.add('opacity-0', 'pointer-events-none');
+        closeBtn.classList.add('opacity-0', 'pointer-events-none');
     }
 
     function showControls() {
         controls.classList.remove('opacity-0', 'pointer-events-none');
+        closeBtn.classList.remove('opacity-0', 'pointer-events-none');
         if (!isTouch || video.paused) return;
         clearTimeout(hideControlsTimeout);
         hideControlsTimeout = setTimeout(hideControls, 3000);
@@ -99,6 +101,14 @@
     fullscreenBtn.addEventListener('click', toggleFullscreen);
     closeBtn.addEventListener('click', hidePlayer);
 
+    modal.addEventListener('click', (e) => {
+        if (isTouch) return;
+        if (e.target === modal || e.target === video) {
+            togglePlay();
+            updatePlayButton();
+        }
+    });
+
     video.addEventListener('play', () => {
         updatePlayButton();
         showControls();
@@ -144,6 +154,7 @@
     if (isTouch) {
         video.addEventListener('touchstart', showControls);
         controls.addEventListener('touchstart', showControls);
+        modal.addEventListener('touchstart', showControls);
     }
 
     document.addEventListener('keydown', (e) => {
