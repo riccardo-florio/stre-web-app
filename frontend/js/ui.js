@@ -180,10 +180,29 @@ async function populateDownloadSection(slug, title) {
                 desc.className = 'text-xs line-clamp-3';
                 desc.textContent = ep.description || '';
                 body.appendChild(desc);
-                const btn = document.createElement('button');
-                btn.className = 'bg-blue-500 text-white rounded px-2 py-1 text-xs mt-auto';
-                btn.textContent = 'Scarica';
-                btn.onclick = () => {
+                const btnContainer = document.createElement('div');
+                btnContainer.className = 'flex gap-2 mt-auto';
+                const watchEpBtn = document.createElement('button');
+                watchEpBtn.className = 'bg-gray-200 text-gray-800 rounded px-2 py-1 text-xs';
+                watchEpBtn.textContent = 'Guarda';
+                watchEpBtn.onclick = async () => {
+                    try {
+                        const links = await fetchStreamingLinks(filmId, ep.id);
+                        const hlsLink = links.find(l => l.includes('playlist') || l.includes('.m3u8'));
+                        if (hlsLink) {
+                            showPlayer(hlsLink, ep.id);
+                        } else {
+                            alert('Nessun link disponibile');
+                        }
+                    } catch (err) {
+                        console.error('Errore nel recupero dei link', err);
+                        alert('Errore nel recupero dei link');
+                    }
+                };
+                const downloadEpBtn = document.createElement('button');
+                downloadEpBtn.className = 'bg-blue-500 text-white rounded px-2 py-1 text-xs';
+                downloadEpBtn.textContent = 'Scarica';
+                downloadEpBtn.onclick = () => {
                     socket.emit('start_download', {
                         domain: mainUrl,
                         filmid: filmId,
@@ -194,7 +213,9 @@ async function populateDownloadSection(slug, title) {
                         episode: ep.episode
                     });
                 };
-                body.appendChild(btn);
+                btnContainer.appendChild(watchEpBtn);
+                btnContainer.appendChild(downloadEpBtn);
+                body.appendChild(btnContainer);
 
                 card.appendChild(body);
                 epContainer.appendChild(card);
