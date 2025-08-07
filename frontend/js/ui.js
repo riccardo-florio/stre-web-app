@@ -194,6 +194,8 @@ async function populateDownloadSection(slug, title) {
         downloadBtn.classList.remove('hidden');
         watchBtn.classList.remove('hidden');
     }
+}
+
 function updateDownloadProgress(id, percent, eta = null, downloaded = null, total = null, speed = null) {
     const item = downloads[id];
     if (!item) return;
