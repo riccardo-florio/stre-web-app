@@ -26,7 +26,6 @@ async function checkVersions() {
     console.log("Versione corrente:", currentVersion);
 
     const releaseversion = document.getElementById("release-version");
-    console.log(latestVersion==currentVersion);
     if (latestVersion == currentVersion) {
         releaseversion.innerHTML = currentVersion;
     } else {

@@ -13,7 +13,8 @@ from utils.app_functions import (
     cancel_download,
     get_download_state,
     check_connection,
-    get_git_version
+    get_git_version,
+    get_links
 )
 from scuapi import API
 from utils.fixed_api import API as FixedAPI
@@ -95,6 +96,11 @@ def get_title_info(slug):
 def get_full_info(slug):
     new_sc = FixedAPI(stre.domain)
     results = get_extended_info(new_sc, slug)
+    return jsonify(results)
+
+@app.route("/api/get-streaming-links/<id>")
+def get_streaming_links(id):
+    results = get_links(stre.sc, id)
     return jsonify(results)
 
 @socketio.on("start_download")

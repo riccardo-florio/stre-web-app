@@ -79,6 +79,10 @@ def get_extended_info(sc, slug):
     results = sc.load(slug)
     return results
 
+def get_links(sc, id):
+    results = sc.get_links(id)
+    return results
+
 VERSION_FILE = ".version"
 
 def get_git_version():
