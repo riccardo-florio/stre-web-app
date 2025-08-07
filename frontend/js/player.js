@@ -47,7 +47,11 @@
     }
 
     function updatePlayButton() {
-        playPauseBtn.textContent = video.paused ? 'Play' : 'Pause';
+        playPauseBtn.textContent = video.paused ? 'play_arrow' : 'pause';
+    }
+
+    function updateFullscreenButton() {
+        fullscreenBtn.textContent = document.fullscreenElement ? 'fullscreen_exit' : 'fullscreen';
     }
 
     function updateProgress() {
@@ -80,6 +84,8 @@
     video.addEventListener('timeupdate', updateProgress);
     video.addEventListener('loadedmetadata', updateProgress);
     progressBar.addEventListener('input', seekVideo);
+
+    document.addEventListener('fullscreenchange', updateFullscreenButton);
 
     document.addEventListener('keydown', (e) => {
         if (modal.classList.contains('hidden')) return;
