@@ -171,7 +171,7 @@ async function populateDownloadSection(slug, title) {
                 card.appendChild(img);
 
                 const body = document.createElement('div');
-                body.className = 'p-2 flex flex-col gap-1';
+                body.className = 'p-2 flex-1 flex flex-col gap-1';
                 const titleEl = document.createElement('h4');
                 titleEl.className = 'font-semibold text-sm';
                 titleEl.textContent = `E${ep.episode} - ${ep.name}`;
@@ -181,7 +181,7 @@ async function populateDownloadSection(slug, title) {
                 desc.textContent = ep.description || '';
                 body.appendChild(desc);
                 const btnContainer = document.createElement('div');
-                btnContainer.className = 'flex gap-2 mt-auto';
+                btnContainer.className = 'grid gap-2 mt-auto';
                 const watchEpBtn = document.createElement('button');
                 watchEpBtn.className = 'bg-gray-200 text-gray-800 rounded px-2 py-1 text-xs';
                 watchEpBtn.textContent = 'Guarda';
