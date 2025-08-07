@@ -113,6 +113,7 @@ async function populateDownloadSection(slug, title) {
     document.getElementById('choose-genres').innerHTML = `Genere: ${genresString}`;
 
     const downloadBtn = document.getElementById('download-btn');
+    const watchBtn = document.getElementById('watch-btn');
 
     if (data.type == "tv") {
         const wrapper = document.getElementById('choose-episodes');
@@ -120,6 +121,7 @@ async function populateDownloadSection(slug, title) {
         const epContainer = document.getElementById('episodes-container');
         wrapper.classList.remove('hidden');
         downloadBtn.classList.add('hidden');
+        watchBtn.classList.add('hidden');
 
         let extendedData = await fetchExtendedInfo(completeSlug);
 
@@ -190,7 +192,35 @@ async function populateDownloadSection(slug, title) {
     } else {
         document.getElementById('choose-episodes').classList.add('hidden');
         downloadBtn.classList.remove('hidden');
+        watchBtn.classList.remove('hidden');
     }
+}
+
+function showPlayer(src) {
+    const modal = document.getElementById('player-modal');
+    const video = document.getElementById('video-player');
+    modal.classList.remove('hidden');
+
+    if (Hls.isSupported()) {
+        const hls = new Hls();
+        hls.loadSource(src);
+        hls.attachMedia(video);
+        video.hlsInstance = hls;
+    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = src;
+    }
+}
+
+function hidePlayer() {
+    const modal = document.getElementById('player-modal');
+    const video = document.getElementById('video-player');
+    modal.classList.add('hidden');
+    if (video.hlsInstance) {
+        video.hlsInstance.destroy();
+        video.hlsInstance = null;
+    }
+    video.pause();
+    video.removeAttribute('src');
 }
 
 function updateDownloadProgress(id, percent, eta = null, downloaded = null, total = null, speed = null) {
