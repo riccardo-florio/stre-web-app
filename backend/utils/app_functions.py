@@ -79,15 +79,30 @@ def get_extended_info(sc, slug):
     results = sc.load(slug)
     return results
 
-import subprocess
+VERSION_FILE = ".version"
 
 def get_git_version():
     try:
+        # Prova a leggere l'ultimo tag
         tags = subprocess.check_output(['git', 'tag']).decode().splitlines()
-        return tags[-1] if tags else None  # prende l'ultimo della lista
-    except Exception as e:
-        return f"Errore: {e}"
+        if tags:
+            current_version = tags[-1]
 
+            # Salva la versione in un file
+            with open(VERSION_FILE, "w") as f:
+                f.write(current_version)
+
+            return current_version
+        else:
+            raise Exception("Nessun tag trovato.")
+    except Exception:
+        # Se git non è disponibile o c'è un errore, prova a leggere il file .version
+        if os.path.exists(VERSION_FILE):
+            with open(VERSION_FILE, "r") as f:
+                return f.read().strip()
+        else:
+            return "versione non disponibile"
+            
 def download_with_socket(
     domain,
     filmid,
