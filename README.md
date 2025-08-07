@@ -169,5 +169,4 @@ sessioni.
 
 - gestione download interrotto dal server
 - implementare cronologia (es. download completati, interrotti, ecc..)
-- aggiungere possibilità di usare custom url
-- rilevamento nuova versione
+- aggiungere possibilità di usare custom url (non necessario al momento)
