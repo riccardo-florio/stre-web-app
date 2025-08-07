@@ -28,8 +28,11 @@ async function fetchAppVersion() {
     return data;
 }
 
-async function fetchStreamingLinks(id) {
-    const res = await fetch(`/api/get-streaming-links/${id}`);
+async function fetchStreamingLinks(id, episodeId = null) {
+    const url = episodeId
+        ? `/api/get-streaming-links/${id}?episode_id=${episodeId}`
+        : `/api/get-streaming-links/${id}`;
+    const res = await fetch(url);
     const data = await res.json();
     return data;
 }

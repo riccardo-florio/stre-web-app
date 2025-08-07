@@ -99,9 +99,10 @@ def get_full_info(slug):
     results = get_extended_info(stre.fixed_sc, slug)
     return jsonify(results)
 
-@app.route("/api/get-streaming-links/<id>")
-def get_streaming_links(id):
-    results = get_links(stre.fixed_sc, id)
+@app.route("/api/get-streaming-links/<content_id>")
+def get_streaming_links(content_id):
+    episode_id = request.args.get("episode_id")
+    results = get_links(stre.fixed_sc, content_id, episode_id)
     return jsonify(results)
 
 @socketio.on("start_download")
