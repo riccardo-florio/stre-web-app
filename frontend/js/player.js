@@ -22,8 +22,8 @@
     function showControls() {
         controls.classList.remove('opacity-0', 'pointer-events-none');
         closeBtn.classList.remove('opacity-0', 'pointer-events-none');
-        if (!isTouch || video.paused) return;
         clearTimeout(hideControlsTimeout);
+        if (video.paused) return;
         hideControlsTimeout = setTimeout(hideControls, 3000);
     }
 
@@ -209,6 +209,8 @@
         video.addEventListener('touchstart', showControls);
         controls.addEventListener('touchstart', showControls);
         modal.addEventListener('touchstart', showControls);
+    } else {
+        modal.addEventListener('mousemove', showControls);
     }
 
     document.addEventListener('keydown', (e) => {
