@@ -29,10 +29,12 @@ class StreAPI:
     def __init__(self):
         self.domain = refresh_stre_domain()
         self.sc = API(self.domain)
+        self.fixed_sc = FixedAPI(self.domain)
 
     def refresh(self):
         self.domain = refresh_stre_domain()
         self.sc = API(self.domain)
+        self.fixed_sc = FixedAPI(self.domain)
 
 
 stre = StreAPI()
@@ -94,13 +96,12 @@ def get_title_info(slug):
 
 @app.route("/api/get-extended-info/<slug>")
 def get_full_info(slug):
-    new_sc = FixedAPI(stre.domain)
-    results = get_extended_info(new_sc, slug)
+    results = get_extended_info(stre.fixed_sc, slug)
     return jsonify(results)
 
 @app.route("/api/get-streaming-links/<id>")
 def get_streaming_links(id):
-    results = get_links(stre.sc, id)
+    results = get_links(stre.fixed_sc, id)
     return jsonify(results)
 
 @socketio.on("start_download")
