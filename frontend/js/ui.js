@@ -3,6 +3,23 @@ function toggleMobileMenu() {
     document.getElementById('download-tab').classList.toggle('pointer-events-none');
 }
 
+async function getLatestReleaseVersion() {
+  const url = 'https://api.github.com/repos/riccardo-florio/stre-web-app/releases/latest';
+
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error("Errore nella richiesta");
+
+    const data = await response.json();
+    console.log("Ultima release:", data.tag_name);
+
+    const releaseversion = document.getElementById("release-version");
+    releaseversion.innerHTML = data.tag_name; // ad esempio: "v1.2.3"
+  } catch (error) {
+    console.error("Errore:", error);
+  }
+}
+
 function populateUrl(url) {
     streUrl = document.getElementById("stre-url");
     //console.log(url)

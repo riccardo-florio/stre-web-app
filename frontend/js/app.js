@@ -131,6 +131,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
     updateNoDownloadsMessage();
+    getLatestReleaseVersion()
 
     const form = document.querySelector('form');
     const downloadBtn = document.getElementById('download-btn');
