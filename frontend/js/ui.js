@@ -11,13 +11,27 @@ async function getLatestReleaseVersion() {
     if (!response.ok) throw new Error("Errore nella richiesta");
 
     const data = await response.json();
-    console.log("Ultima release:", data.tag_name);
-
-    const releaseversion = document.getElementById("release-version");
-    releaseversion.innerHTML = data.tag_name; // ad esempio: "v1.2.3"
+    return data.tag_name; // ad esempio: "v1.2.3"
   } catch (error) {
     console.error("Errore:", error);
+    return null;
   }
+}
+
+async function checkVersions() {
+    const latestVersion = await getLatestReleaseVersion();
+    const currentVersion = await fetchAppVersion();
+
+    console.log("Ultima release:", latestVersion);
+    console.log("Versione corrente:", currentVersion);
+
+    const releaseversion = document.getElementById("release-version");
+    console.log(latestVersion==currentVersion);
+    if (latestVersion == currentVersion) {
+        releaseversion.innerHTML = currentVersion;
+    } else {
+        releaseversion.innerHTML = `${currentVersion} (<span class="text-green-600 font-semibold">new ${latestVersion}</span>)`;
+    }
 }
 
 function populateUrl(url) {

@@ -13,6 +13,7 @@ from utils.app_functions import (
     cancel_download,
     get_download_state,
     check_connection,
+    get_git_version
 )
 from scuapi import API
 from utils.fixed_api import API as FixedAPI
@@ -63,6 +64,9 @@ def home():
 def get_main_domain():
     return jsonify(stre.domain)
 
+@app.route("/api/get-app-version")
+def get_app_version():
+    return jsonify(get_git_version())
 
 @app.route("/api/refresh-domain", methods=["POST"])
 def refresh_domain():

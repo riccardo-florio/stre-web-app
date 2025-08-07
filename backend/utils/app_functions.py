@@ -8,6 +8,7 @@ import socket
 import time
 import re
 import os
+import subprocess
 
 # 👇 Nuovo dizionario globale per gestire le cancellazioni
 cancel_flags = {}
@@ -77,6 +78,15 @@ def get_info(sc, slug):
 def get_extended_info(sc, slug):
     results = sc.load(slug)
     return results
+
+import subprocess
+
+def get_git_version():
+    try:
+        tags = subprocess.check_output(['git', 'tag']).decode().splitlines()
+        return tags[-1] if tags else None  # prende l'ultimo della lista
+    except Exception as e:
+        return f"Errore: {e}"
 
 def download_with_socket(
     domain,

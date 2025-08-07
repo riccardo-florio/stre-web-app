@@ -22,6 +22,12 @@ async function fetchExtendedInfo(slug) {
     return data;
 }
 
+async function fetchAppVersion() {
+    const res = await fetch('/api/get-app-version');
+    const data = await res.json();
+    return data;
+}
+
 async function checkDomainReachable(domain) {
     try {
         const res = await fetch(`/api/check-domain/${domain}`);
