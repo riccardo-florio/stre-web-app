@@ -135,6 +135,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const form = document.querySelector('form');
     const downloadBtn = document.getElementById('download-btn');
+    const watchBtn = document.getElementById('watch-btn');
+    const closePlayerBtn = document.getElementById('close-player');
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -154,6 +156,25 @@ document.addEventListener('DOMContentLoaded', async () => {
             filmid: filmId,
             title: filmTitle
         });
+    });
+
+    watchBtn.addEventListener('click', async () => {
+        try {
+            const links = await fetchStreamingLinks(filmId);
+            const hlsLink = links.find(l => l.includes('playlist') || l.includes('.m3u8'));
+            if (hlsLink) {
+                showPlayer(hlsLink);
+            } else {
+                alert('Nessun link disponibile');
+            }
+        } catch (err) {
+            console.error('Errore nel recupero dei link', err);
+            alert('Errore nel recupero dei link');
+        }
+    });
+
+    closePlayerBtn.addEventListener('click', () => {
+        hidePlayer();
     });
 
     handleNavigationFromURL();
