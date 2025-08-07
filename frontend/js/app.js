@@ -66,6 +66,20 @@ window.onload = () => {
         }
     });
 
+    socket.on('download_in_progress', data => {
+        let item = downloads[data.id];
+        if (!item && data.title) {
+            createDownloadItem(data.id, data.title);
+            item = downloads[data.id];
+        }
+        if (item) {
+            item.percentSpan.innerText = '⚠️ Già in corso';
+            item.bar.classList.add('animate-pulse');
+            item.active = true;
+            updateNoDownloadsMessage();
+        }
+    });
+
     // Gestione dell'annullamento del download
     socket.on("download_cancelled", data => {
         updateDownloadProgress(data.id, 0);

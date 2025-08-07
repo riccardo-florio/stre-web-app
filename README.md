@@ -125,6 +125,11 @@ socket.on('download_progress', data => {
 socket.on('download_exists', data => {
     alert(`${data.title} è già stato scaricato.`);
 });
+
+// se il contenuto è già in download, viene notificato
+socket.on('download_in_progress', data => {
+    alert(`${data.title} è già in download.`);
+});
 ```
 
 ## Download multipli e gestione multiutente
@@ -164,6 +169,5 @@ sessioni.
 
 - gestione download interrotto dal server
 - implementare cronologia (es. download completati, interrotti, ecc..)
-- check download già in corso
 - aggiungere possibilità di usare custom url
 - rilevamento nuova versione
