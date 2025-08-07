@@ -152,6 +152,20 @@ def download_with_socket(
         display_title = title
 
     final_path = output_path.replace('%(ext)s', 'mp4')
+    # Se è già in corso un download per lo stesso file, evita di avviarne un altro
+    for existing_id, state in download_states.items():
+        if state.get('path') == final_path:
+            socketio.emit(
+                'download_in_progress',
+                {
+                    'status': 'in_progress',
+                    'id': existing_id,
+                    'title': state.get('title') or display_title,
+                },
+            )
+            print('[INFO] Download non avviato: download già in corso.')
+            return
+
     if os.path.exists(final_path):
         socketio.emit(
             'download_exists',
@@ -177,6 +191,7 @@ def download_with_socket(
         "downloading": True,
         "progress": None,
         "title": display_title,
+        "path": final_path,
     }
 
     if display_title:
