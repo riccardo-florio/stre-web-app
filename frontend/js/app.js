@@ -95,6 +95,24 @@ window.onload = () => {
         }
     });
 
+    // Gestione di un download interrotto o fallito
+    socket.on("download_error", data => {
+        updateDownloadProgress(data.id, 0);
+        const item = downloads[data.id];
+        if (item) {
+            item.percentSpan.innerText = "⚠️ Errore";
+            if (item.cancelBtn) {
+                item.cancelBtn.disabled = true;
+                item.cancelBtn.classList.add('opacity-50');
+            }
+            item.active = false;
+            updateNoDownloadsMessage();
+        }
+        if (data.message) {
+            console.error("Download error:", data.message);
+        }
+    });
+
     // Gestione download completato
     socket.on("download_finished", data => {
         updateDownloadProgress(data.id, 0);

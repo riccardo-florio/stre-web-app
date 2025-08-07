@@ -239,6 +239,19 @@ def download_with_socket(
                     download_states.pop(download_id, None)
                     cancel_flags.pop(download_id, None)
                     break
+                elif d['status'] == 'error':
+                    socketio.emit(
+                        'download_error',
+                        {
+                            'status': 'error',
+                            'id': download_id,
+                            'message': d.get('message'),
+                        },
+                    )
+                    download_states.pop(download_id, None)
+                    cancel_flags.pop(download_id, None)
+                    print(f"[ERROR] Download interrotto: {download_id}")
+                    break
 
             except Empty:
                 time.sleep(0.1)
