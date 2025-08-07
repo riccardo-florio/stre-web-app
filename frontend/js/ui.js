@@ -193,6 +193,7 @@ async function populateDownloadSection(slug, title) {
         document.getElementById('choose-episodes').classList.add('hidden');
         downloadBtn.classList.remove('hidden');
         watchBtn.classList.remove('hidden');
+        updateWatchButtonLabel(filmId);
     }
 }
 

@@ -63,6 +63,7 @@
             modal.requestFullscreen();
         }
         showControls();
+        updateWatchButtonLabel();
     }
 
     function hidePlayer(popState = false) {
@@ -83,6 +84,7 @@
         video.removeAttribute('src');
         progressBar.value = 0;
         timeDisplay.textContent = '0:00/0:00';
+        updateWatchButtonLabel();
         currentFilmId = null;
         resumeTime = 0;
         hideLoading();
@@ -120,6 +122,7 @@
         timeDisplay.textContent = `${formatTime(video.currentTime)} / ${formatTime(video.duration)}`;
         if (currentFilmId) {
             localStorage.setItem('progress-' + currentFilmId, video.currentTime);
+            updateWatchButtonLabel();
         }
     }
 
@@ -167,6 +170,7 @@
     video.addEventListener('ended', () => {
         if (currentFilmId) {
             localStorage.removeItem('progress-' + currentFilmId);
+            updateWatchButtonLabel();
         }
     });
     progressBar.addEventListener('input', seekVideo);
@@ -233,4 +237,12 @@
 
     window.showPlayer = showPlayer;
     window.hidePlayer = hidePlayer;
+    window.updateWatchButtonLabel = updateWatchButtonLabel;
+
+    function updateWatchButtonLabel(id = currentFilmId || window.filmId) {
+        const watchBtn = document.getElementById('watch-btn');
+        if (!watchBtn || !id) return;
+        const progress = parseFloat(localStorage.getItem('progress-' + id) || '0');
+        watchBtn.textContent = progress > 0 ? 'Riprendi' : 'Guarda';
+    }
 })();
