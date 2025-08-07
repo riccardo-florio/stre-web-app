@@ -87,6 +87,25 @@
 
     document.addEventListener('fullscreenchange', updateFullscreenButton);
 
+    // Enable double-tap seeking on touch devices only
+    if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+        let lastTap = 0;
+        video.addEventListener('touchend', (e) => {
+            const currentTime = Date.now();
+            if (currentTime - lastTap < 300) {
+                const tapX = e.changedTouches[0].clientX;
+                const half = window.innerWidth / 2;
+                if (tapX < half) {
+                    video.currentTime = Math.max(video.currentTime - 10, 0);
+                } else {
+                    video.currentTime = Math.min(video.currentTime + 10, video.duration);
+                }
+                updateProgress();
+            }
+            lastTap = currentTime;
+        });
+    }
+
     document.addEventListener('keydown', (e) => {
         if (modal.classList.contains('hidden')) return;
         switch (e.key) {
