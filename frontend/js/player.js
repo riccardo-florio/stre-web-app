@@ -7,6 +7,7 @@
     const closeBtn = document.getElementById('close-player');
     const controls = document.getElementById('player-controls');
     const timeDisplay = document.getElementById('time-display');
+    const loading = document.getElementById('player-loading');
     const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     let hideControlsTimeout = null;
     let hlsInstance = null;
@@ -26,10 +27,19 @@
         hideControlsTimeout = setTimeout(hideControls, 3000);
     }
 
+    function showLoading() {
+        loading.classList.remove('hidden');
+    }
+
+    function hideLoading() {
+        loading.classList.add('hidden');
+    }
+
     function showPlayer(src, filmId) {
         modal.classList.remove('hidden');
         currentFilmId = filmId;
         resumeTime = parseFloat(localStorage.getItem('progress-' + filmId)) || 0;
+        showLoading();
 
         if (Hls.isSupported()) {
             hlsInstance = new Hls();
@@ -74,6 +84,7 @@
         timeDisplay.textContent = '0:00/0:00';
         currentFilmId = null;
         resumeTime = 0;
+        hideLoading();
     }
 
     function togglePlay() {
@@ -146,6 +157,9 @@
     });
     video.addEventListener('timeupdate', updateProgress);
     video.addEventListener('loadedmetadata', updateProgress);
+    video.addEventListener('loadeddata', hideLoading);
+    video.addEventListener('waiting', showLoading);
+    video.addEventListener('playing', hideLoading);
     video.addEventListener('ended', () => {
         if (currentFilmId) {
             localStorage.removeItem('progress-' + currentFilmId);
