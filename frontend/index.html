@@ -104,10 +104,15 @@
                                 <select id="season-select" class="mb-3 p-2 border rounded w-full"></select>
                                 <div id="episodes-container" class="flex gap-4 overflow-x-auto pb-2"></div>
                             </div>
-                            <button id="download-btn"
-                                class="bg-blue-500 rounded-[0.5em] text-white px-4 py-2 font-medium">
-                                Avvia Download
-                            </button>
+                            <div class="flex gap-3">
+                                <button id="watch-btn" class="bg-green-500 rounded-[0.5em] text-white px-4 py-2 font-medium hidden">
+                                    Guarda
+                                </button>
+                                <button id="download-btn"
+                                    class="bg-blue-500 rounded-[0.5em] text-white px-4 py-2 font-medium">
+                                    Avvia Download
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -131,11 +136,24 @@
         <span id="release-version" class="text-center text-gray-800 mt-3"></span>
     </div>
 
+    <!-- Player Modal -->
+    <div id="player-modal" class="fixed inset-0 bg-black hidden z-50">
+        <video id="video-player" class="w-full h-full object-contain"></video>
+        <div id="player-controls" class="absolute bottom-0 left-0 right-0 flex items-center gap-4 p-4 bg-black/60">
+            <button id="play-pause" class="text-white">Play</button>
+            <input id="player-progress" type="range" min="0" value="0" class="flex-1">
+            <button id="fullscreen-btn" class="text-white">Fullscreen</button>
+        </div>
+        <button id="close-player" class="absolute top-2 right-2 text-white text-2xl">&times;</button>
+    </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"
         integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA=="
         crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script src="js/api.js"></script>
     <script src="js/ui.js"></script>
+    <script src="js/player.js"></script>
     <script src="js/app.js"></script>
 </body>
 

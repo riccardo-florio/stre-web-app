@@ -113,6 +113,7 @@ async function populateDownloadSection(slug, title) {
     document.getElementById('choose-genres').innerHTML = `Genere: ${genresString}`;
 
     const downloadBtn = document.getElementById('download-btn');
+    const watchBtn = document.getElementById('watch-btn');
 
     if (data.type == "tv") {
         const wrapper = document.getElementById('choose-episodes');
@@ -120,6 +121,7 @@ async function populateDownloadSection(slug, title) {
         const epContainer = document.getElementById('episodes-container');
         wrapper.classList.remove('hidden');
         downloadBtn.classList.add('hidden');
+        watchBtn.classList.add('hidden');
 
         let extendedData = await fetchExtendedInfo(completeSlug);
 
@@ -190,9 +192,8 @@ async function populateDownloadSection(slug, title) {
     } else {
         document.getElementById('choose-episodes').classList.add('hidden');
         downloadBtn.classList.remove('hidden');
+        watchBtn.classList.remove('hidden');
     }
-}
-
 function updateDownloadProgress(id, percent, eta = null, downloaded = null, total = null, speed = null) {
     const item = downloads[id];
     if (!item) return;
