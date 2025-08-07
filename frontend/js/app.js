@@ -6,14 +6,37 @@ let filmTitle = null;
 let lastSearchQuery = null;
 const playerModal = document.getElementById('player-modal');
 
+let serverAlertShown = false;
+function notifyServerUnreachable() {
+    if (serverAlertShown) return;
+    serverAlertShown = true;
+    alert('Server non raggiungibile. Controlla la connessione e riprova.');
+}
+window.notifyServerUnreachable = notifyServerUnreachable;
+function isServerReachable() {
+    return socket && socket.connected;
+}
+window.isServerReachable = isServerReachable;
+
 window.onload = () => {
     socket = io();
     socket.connect("http://127.0.0.1:5000");
+
+    socket.on('connect_error', () => {
+        console.error('Errore di connessione al server');
+        notifyServerUnreachable();
+    });
+
+    socket.on('disconnect', () => {
+        console.warn('Connessione al server persa');
+        notifyServerUnreachable();
+    });
 
     socket.on("connect", () => {
         console.log("Connected!");
         socketid = socket.id;
         console.log("Socket id: " + socketid);
+        serverAlertShown = false;
     })
 
     socket.on('active_downloads', data => {
@@ -165,6 +188,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     downloadBtn.addEventListener('click', async (e) => {
+        if (!isServerReachable()) {
+            notifyServerUnreachable();
+            return;
+        }
         socket.emit("start_download", {
             domain: mainUrl,
             filmid: filmId,

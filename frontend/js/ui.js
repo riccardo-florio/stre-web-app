@@ -203,6 +203,10 @@ async function populateDownloadSection(slug, title) {
                 downloadEpBtn.className = 'bg-blue-500 text-white rounded px-2 py-1 text-xs';
                 downloadEpBtn.textContent = 'Scarica';
                 downloadEpBtn.onclick = () => {
+                    if (!isServerReachable()) {
+                        notifyServerUnreachable();
+                        return;
+                    }
                     socket.emit('start_download', {
                         domain: mainUrl,
                         filmid: filmId,
@@ -296,7 +300,13 @@ function createDownloadItem(id, title) {
     const cancelBtn = document.createElement('button');
     cancelBtn.className = 'bg-red-600 rounded-[0.5em] text-white px-4 py-2 font-medium';
     cancelBtn.textContent = 'Annulla';
-    cancelBtn.onclick = () => { socket.emit('cancel_download', { id }); };
+    cancelBtn.onclick = () => {
+        if (!isServerReachable()) {
+            notifyServerUnreachable();
+            return;
+        }
+        socket.emit('cancel_download', { id });
+    };
     header.appendChild(titleSpan);
     header.appendChild(cancelBtn);
     wrapper.appendChild(header);
