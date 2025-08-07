@@ -26,7 +26,6 @@ async function checkVersions() {
     console.log("Versione corrente:", currentVersion);
 
     const releaseversion = document.getElementById("release-version");
-    console.log(latestVersion==currentVersion);
     if (latestVersion == currentVersion) {
         releaseversion.innerHTML = currentVersion;
     } else {
@@ -79,8 +78,8 @@ function populateSearchResults(results, query, mainUrl) {
                     <span class="text-pretty">Uscita: <span class="font-semibold">${year}</span></span>
                 </div>
                 <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
-                    <a href="https://${mainUrl}/it/watch/${data.id}" target="_blank"
-                    class="bg-gray-200 rounded-[0.5em] text-gray-800 px-4 py-2 font-medium text-center">Guarda</a>
+                    <button onClick="watchFromSearch(${data.id})"
+                    class="bg-gray-200 rounded-[0.5em] text-gray-800 px-4 py-2 font-medium">Guarda</button>
                     <button onClick="searchResultToDownload(${data.id}, '${data.slug}', '${title}')"
                     class="bg-blue-500 rounded-[0.5em] text-white px-4 py-2 font-medium">Info</button>
                 </div>
@@ -95,6 +94,21 @@ function populateSearchResults(results, query, mainUrl) {
 function populateSearchResultError() {
     const resultsCardsContainer = document.getElementById('search-cards-container');
     resultsCardsContainer.innerHTML = `<p class="text-red-500 text-pretty">Errore nella ricerca. Riprova più tardi.</p>`;
+}
+
+async function watchFromSearch(id) {
+    try {
+        const links = await fetchStreamingLinks(id);
+        const hlsLink = links.find(l => l.includes('playlist') || l.includes('.m3u8'));
+        if (hlsLink) {
+            showPlayer(hlsLink, id);
+        } else {
+            alert('Nessun link disponibile');
+        }
+    } catch (err) {
+        console.error('Errore nel recupero dei link', err);
+        alert('Errore nel recupero dei link');
+    }
 }
 
 async function populateDownloadSection(slug, title) {
@@ -114,6 +128,7 @@ async function populateDownloadSection(slug, title) {
     document.getElementById('choose-genres').innerHTML = `Genere: ${genresString}`;
 
     const downloadBtn = document.getElementById('download-btn');
+    const watchBtn = document.getElementById('watch-btn');
 
     if (data.type == "tv") {
         const wrapper = document.getElementById('choose-episodes');
@@ -121,6 +136,7 @@ async function populateDownloadSection(slug, title) {
         const epContainer = document.getElementById('episodes-container');
         wrapper.classList.remove('hidden');
         downloadBtn.classList.add('hidden');
+        watchBtn.classList.add('hidden');
 
         let extendedData = await fetchExtendedInfo(completeSlug);
 
@@ -155,7 +171,7 @@ async function populateDownloadSection(slug, title) {
                 card.appendChild(img);
 
                 const body = document.createElement('div');
-                body.className = 'p-2 flex flex-col gap-1';
+                body.className = 'p-2 flex-1 flex flex-col gap-1';
                 const titleEl = document.createElement('h4');
                 titleEl.className = 'font-semibold text-sm';
                 titleEl.textContent = `E${ep.episode} - ${ep.name}`;
@@ -164,10 +180,29 @@ async function populateDownloadSection(slug, title) {
                 desc.className = 'text-xs line-clamp-3';
                 desc.textContent = ep.description || '';
                 body.appendChild(desc);
-                const btn = document.createElement('button');
-                btn.className = 'bg-blue-500 text-white rounded px-2 py-1 text-xs mt-auto';
-                btn.textContent = 'Scarica';
-                btn.onclick = () => {
+                const btnContainer = document.createElement('div');
+                btnContainer.className = 'grid gap-2 mt-auto';
+                const watchEpBtn = document.createElement('button');
+                watchEpBtn.className = 'bg-gray-200 text-gray-800 rounded px-2 py-1 text-xs';
+                watchEpBtn.textContent = 'Guarda';
+                watchEpBtn.onclick = async () => {
+                    try {
+                        const links = await fetchStreamingLinks(filmId, ep.id);
+                        const hlsLink = links.find(l => l.includes('playlist') || l.includes('.m3u8'));
+                        if (hlsLink) {
+                            showPlayer(hlsLink, ep.id);
+                        } else {
+                            alert('Nessun link disponibile');
+                        }
+                    } catch (err) {
+                        console.error('Errore nel recupero dei link', err);
+                        alert('Errore nel recupero dei link');
+                    }
+                };
+                const downloadEpBtn = document.createElement('button');
+                downloadEpBtn.className = 'bg-blue-500 text-white rounded px-2 py-1 text-xs';
+                downloadEpBtn.textContent = 'Scarica';
+                downloadEpBtn.onclick = () => {
                     socket.emit('start_download', {
                         domain: mainUrl,
                         filmid: filmId,
@@ -178,7 +213,9 @@ async function populateDownloadSection(slug, title) {
                         episode: ep.episode
                     });
                 };
-                body.appendChild(btn);
+                btnContainer.appendChild(watchEpBtn);
+                btnContainer.appendChild(downloadEpBtn);
+                body.appendChild(btnContainer);
 
                 card.appendChild(body);
                 epContainer.appendChild(card);
@@ -191,7 +228,36 @@ async function populateDownloadSection(slug, title) {
     } else {
         document.getElementById('choose-episodes').classList.add('hidden');
         downloadBtn.classList.remove('hidden');
+        watchBtn.classList.remove('hidden');
+        updateWatchButtonLabel(filmId);
     }
+}
+
+function showPlayer(src) {
+    const modal = document.getElementById('player-modal');
+    const video = document.getElementById('video-player');
+    modal.classList.remove('hidden');
+
+    if (Hls.isSupported()) {
+        const hls = new Hls();
+        hls.loadSource(src);
+        hls.attachMedia(video);
+        video.hlsInstance = hls;
+    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = src;
+    }
+}
+
+function hidePlayer() {
+    const modal = document.getElementById('player-modal');
+    const video = document.getElementById('video-player');
+    modal.classList.add('hidden');
+    if (video.hlsInstance) {
+        video.hlsInstance.destroy();
+        video.hlsInstance = null;
+    }
+    video.pause();
+    video.removeAttribute('src');
 }
 
 function updateDownloadProgress(id, percent, eta = null, downloaded = null, total = null, speed = null) {

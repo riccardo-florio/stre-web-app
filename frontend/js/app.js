@@ -4,6 +4,7 @@ let mainUrl = null;
 let filmId = null;
 let filmTitle = null;
 let lastSearchQuery = null;
+const playerModal = document.getElementById('player-modal');
 
 window.onload = () => {
     socket = io();
@@ -135,6 +136,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const form = document.querySelector('form');
     const downloadBtn = document.getElementById('download-btn');
+    const watchBtn = document.getElementById('watch-btn');
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -154,6 +156,21 @@ document.addEventListener('DOMContentLoaded', async () => {
             filmid: filmId,
             title: filmTitle
         });
+    });
+
+    watchBtn.addEventListener('click', async () => {
+        try {
+            const links = await fetchStreamingLinks(filmId);
+            const hlsLink = links.find(l => l.includes('playlist') || l.includes('.m3u8'));
+            if (hlsLink) {
+                showPlayer(hlsLink, filmId);
+            } else {
+                alert('Nessun link disponibile');
+            }
+        } catch (err) {
+            console.error('Errore nel recupero dei link', err);
+            alert('Errore nel recupero dei link');
+        }
     });
 
     handleNavigationFromURL();
@@ -190,5 +207,9 @@ async function handleNavigationFromURL() {
 }
 
 window.addEventListener('popstate', () => {
-    handleNavigationFromURL();
+    if (!playerModal.classList.contains('hidden')) {
+        hidePlayer();
+    } else {
+        handleNavigationFromURL();
+    }
 });

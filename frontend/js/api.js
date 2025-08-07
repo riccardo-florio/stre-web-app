@@ -28,6 +28,15 @@ async function fetchAppVersion() {
     return data;
 }
 
+async function fetchStreamingLinks(id, episodeId = null) {
+    const url = episodeId
+        ? `/api/get-streaming-links/${id}?episode_id=${episodeId}`
+        : `/api/get-streaming-links/${id}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    return data;
+}
+
 async function checkDomainReachable(domain) {
     try {
         const res = await fetch(`/api/check-domain/${domain}`);

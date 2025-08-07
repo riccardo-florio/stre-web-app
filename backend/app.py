@@ -13,7 +13,8 @@ from utils.app_functions import (
     cancel_download,
     get_download_state,
     check_connection,
-    get_git_version
+    get_git_version,
+    get_links
 )
 from scuapi import API
 from utils.fixed_api import API as FixedAPI
@@ -28,10 +29,12 @@ class StreAPI:
     def __init__(self):
         self.domain = refresh_stre_domain()
         self.sc = API(self.domain)
+        self.fixed_sc = FixedAPI(self.domain)
 
     def refresh(self):
         self.domain = refresh_stre_domain()
         self.sc = API(self.domain)
+        self.fixed_sc = FixedAPI(self.domain)
 
 
 stre = StreAPI()
@@ -93,8 +96,13 @@ def get_title_info(slug):
 
 @app.route("/api/get-extended-info/<slug>")
 def get_full_info(slug):
-    new_sc = FixedAPI(stre.domain)
-    results = get_extended_info(new_sc, slug)
+    results = get_extended_info(stre.fixed_sc, slug)
+    return jsonify(results)
+
+@app.route("/api/get-streaming-links/<content_id>")
+def get_streaming_links(content_id):
+    episode_id = request.args.get("episode_id")
+    results = get_links(stre.fixed_sc, content_id, episode_id)
     return jsonify(results)
 
 @socketio.on("start_download")
