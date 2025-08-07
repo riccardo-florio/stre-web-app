@@ -6,9 +6,12 @@
     const fullscreenBtn = document.getElementById('fullscreen-btn');
     const closeBtn = document.getElementById('close-player');
     const controls = document.getElementById('player-controls');
+    const timeDisplay = document.getElementById('time-display');
     const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     let hideControlsTimeout = null;
     let hlsInstance = null;
+    let currentFilmId = null;
+    let resumeTime = 0;
 
     function hideControls() {
         controls.classList.add('opacity-0', 'pointer-events-none');
@@ -23,8 +26,10 @@
         hideControlsTimeout = setTimeout(hideControls, 3000);
     }
 
-    function showPlayer(src) {
+    function showPlayer(src, filmId) {
         modal.classList.remove('hidden');
+        currentFilmId = filmId;
+        resumeTime = parseFloat(localStorage.getItem('progress-' + filmId)) || 0;
 
         if (Hls.isSupported()) {
             hlsInstance = new Hls();
@@ -33,6 +38,14 @@
         } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
             video.src = src;
         }
+
+        video.addEventListener('loadedmetadata', function init() {
+            if (resumeTime > 0 && resumeTime < video.duration) {
+                video.currentTime = resumeTime;
+            }
+            updateProgress();
+            video.removeEventListener('loadedmetadata', init);
+        });
 
         video.play();
         if (modal.requestFullscreen) {
@@ -58,6 +71,9 @@
         video.pause();
         video.removeAttribute('src');
         progressBar.value = 0;
+        timeDisplay.textContent = '0:00/0:00';
+        currentFilmId = null;
+        resumeTime = 0;
     }
 
     function togglePlay() {
@@ -76,9 +92,20 @@
         fullscreenBtn.textContent = document.fullscreenElement ? 'fullscreen_exit' : 'fullscreen';
     }
 
+    function formatTime(sec) {
+        if (!sec || isNaN(sec)) return '0:00';
+        const m = Math.floor(sec / 60);
+        const s = Math.floor(sec % 60).toString().padStart(2, '0');
+        return `${m}:${s}`;
+    }
+
     function updateProgress() {
         progressBar.max = video.duration || 0;
         progressBar.value = video.currentTime;
+        timeDisplay.textContent = `${formatTime(video.currentTime)} / ${formatTime(video.duration)}`;
+        if (currentFilmId) {
+            localStorage.setItem('progress-' + currentFilmId, video.currentTime);
+        }
     }
 
     function seekVideo() {
@@ -119,6 +146,11 @@
     });
     video.addEventListener('timeupdate', updateProgress);
     video.addEventListener('loadedmetadata', updateProgress);
+    video.addEventListener('ended', () => {
+        if (currentFilmId) {
+            localStorage.removeItem('progress-' + currentFilmId);
+        }
+    });
     progressBar.addEventListener('input', seekVideo);
 
     document.addEventListener('fullscreenchange', () => {

@@ -162,7 +162,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const links = await fetchStreamingLinks(filmId);
             const hlsLink = links.find(l => l.includes('playlist') || l.includes('.m3u8'));
             if (hlsLink) {
-                showPlayer(hlsLink);
+                showPlayer(hlsLink, filmId);
             } else {
                 alert('Nessun link disponibile');
             }
