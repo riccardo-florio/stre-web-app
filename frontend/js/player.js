@@ -37,6 +37,7 @@
 
     function showPlayer(src, filmId) {
         modal.classList.remove('hidden');
+        history.pushState({ ...(history.state || {}), player: true }, '', location.href);
         currentFilmId = filmId;
         resumeTime = parseFloat(localStorage.getItem('progress-' + filmId)) || 0;
         showLoading();
@@ -64,7 +65,7 @@
         showControls();
     }
 
-    function hidePlayer() {
+    function hidePlayer(popState = false) {
         modal.classList.add('hidden');
         if (document.fullscreenElement) {
             document.exitFullscreen();
@@ -85,6 +86,9 @@
         currentFilmId = null;
         resumeTime = 0;
         hideLoading();
+        if (popState && history.state && history.state.player) {
+            history.back();
+        }
     }
 
     function togglePlay() {
@@ -137,7 +141,7 @@
     });
 
     fullscreenBtn.addEventListener('click', toggleFullscreen);
-    closeBtn.addEventListener('click', hidePlayer);
+    closeBtn.addEventListener('click', () => hidePlayer(true));
 
     modal.addEventListener('click', (e) => {
         if (isTouch) return;
@@ -222,7 +226,7 @@
                 toggleFullscreen();
                 break;
             case 'Escape':
-                hidePlayer();
+                hidePlayer(true);
                 break;
         }
     });

@@ -4,6 +4,7 @@ let mainUrl = null;
 let filmId = null;
 let filmTitle = null;
 let lastSearchQuery = null;
+const playerModal = document.getElementById('player-modal');
 
 window.onload = () => {
     socket = io();
@@ -206,5 +207,9 @@ async function handleNavigationFromURL() {
 }
 
 window.addEventListener('popstate', () => {
-    handleNavigationFromURL();
+    if (!playerModal.classList.contains('hidden')) {
+        hidePlayer();
+    } else {
+        handleNavigationFromURL();
+    }
 });
