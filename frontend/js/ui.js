@@ -79,7 +79,7 @@ function populateSearchResults(results, query, mainUrl) {
                 </div>
                 <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
                     <button onClick="watchFromSearch(${data.id})"
-                    class="bg-green-500 rounded-[0.5em] text-white px-4 py-2 font-medium">Guarda</button>
+                    class="bg-gray-200 rounded-[0.5em] text-gray-800 px-4 py-2 font-medium">Guarda</button>
                     <button onClick="searchResultToDownload(${data.id}, '${data.slug}', '${title}')"
                     class="bg-blue-500 rounded-[0.5em] text-white px-4 py-2 font-medium">Info</button>
                 </div>
