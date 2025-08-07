@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Stre Downloader App</title>
+    <link rel="icon" type="image/x-icon" href="/assets/icon.svg">
 
     <!-- CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -18,10 +19,13 @@
 
     <!-- Menu Bar -->
     <div class="px-10 pt-9 pb-0 flex justify-between items-center lg:hidden">
-        <h2 class="text-pretty">Stre Api Downloader</h2>
+        <div class="flex items-center gap-4">
+            <img src="/assets/icon.svg" alt="Stre Api Downloader" class="size-7">
+            <h2 class="text-pretty text-xl">Stre Api Downloader</h2>
+        </div>
         <button onclick="toggleMobileMenu()" class="relative self-end">
             <span id="download-indicator" class="absolute top-1 bg-red-500 w-2 h-2 rounded-full hidden"></span>
-            <span class="material-symbols-rounded text-2xl text-blue-500">
+            <span class="material-symbols-rounded text-2xl text-gray-700">
                 menu
             </span>
         </button>
@@ -40,7 +44,7 @@
                     <h1 class="text-4xl text-center mb-10 text-pretty">Cosa vuoi scaricare?</h1>
                     <div class="flex items-center gap-2 border-2 border-gray-200 rounded-full p-2 pl-8 w-full">
                         <input type="text" placeholder="Titolo del film / serie tv" autofocus
-                            class="outline-none w-full">
+                            enterkeyhint="search" class="outline-none w-full">
                         <button type="submit" id="search-button"
                             class="flex items-center justify-center bg-blue-500 hover:bg-blue-600 text-white p-4 rounded-full transition">
                             <span class="material-symbols-rounded text-[20px]">
@@ -117,7 +121,7 @@
     <div id="download-tab"
         class="absolute opacity-0 pointer-events-none lg:opacity-100 lg:pointer-events-auto lg:static lg:position bg-white w-full lg:w-auto lg:min-w-96 h-full lg:rounded-[3rem] py-9 px-10 lg:shadow lg:border border-gray-200 lg:flex flex-col transition-opacity">
         <button onclick="toggleMobileMenu()" class="absolute right-10 top-9 lg:hidden">
-            <span class="material-symbols-rounded text-2xl">
+            <span class="material-symbols-rounded text-3xl">
                 close
             </span>
         </button>

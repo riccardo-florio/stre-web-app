@@ -143,6 +143,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             alert("Inserisci un titolo!");
             return;
         }
+        input.blur(); // rimuove il focus e chiude la tastiera su mobile
         searchAndShowResults(query);
     });
 
