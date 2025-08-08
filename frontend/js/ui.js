@@ -295,7 +295,7 @@ function createDownloadItem(id, title) {
     const header = document.createElement('div');
     header.className = 'flex justify-between items-center mb-2';
     const titleSpan = document.createElement('span');
-    titleSpan.className = 'font-semibold text-pretty';
+    titleSpan.className = 'font-semibold text-pretty line-clamp-1 max-w-[75%]';
     titleSpan.textContent = title;
     const cancelBtn = document.createElement('button');
     cancelBtn.className = 'bg-red-600 rounded-[0.5em] text-white px-4 py-2 font-medium';
