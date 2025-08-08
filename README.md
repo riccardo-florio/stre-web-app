@@ -132,6 +132,8 @@ socket.on('download_in_progress', data => {
 });
 ```
 
+Se il server non è raggiungibile o la connessione viene interrotta, l'interfaccia avvisa l'utente per segnalare l'interruzione del download.
+
 ## Download multipli e gestione multiutente
 
 Ogni download viene eseguito in un **thread** dedicato così da poter avviare più
@@ -167,6 +169,5 @@ sessioni.
 
 ## TODO
 
-- gestione download interrotto dal server
 - implementare cronologia (es. download completati, interrotti, ecc..)
 - aggiungere possibilità di usare custom url (non necessario al momento)

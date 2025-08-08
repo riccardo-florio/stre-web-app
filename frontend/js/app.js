@@ -6,15 +6,50 @@ let filmTitle = null;
 let lastSearchQuery = null;
 const playerModal = document.getElementById('player-modal');
 
+let serverAlertShown = false;
+function notifyServerUnreachable() {
+    if (serverAlertShown) return;
+    serverAlertShown = true;
+    alert('Server non raggiungibile. Controlla la connessione e riprova.');
+    if (typeof downloads !== 'undefined') {
+        Object.values(downloads).forEach(item => {
+            if (item.active) {
+                item.percentSpan.innerText = '❌ Connessione persa';
+                item.bar.classList.remove('animate-pulse');
+                item.active = false;
+            }
+        });
+        updateNoDownloadsMessage();
+    }
+}
+window.notifyServerUnreachable = notifyServerUnreachable;
+function isServerReachable() {
+    return socket && socket.connected;
+}
+window.isServerReachable = isServerReachable;
+
 window.onload = () => {
-    socket = io();
-    socket.connect("http://127.0.0.1:5000");
+    socket = io({ autoConnect: false });
+
+    const handleConnectionError = (err) => {
+        console.error('Errore di connessione al server', err);
+        notifyServerUnreachable();
+    };
+
+    socket.on('connect_error', handleConnectionError);
+    socket.on('error', handleConnectionError);
+    socket.on('disconnect', handleConnectionError);
+    socket.io.on('reconnect_error', handleConnectionError);
+    socket.io.on('reconnect_failed', handleConnectionError);
 
     socket.on("connect", () => {
         console.log("Connected!");
         socketid = socket.id;
         console.log("Socket id: " + socketid);
-    })
+        serverAlertShown = false;
+    });
+
+    socket.connect();
 
     socket.on('active_downloads', data => {
         for (const [id, info] of Object.entries(data)) {
@@ -165,6 +200,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     downloadBtn.addEventListener('click', async (e) => {
+        if (!isServerReachable()) {
+            notifyServerUnreachable();
+            return;
+        }
         socket.emit("start_download", {
             domain: mainUrl,
             filmid: filmId,
