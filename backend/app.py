@@ -123,7 +123,8 @@ def create_user():
         return jsonify({"error": "username and password required"}), 400
     if User.query.filter_by(username=username).first():
         return jsonify({"error": "username already exists"}), 400
-    user = User(username=username, password=password)
+    user = User(username=username)
+    user.set_password(password)
     db.session.add(user)
     db.session.commit()
     return jsonify({"id": user.id, "username": user.username}), 201
