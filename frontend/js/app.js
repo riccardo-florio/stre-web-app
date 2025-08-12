@@ -3,6 +3,8 @@ let socketid = undefined;
 let mainUrl = null;
 let filmId = null;
 let filmTitle = null;
+let filmSlug = null;
+let filmCover = null;
 let lastSearchQuery = null;
 const playerModal = document.getElementById('player-modal');
 
@@ -182,13 +184,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     updateNoDownloadsMessage();
     checkVersions();
-
     const storedUser = localStorage.getItem('username');
     if (storedUser) {
         updateMainTitle(storedUser);
     } else {
         showLoginModal();
     }
+    populateContinueWatching();
 
     const form = document.querySelector('form');
     const downloadBtn = document.getElementById('download-btn');
@@ -223,7 +225,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const links = await fetchStreamingLinks(filmId);
             const hlsLink = links.find(l => l.includes('playlist') || l.includes('.m3u8'));
             if (hlsLink) {
-                showPlayer(hlsLink, filmId);
+                showPlayer(hlsLink, filmId, filmSlug, filmTitle, filmCover);
             } else {
                 alert('Nessun link disponibile');
             }

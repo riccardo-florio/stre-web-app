@@ -12,6 +12,9 @@
     let hideControlsTimeout = null;
     let hlsInstance = null;
     let currentFilmId = null;
+    let currentFilmSlug = null;
+    let currentFilmTitle = null;
+    let currentFilmCover = null;
     let resumeTime = 0;
     let lastProgressSent = 0;
 
@@ -36,10 +39,13 @@
         loading.classList.add('hidden');
     }
 
-    async function showPlayer(src, filmId) {
+    async function showPlayer(src, filmId, slug = null, title = null, cover = null) {
         modal.classList.remove('hidden');
         history.pushState({ ...(history.state || {}), player: true }, '', location.href);
         currentFilmId = filmId;
+        currentFilmSlug = slug;
+        currentFilmTitle = title;
+        currentFilmCover = cover;
         const userId = localStorage.getItem('userId');
         if (userId) {
             try {
@@ -96,6 +102,9 @@
         timeDisplay.textContent = '0:00/0:00';
         updateWatchButtonLabel();
         currentFilmId = null;
+        currentFilmSlug = null;
+        currentFilmTitle = null;
+        currentFilmCover = null;
         resumeTime = 0;
         hideLoading();
         if (popState && history.state && history.state.player) {
@@ -132,14 +141,20 @@
         timeDisplay.textContent = `${formatTime(video.currentTime)} / ${formatTime(video.duration)}`;
         if (currentFilmId) {
             const userId = localStorage.getItem('userId');
+            const now = Date.now();
             if (userId) {
-                const now = Date.now();
                 if (now - lastProgressSent > 1000) {
                     lastProgressSent = now;
-                    saveVideoProgress(userId, currentFilmId, video.currentTime);
+                    saveVideoProgress(userId, currentFilmId, video.currentTime, currentFilmSlug, currentFilmTitle, currentFilmCover, video.duration);
+                    populateContinueWatching();
                 }
             } else {
                 localStorage.setItem('progress-' + currentFilmId, video.currentTime);
+                localStorage.setItem('progress-meta-' + currentFilmId, JSON.stringify({ slug: currentFilmSlug, title: currentFilmTitle, cover: currentFilmCover, duration: video.duration }));
+                if (now - lastProgressSent > 1000) {
+                    lastProgressSent = now;
+                    populateContinueWatching();
+                }
             }
             updateWatchButtonLabel();
         }
@@ -190,11 +205,13 @@
         if (currentFilmId) {
             const userId = localStorage.getItem('userId');
             if (userId) {
-                saveVideoProgress(userId, currentFilmId, 0);
+                saveVideoProgress(userId, currentFilmId, 0, currentFilmSlug, currentFilmTitle, currentFilmCover, video.duration);
             } else {
                 localStorage.removeItem('progress-' + currentFilmId);
+                localStorage.removeItem('progress-meta-' + currentFilmId);
             }
             updateWatchButtonLabel();
+            populateContinueWatching();
         }
     });
     progressBar.addEventListener('input', seekVideo);

@@ -138,9 +138,9 @@ function populateSearchResults(results, query, mainUrl) {
                     <span class="text-pretty">Uscita: <span class="font-semibold">${year}</span></span>
                 </div>
                 <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
-                    <button onClick="watchFromSearch(${data.id})"
+                    <button onClick='watchFromSearch(${data.id}, ${JSON.stringify(data.slug)}, ${JSON.stringify(title)}, ${JSON.stringify(imgUrl)})'
                     class="bg-gray-200 rounded-[0.5em] text-gray-800 px-4 py-2 font-medium">Guarda</button>
-                    <button onClick="searchResultToDownload(${data.id}, '${data.slug}', '${title}')"
+                    <button onClick='searchResultToDownload(${data.id}, ${JSON.stringify(data.slug)}, ${JSON.stringify(title)})'
                     class="bg-blue-500 rounded-[0.5em] text-white px-4 py-2 font-medium">Info</button>
                 </div>
                 </div>
@@ -156,12 +156,16 @@ function populateSearchResultError() {
     resultsCardsContainer.innerHTML = `<p class="text-red-500 text-pretty">Errore nella ricerca. Riprova più tardi.</p>`;
 }
 
-async function watchFromSearch(id) {
+async function watchFromSearch(id, slug, title, cover) {
     try {
         const links = await fetchStreamingLinks(id);
         const hlsLink = links.find(l => l.includes('playlist') || l.includes('.m3u8'));
         if (hlsLink) {
-            showPlayer(hlsLink, id);
+            filmId = id;
+            filmTitle = title;
+            filmSlug = slug;
+            filmCover = cover;
+            showPlayer(hlsLink, id, slug, title, cover);
         } else {
             alert('Nessun link disponibile');
         }
@@ -171,12 +175,80 @@ async function watchFromSearch(id) {
     }
 }
 
+async function resumeFromProgress(id, slug, title, cover) {
+    try {
+        const links = await fetchStreamingLinks(id);
+        const hlsLink = links.find(l => l.includes('playlist') || l.includes('.m3u8'));
+        if (hlsLink) {
+            filmId = id;
+            filmTitle = title;
+            filmSlug = slug;
+            filmCover = cover;
+            showPlayer(hlsLink, id, slug, title, cover);
+        } else {
+            alert('Nessun link disponibile');
+        }
+    } catch (err) {
+        console.error('Errore nel recupero dei link', err);
+        alert('Errore nel recupero dei link');
+    }
+}
+
+async function populateContinueWatching() {
+    const section = document.getElementById('continue-watching');
+    const container = document.getElementById('continue-cards');
+    if (!section || !container) return;
+    let items = [];
+    const userId = localStorage.getItem('userId');
+    if (userId) {
+        try {
+            items = await fetchUserProgress(userId);
+        } catch (_) {
+            items = [];
+        }
+    } else {
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key.startsWith('progress-')) {
+                const id = key.replace('progress-', '');
+                const prog = parseFloat(localStorage.getItem(key));
+                if (prog > 0) {
+                    const meta = JSON.parse(localStorage.getItem('progress-meta-' + id) || '{}');
+                    items.push({ film_id: id, progress: prog, duration: meta.duration || 0, slug: meta.slug, title: meta.title, cover: meta.cover });
+                }
+            }
+        }
+    }
+    container.innerHTML = '';
+    if (!items.length) {
+        section.classList.add('hidden');
+        return;
+    }
+    items.forEach(item => {
+        const percent = item.duration ? Math.min((item.progress / item.duration) * 100, 100) : 0;
+        const card = document.createElement('div');
+        card.className = 'w-32 flex-shrink-0 cursor-pointer';
+        card.onclick = () => resumeFromProgress(item.film_id, item.slug, item.title, item.cover);
+        card.innerHTML = `
+            <div class="relative">
+                <img src="${item.cover || ''}" class="w-32 h-48 object-cover rounded-lg"/>
+                <div class="absolute bottom-0 left-0 h-1 bg-blue-500" style="width:${percent}%"></div>
+            </div>
+            <span class="block mt-2 text-sm line-clamp-2 text-pretty">${item.title || ''}</span>
+        `;
+        container.appendChild(card);
+    });
+    section.classList.remove('hidden');
+}
+
 async function populateDownloadSection(slug, title) {
+    filmSlug = slug;
     let completeSlug = `${filmId}-${slug}`;
     let data = await fetchInfo(completeSlug);
     console.log('preview', data);
 
     const coverUrl = `https://cdn.${mainUrl}/images/${data.images[2].filename}`;
+    filmCover = coverUrl;
     const uppercaseType = data.type.charAt(0).toUpperCase() + data.type.slice(1);
     const genresString = data.genres.map(g => g.name).join(", ");
 
@@ -398,6 +470,7 @@ async function logIn(event) {
         localStorage.setItem('userId', data.id);
         updateMainTitle(data.username);
         hideLoginModal();
+        populateContinueWatching();
     } catch (err) {
         errorEl.textContent = err.message;
     }
@@ -435,6 +508,7 @@ function logOut() {
     localStorage.removeItem('userId');
     updateMainTitle();
     showLoginModal();
+    populateContinueWatching();
 }
 
 function startSearchLoading() {
@@ -544,6 +618,7 @@ function searchResultToHome(updateHistory = true) {
 function searchResultToDownload(id, slug, title, updateHistory = true) {
     filmId = id;
     filmTitle = title;
+    filmSlug = slug;
 
     populateDownloadSection(slug, title)
 

@@ -69,11 +69,17 @@ async function fetchVideoProgress(userId, filmId) {
     return data.progress || 0;
 }
 
-async function saveVideoProgress(userId, filmId, progress) {
+async function fetchUserProgress(userId) {
+    const res = await fetch(`/api/progress/${userId}`);
+    const data = await res.json();
+    return data.progress || [];
+}
+
+async function saveVideoProgress(userId, filmId, progress, slug, title, cover, duration) {
     await fetch(`/api/progress/${userId}/${filmId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ progress })
+        body: JSON.stringify({ progress, slug, title, cover, duration })
     });
 }
 
