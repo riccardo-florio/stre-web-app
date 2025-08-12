@@ -4,7 +4,7 @@ from flask_socketio import SocketIO, emit
 import json
 from pathlib import Path
 from uuid import uuid4
-from models import db, User
+from models import db, User, VideoProgress
 from utils.app_functions import (
     refresh_stre_domain,
     search,
@@ -141,6 +141,29 @@ def login_user():
     if not user or not user.check_password(password):
         return jsonify({"error": "invalid credentials"}), 401
     return jsonify({"id": user.id, "username": user.username})
+
+
+@app.route("/api/progress/<int:user_id>/<film_id>", methods=["GET", "POST"])
+def video_progress(user_id, film_id):
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({"error": "user not found"}), 404
+
+    entry = VideoProgress.query.filter_by(user_id=user_id, film_id=film_id).first()
+    if request.method == "GET":
+        return jsonify({"progress": entry.progress if entry else 0})
+
+    data = request.get_json() or {}
+    progress = data.get("progress")
+    if progress is None:
+        return jsonify({"error": "progress required"}), 400
+    if not entry:
+        entry = VideoProgress(user_id=user_id, film_id=film_id, progress=progress)
+        db.session.add(entry)
+    else:
+        entry.progress = progress
+    db.session.commit()
+    return jsonify({"progress": entry.progress})
 
 @socketio.on("start_download")
 def handle_start_download(data):

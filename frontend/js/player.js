@@ -13,6 +13,7 @@
     let hlsInstance = null;
     let currentFilmId = null;
     let resumeTime = 0;
+    let lastProgressSent = 0;
 
     function hideControls() {
         controls.classList.add('opacity-0', 'pointer-events-none');
@@ -35,11 +36,20 @@
         loading.classList.add('hidden');
     }
 
-    function showPlayer(src, filmId) {
+    async function showPlayer(src, filmId) {
         modal.classList.remove('hidden');
         history.pushState({ ...(history.state || {}), player: true }, '', location.href);
         currentFilmId = filmId;
-        resumeTime = parseFloat(localStorage.getItem('progress-' + filmId)) || 0;
+        const userId = localStorage.getItem('userId');
+        if (userId) {
+            try {
+                resumeTime = await fetchVideoProgress(userId, filmId);
+            } catch (_) {
+                resumeTime = 0;
+            }
+        } else {
+            resumeTime = parseFloat(localStorage.getItem('progress-' + filmId)) || 0;
+        }
         showLoading();
 
         if (Hls.isSupported()) {
@@ -121,7 +131,16 @@
         progressBar.value = video.currentTime;
         timeDisplay.textContent = `${formatTime(video.currentTime)} / ${formatTime(video.duration)}`;
         if (currentFilmId) {
-            localStorage.setItem('progress-' + currentFilmId, video.currentTime);
+            const userId = localStorage.getItem('userId');
+            if (userId) {
+                const now = Date.now();
+                if (now - lastProgressSent > 1000) {
+                    lastProgressSent = now;
+                    saveVideoProgress(userId, currentFilmId, video.currentTime);
+                }
+            } else {
+                localStorage.setItem('progress-' + currentFilmId, video.currentTime);
+            }
             updateWatchButtonLabel();
         }
     }
@@ -169,7 +188,12 @@
     video.addEventListener('playing', hideLoading);
     video.addEventListener('ended', () => {
         if (currentFilmId) {
-            localStorage.removeItem('progress-' + currentFilmId);
+            const userId = localStorage.getItem('userId');
+            if (userId) {
+                saveVideoProgress(userId, currentFilmId, 0);
+            } else {
+                localStorage.removeItem('progress-' + currentFilmId);
+            }
             updateWatchButtonLabel();
         }
     });
@@ -239,10 +263,20 @@
     window.hidePlayer = hidePlayer;
     window.updateWatchButtonLabel = updateWatchButtonLabel;
 
-    function updateWatchButtonLabel(id = currentFilmId || window.filmId) {
+    async function updateWatchButtonLabel(id = currentFilmId || window.filmId) {
         const watchBtn = document.getElementById('watch-btn');
         if (!watchBtn || !id) return;
-        const progress = parseFloat(localStorage.getItem('progress-' + id) || '0');
+        const userId = localStorage.getItem('userId');
+        let progress = 0;
+        if (userId) {
+            try {
+                progress = await fetchVideoProgress(userId, id);
+            } catch (_) {
+                progress = 0;
+            }
+        } else {
+            progress = parseFloat(localStorage.getItem('progress-' + id) || '0');
+        }
         watchBtn.textContent = progress > 0 ? 'Riprendi' : 'Guarda';
     }
 })();

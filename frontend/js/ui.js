@@ -292,33 +292,6 @@ async function populateDownloadSection(slug, title) {
     }
 }
 
-function showPlayer(src) {
-    const modal = document.getElementById('player-modal');
-    const video = document.getElementById('video-player');
-    modal.classList.remove('hidden');
-
-    if (Hls.isSupported()) {
-        const hls = new Hls();
-        hls.loadSource(src);
-        hls.attachMedia(video);
-        video.hlsInstance = hls;
-    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-        video.src = src;
-    }
-}
-
-function hidePlayer() {
-    const modal = document.getElementById('player-modal');
-    const video = document.getElementById('video-player');
-    modal.classList.add('hidden');
-    if (video.hlsInstance) {
-        video.hlsInstance.destroy();
-        video.hlsInstance = null;
-    }
-    video.pause();
-    video.removeAttribute('src');
-}
-
 function updateDownloadProgress(id, percent, eta = null, downloaded = null, total = null, speed = null) {
     const item = downloads[id];
     if (!item) return;
@@ -415,9 +388,10 @@ async function logIn(event) {
         return;
     }
     try {
-        await fetchLogIn(username, password);
-        localStorage.setItem('username', username);
-        updateMainTitle(username);
+        const data = await fetchLogIn(username, password);
+        localStorage.setItem('username', data.username);
+        localStorage.setItem('userId', data.id);
+        updateMainTitle(data.username);
         hideLoginModal();
     } catch (err) {
         errorEl.textContent = err.message;
@@ -453,6 +427,7 @@ async function signIn() {
 
 function logOut() {
     localStorage.removeItem('username');
+    localStorage.removeItem('userId');
     updateMainTitle();
     hideLoginModal();
 }
