@@ -3,6 +3,11 @@ function toggleMobileMenu() {
     document.getElementById('download-tab').classList.toggle('pointer-events-none');
 }
 
+function showLoginModal() {
+    document.getElementById('login-modal').classList.remove('opacity-0');
+    document.getElementById('login-modal').classList.remove('pointer-events-none');
+}
+
 async function getLatestReleaseVersion() {
   const url = 'https://api.github.com/repos/riccardo-florio/stre-web-app/releases/latest';
 
@@ -343,6 +348,14 @@ function createDownloadItem(id, title) {
 
     downloads[id] = { bar, percentSpan, etaSpan, dataSpan, speedSpan, cancelBtn, loading: true, active: true };
     updateNoDownloadsMessage();
+}
+
+function logIn() {
+
+}
+
+function signIn() {
+    
 }
 
 function startSearchLoading() {

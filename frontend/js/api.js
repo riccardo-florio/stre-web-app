@@ -37,6 +37,14 @@ async function fetchStreamingLinks(id, episodeId = null) {
     return data;
 }
 
+async function fetchSignIn() {
+
+}
+
+async function fetchLogIn() {
+
+}
+
 async function checkDomainReachable(domain) {
     try {
         const res = await fetch(`/api/check-domain/${domain}`);
