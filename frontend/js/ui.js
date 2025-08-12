@@ -177,7 +177,8 @@ async function watchFromSearch(id, slug, title, cover) {
 
 async function resumeFromProgress(id, slug, title, cover) {
     try {
-        const links = await fetchStreamingLinks(id);
+        const [baseId, episodeId] = id.split('-');
+        const links = await fetchStreamingLinks(baseId, episodeId || null);
         const hlsLink = links.find(l => l.includes('playlist') || l.includes('.m3u8'));
         if (hlsLink) {
             filmId = id;
@@ -322,7 +323,12 @@ async function populateDownloadSection(slug, title) {
                         const links = await fetchStreamingLinks(filmId, ep.id);
                         const hlsLink = links.find(l => l.includes('playlist') || l.includes('.m3u8'));
                         if (hlsLink) {
-                            showPlayer(hlsLink, ep.id);
+                            const epCover = (ep.images && ep.images.length)
+                                ? `https://cdn.${mainUrl}/images/${ep.images[0].filename}`
+                                : filmCover;
+                            const combinedId = `${filmId}-${ep.id}`;
+                            const epTitle = `${filmTitle} - S${ep.season}E${ep.episode} - ${ep.name}`;
+                            showPlayer(hlsLink, combinedId, filmSlug, epTitle, epCover);
                         } else {
                             alert('Nessun link disponibile');
                         }
