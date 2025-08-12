@@ -7,10 +7,12 @@ function showLoginModal() {
     const modal = document.getElementById('login-modal');
     const form = document.getElementById('login-form');
     const logoutContainer = document.getElementById('logout-container');
+    const closeBtn = modal.querySelector('button[onclick="hideLoginModal()"]');
     const username = localStorage.getItem('username');
     if (username) {
         if (form) form.classList.add('hidden');
         if (logoutContainer) logoutContainer.classList.remove('hidden');
+        if (closeBtn) closeBtn.classList.remove('hidden');
     } else {
         if (logoutContainer) logoutContainer.classList.add('hidden');
         if (form) {
@@ -18,12 +20,15 @@ function showLoginModal() {
             const usernameInput = form.querySelector('input[name="username"]');
             if (usernameInput) usernameInput.focus();
         }
+        if (closeBtn) closeBtn.classList.add('hidden');
     }
     modal.classList.remove('opacity-0');
     modal.classList.remove('pointer-events-none');
 }
 
 function hideLoginModal() {
+    const username = localStorage.getItem('username');
+    if (!username) return;
     const modal = document.getElementById('login-modal');
     modal.classList.add('opacity-0');
     modal.classList.add('pointer-events-none');
@@ -429,7 +434,7 @@ function logOut() {
     localStorage.removeItem('username');
     localStorage.removeItem('userId');
     updateMainTitle();
-    hideLoginModal();
+    showLoginModal();
 }
 
 function startSearchLoading() {
