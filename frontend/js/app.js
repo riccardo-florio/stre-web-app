@@ -183,6 +183,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     updateNoDownloadsMessage();
     checkVersions();
 
+    const storedUser = localStorage.getItem('username');
+    if (storedUser) {
+        updateMainTitle(storedUser);
+    }
+
     const form = document.querySelector('form');
     const downloadBtn = document.getElementById('download-btn');
     const watchBtn = document.getElementById('watch-btn');

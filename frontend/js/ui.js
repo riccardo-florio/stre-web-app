@@ -4,8 +4,58 @@ function toggleMobileMenu() {
 }
 
 function showLoginModal() {
-    document.getElementById('login-modal').classList.remove('opacity-0');
-    document.getElementById('login-modal').classList.remove('pointer-events-none');
+    const modal = document.getElementById('login-modal');
+    const form = document.getElementById('login-form');
+    const logoutContainer = document.getElementById('logout-container');
+    const username = localStorage.getItem('username');
+    if (username) {
+        if (form) form.classList.add('hidden');
+        if (logoutContainer) logoutContainer.classList.remove('hidden');
+    } else {
+        if (logoutContainer) logoutContainer.classList.add('hidden');
+        if (form) {
+            form.classList.remove('hidden');
+            const usernameInput = form.querySelector('input[name="username"]');
+            if (usernameInput) usernameInput.focus();
+        }
+    }
+    modal.classList.remove('opacity-0');
+    modal.classList.remove('pointer-events-none');
+}
+
+function hideLoginModal() {
+    const modal = document.getElementById('login-modal');
+    modal.classList.add('opacity-0');
+    modal.classList.add('pointer-events-none');
+    const usernameInput = modal.querySelector('input[name="username"]');
+    const passwordInput = modal.querySelector('input[type="password"]');
+    const errorEl = document.getElementById('login-error-message');
+    if (usernameInput) usernameInput.value = '';
+    if (passwordInput) passwordInput.value = '';
+    if (errorEl) errorEl.textContent = '';
+    const form = document.getElementById('login-form');
+    const logoutContainer = document.getElementById('logout-container');
+    if (form) form.classList.remove('hidden');
+    if (logoutContainer) logoutContainer.classList.add('hidden');
+}
+
+document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+        const modal = document.getElementById('login-modal');
+        if (modal && !modal.classList.contains('pointer-events-none')) {
+            hideLoginModal();
+        }
+    }
+});
+
+function updateMainTitle(username) {
+    const title = document.getElementById('main-title');
+    if (!title) return;
+    if (username) {
+        title.textContent = `Ciao ${username}, cosa vuoi scaricare?`;
+    } else {
+        title.textContent = 'Cosa vuoi scaricare?';
+    }
 }
 
 async function getLatestReleaseVersion() {
@@ -350,12 +400,61 @@ function createDownloadItem(id, title) {
     updateNoDownloadsMessage();
 }
 
-function logIn() {
-
+async function logIn(event) {
+    event.preventDefault();
+    const usernameInput = document.querySelector('#login-modal input[type="text"]');
+    const passwordInput = document.querySelector('#login-modal input[type="password"]');
+    const username = usernameInput.value.trim();
+    const password = passwordInput.value.trim();
+    const errorEl = document.getElementById('login-error-message');
+    errorEl.textContent = '';
+    errorEl.classList.remove('text-green-600');
+    errorEl.classList.add('text-red-600');
+    if (!username || !password) {
+        errorEl.textContent = 'Username e password sono obbligatori';
+        return;
+    }
+    try {
+        await fetchLogIn(username, password);
+        localStorage.setItem('username', username);
+        updateMainTitle(username);
+        hideLoginModal();
+    } catch (err) {
+        errorEl.textContent = err.message;
+    }
 }
 
-function signIn() {
-    
+async function signIn() {
+    const usernameInput = document.querySelector('#login-modal input[type="text"]');
+    const passwordInput = document.querySelector('#login-modal input[type="password"]');
+    const username = usernameInput.value.trim();
+    const password = passwordInput.value.trim();
+    const errorEl = document.getElementById('login-error-message');
+    errorEl.textContent = '';
+    errorEl.classList.remove('text-green-600');
+    errorEl.classList.add('text-red-600');
+    if (!username || !password) {
+        errorEl.textContent = 'Username e password sono obbligatori';
+        return;
+    }
+    try {
+        await fetchSignIn(username, password);
+        usernameInput.value = '';
+        passwordInput.value = '';
+        errorEl.classList.remove('text-red-600');
+        errorEl.classList.add('text-green-600');
+        errorEl.textContent = 'Account creato con successo';
+    } catch (err) {
+        errorEl.classList.remove('text-green-600');
+        errorEl.classList.add('text-red-600');
+        errorEl.textContent = err.message;
+    }
+}
+
+function logOut() {
+    localStorage.removeItem('username');
+    updateMainTitle();
+    hideLoginModal();
 }
 
 function startSearchLoading() {
