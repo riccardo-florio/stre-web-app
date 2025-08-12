@@ -8,6 +8,18 @@ function showLoginModal() {
     document.getElementById('login-modal').classList.remove('pointer-events-none');
 }
 
+function hideLoginModal() {
+    const modal = document.getElementById('login-modal');
+    modal.classList.add('opacity-0');
+    modal.classList.add('pointer-events-none');
+    const usernameInput = modal.querySelector('input[type="text"]');
+    const passwordInput = modal.querySelector('input[type="password"]');
+    const errorEl = document.getElementById('login-error-message');
+    if (usernameInput) usernameInput.value = '';
+    if (passwordInput) passwordInput.value = '';
+    if (errorEl) errorEl.textContent = '';
+}
+
 function updateMainTitle(username) {
     const title = document.getElementById('main-title');
     if (!title) return;
@@ -376,10 +388,7 @@ async function logIn(event) {
         await fetchLogIn(username, password);
         localStorage.setItem('username', username);
         updateMainTitle(username);
-        document.getElementById('login-modal').classList.add('opacity-0');
-        document.getElementById('login-modal').classList.add('pointer-events-none');
-        usernameInput.value = '';
-        passwordInput.value = '';
+        hideLoginModal();
     } catch (err) {
         errorEl.textContent = err.message;
     }

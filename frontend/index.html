@@ -201,6 +201,9 @@
     <!-- Login Modal -->
     <div id="login-modal"
         class="bg-black/50 absolute top-0 left-0 size-full opacity-0 pointer-events-none transition-opacity flex items-center justify-center">
+        <button type="button" onclick="hideLoginModal()" class="absolute top-5 right-5 text-white">
+            <span class="material-symbols-rounded text-3xl">close</span>
+        </button>
         <form onsubmit="logIn(event)" class="bg-white p-10 rounded-3xl flex flex-col gap-2">
             <h2 class="text-2xl mb-2">Login</h2>
             <span id="login-error-message" class="text-red-600"></span>
