@@ -50,8 +50,17 @@ async function fetchSignIn(username, password) {
     return data;
 }
 
-async function fetchLogIn() {
-
+async function fetchLogIn(username, password) {
+    const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+    });
+    const data = await res.json();
+    if (!res.ok) {
+        throw new Error(data.error || 'Credenziali non valide');
+    }
+    return data;
 }
 
 async function checkDomainReachable(domain) {

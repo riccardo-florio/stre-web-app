@@ -8,6 +8,16 @@ function showLoginModal() {
     document.getElementById('login-modal').classList.remove('pointer-events-none');
 }
 
+function updateMainTitle(username) {
+    const title = document.getElementById('main-title');
+    if (!title) return;
+    if (username) {
+        title.textContent = `Ciao ${username}, cosa vuoi scaricare?`;
+    } else {
+        title.textContent = 'Cosa vuoi scaricare?';
+    }
+}
+
 async function getLatestReleaseVersion() {
   const url = 'https://api.github.com/repos/riccardo-florio/stre-web-app/releases/latest';
 
@@ -350,8 +360,29 @@ function createDownloadItem(id, title) {
     updateNoDownloadsMessage();
 }
 
-function logIn() {
-
+async function logIn(event) {
+    event.preventDefault();
+    const usernameInput = document.querySelector('#login-modal input[type="text"]');
+    const passwordInput = document.querySelector('#login-modal input[type="password"]');
+    const username = usernameInput.value.trim();
+    const password = passwordInput.value.trim();
+    const errorEl = document.getElementById('login-error-message');
+    errorEl.textContent = '';
+    if (!username || !password) {
+        errorEl.textContent = 'Username e password sono obbligatori';
+        return;
+    }
+    try {
+        await fetchLogIn(username, password);
+        localStorage.setItem('username', username);
+        updateMainTitle(username);
+        document.getElementById('login-modal').classList.add('opacity-0');
+        document.getElementById('login-modal').classList.add('pointer-events-none');
+        usernameInput.value = '';
+        passwordInput.value = '';
+    } catch (err) {
+        errorEl.textContent = err.message;
+    }
 }
 
 async function signIn() {

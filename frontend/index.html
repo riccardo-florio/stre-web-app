@@ -41,7 +41,7 @@
             <!-- form di ricerca -->
             <form class="relative h-1/3 w-full flex items-center justify-center transition-all duration-700">
                 <div class="flex flex-col items-center w-96 -translate-y-32 md:-translate-y-0">
-                    <h1 class="text-4xl text-center mb-10 text-pretty">Cosa vuoi scaricare?</h1>
+                    <h1 id="main-title" class="text-4xl text-center mb-10 text-pretty">Cosa vuoi scaricare?</h1>
                     <div class="flex items-center gap-2 border-2 border-gray-200 rounded-full p-2 pl-8 w-full">
                         <input type="text" placeholder="Titolo del film / serie tv" autofocus enterkeyhint="search"
                             class="outline-none w-full">
@@ -201,12 +201,12 @@
     <!-- Login Modal -->
     <div id="login-modal"
         class="bg-black/50 absolute top-0 left-0 size-full opacity-0 pointer-events-none transition-opacity flex items-center justify-center">
-        <form onclick="logIn()" class="bg-white p-10 rounded-3xl flex flex-col gap-2">
+        <form onsubmit="logIn(event)" class="bg-white p-10 rounded-3xl flex flex-col gap-2">
             <h2 class="text-2xl mb-2">Login</h2>
             <span id="login-error-message" class="text-red-600"></span>
             <input type="text" name="username" id="" placeholder="Username" class="rounded-xl border-2 px-3 py-2">
             <input type="password" name="username" id="" placeholder="Password" class="rounded-xl border-2 px-3 py-2">
-            <button onclick="signIn()" class="text-blue-600">Crea un account</button>
+            <button type="button" onclick="signIn()" class="text-blue-600">Crea un account</button>
             <input type="submit" value="Login" class="bg-blue-500 text-white font-semibold rounded-lg px-3 py-2 cursor-pointer">
         </form>
     </div>
