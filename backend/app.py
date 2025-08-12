@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 from uuid import uuid4
 from models import db, User, VideoProgress
+from sqlalchemy import text
 from utils.app_functions import (
     refresh_stre_domain,
     search,
@@ -45,8 +46,31 @@ app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///users.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db.init_app(app)
 
+def ensure_video_progress_columns():
+    info = db.session.execute(text("PRAGMA table_info(video_progress)"))
+    columns = [row[1] for row in info]
+    if "duration" not in columns:
+        db.session.execute(
+            text("ALTER TABLE video_progress ADD COLUMN duration REAL DEFAULT 0")
+        )
+    if "slug" not in columns:
+        db.session.execute(
+            text("ALTER TABLE video_progress ADD COLUMN slug VARCHAR(255)")
+        )
+    if "title" not in columns:
+        db.session.execute(
+            text("ALTER TABLE video_progress ADD COLUMN title VARCHAR(255)")
+        )
+    if "cover" not in columns:
+        db.session.execute(
+            text("ALTER TABLE video_progress ADD COLUMN cover VARCHAR(255)")
+        )
+    db.session.commit()
+
+
 with app.app_context():
     db.create_all()
+    ensure_video_progress_columns()
 
 socketio = SocketIO(app)
 
