@@ -4,21 +4,33 @@ function toggleMobileMenu() {
 }
 
 function showLoginModal() {
-    document.getElementById('login-modal').classList.remove('opacity-0');
-    document.getElementById('login-modal').classList.remove('pointer-events-none');
+    const modal = document.getElementById('login-modal');
+    modal.classList.remove('opacity-0');
+    modal.classList.remove('pointer-events-none');
+    const usernameInput = modal.querySelector('input[name="username"]');
+    if (usernameInput) usernameInput.focus();
 }
 
 function hideLoginModal() {
     const modal = document.getElementById('login-modal');
     modal.classList.add('opacity-0');
     modal.classList.add('pointer-events-none');
-    const usernameInput = modal.querySelector('input[type="text"]');
+    const usernameInput = modal.querySelector('input[name="username"]');
     const passwordInput = modal.querySelector('input[type="password"]');
     const errorEl = document.getElementById('login-error-message');
     if (usernameInput) usernameInput.value = '';
     if (passwordInput) passwordInput.value = '';
     if (errorEl) errorEl.textContent = '';
 }
+
+document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+        const modal = document.getElementById('login-modal');
+        if (modal && !modal.classList.contains('pointer-events-none')) {
+            hideLoginModal();
+        }
+    }
+});
 
 function updateMainTitle(username) {
     const title = document.getElementById('main-title');
