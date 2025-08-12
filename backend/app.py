@@ -4,6 +4,7 @@ from flask_socketio import SocketIO, emit
 import json
 from pathlib import Path
 from uuid import uuid4
+from models import db, User
 from utils.app_functions import (
     refresh_stre_domain,
     search,
@@ -40,6 +41,13 @@ class StreAPI:
 stre = StreAPI()
 
 app = Flask(__name__, static_folder=str(FRONTEND_DIR), static_url_path="")
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///users.db"
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+db.init_app(app)
+
+with app.app_context():
+    db.create_all()
+
 socketio = SocketIO(app)
 
 @socketio.on("connect")
@@ -104,6 +112,21 @@ def get_streaming_links(content_id):
     episode_id = request.args.get("episode_id")
     results = get_links(stre.fixed_sc, content_id, episode_id)
     return jsonify(results)
+
+
+@app.route("/api/users", methods=["POST"])
+def create_user():
+    data = request.get_json() or {}
+    username = data.get("username")
+    password = data.get("password")
+    if not username or not password:
+        return jsonify({"error": "username and password required"}), 400
+    if User.query.filter_by(username=username).first():
+        return jsonify({"error": "username already exists"}), 400
+    user = User(username=username, password=password)
+    db.session.add(user)
+    db.session.commit()
+    return jsonify({"id": user.id, "username": user.username}), 201
 
 @socketio.on("start_download")
 def handle_start_download(data):
