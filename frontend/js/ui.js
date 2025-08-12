@@ -151,12 +151,16 @@ function populateSearchResultError() {
     resultsCardsContainer.innerHTML = `<p class="text-red-500 text-pretty">Errore nella ricerca. Riprova più tardi.</p>`;
 }
 
+function proxiedHls(url) {
+    return url ? `/proxy-hls?u=${encodeURIComponent(url)}` : url;
+}
+
 async function watchFromSearch(id) {
     try {
         const links = await fetchStreamingLinks(id);
         const hlsLink = links.find(l => l.includes('playlist') || l.includes('.m3u8'));
         if (hlsLink) {
-            showPlayer(hlsLink, id);
+            showPlayer(proxiedHls(hlsLink), id);
         } else {
             alert('Nessun link disponibile');
         }
@@ -245,7 +249,7 @@ async function populateDownloadSection(slug, title) {
                         const links = await fetchStreamingLinks(filmId, ep.id);
                         const hlsLink = links.find(l => l.includes('playlist') || l.includes('.m3u8'));
                         if (hlsLink) {
-                            showPlayer(hlsLink, ep.id);
+                            showPlayer(proxiedHls(hlsLink), ep.id);
                         } else {
                             alert('Nessun link disponibile');
                         }
@@ -290,33 +294,6 @@ async function populateDownloadSection(slug, title) {
         watchBtn.classList.remove('hidden');
         updateWatchButtonLabel(filmId);
     }
-}
-
-function showPlayer(src) {
-    const modal = document.getElementById('player-modal');
-    const video = document.getElementById('video-player');
-    modal.classList.remove('hidden');
-
-    if (Hls.isSupported()) {
-        const hls = new Hls();
-        hls.loadSource(src);
-        hls.attachMedia(video);
-        video.hlsInstance = hls;
-    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-        video.src = src;
-    }
-}
-
-function hidePlayer() {
-    const modal = document.getElementById('player-modal');
-    const video = document.getElementById('video-player');
-    modal.classList.add('hidden');
-    if (video.hlsInstance) {
-        video.hlsInstance.destroy();
-        video.hlsInstance = null;
-    }
-    video.pause();
-    video.removeAttribute('src');
 }
 
 function updateDownloadProgress(id, percent, eta = null, downloaded = null, total = null, speed = null) {

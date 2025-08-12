@@ -221,7 +221,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             const links = await fetchStreamingLinks(filmId);
             const hlsLink = links.find(l => l.includes('playlist') || l.includes('.m3u8'));
             if (hlsLink) {
-                showPlayer(hlsLink, filmId);
+                const prox = `/proxy-hls?u=${encodeURIComponent(hlsLink)}`;
+                showPlayer(prox, filmId);
             } else {
                 alert('Nessun link disponibile');
             }

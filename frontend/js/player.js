@@ -9,6 +9,7 @@
     const timeDisplay = document.getElementById('time-display');
     const loading = document.getElementById('player-loading');
     const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    const isIOS = /iP(ad|hone|od)/i.test(navigator.userAgent);
     let hideControlsTimeout = null;
     let hlsInstance = null;
     let currentFilmId = null;
@@ -35,19 +36,73 @@
         loading.classList.add('hidden');
     }
 
-    function showPlayer(src, filmId) {
+    async function showPlayer(src, filmId) {
         modal.classList.remove('hidden');
         history.pushState({ ...(history.state || {}), player: true }, '', location.href);
         currentFilmId = filmId;
         resumeTime = parseFloat(localStorage.getItem('progress-' + filmId)) || 0;
         showLoading();
 
-        if (Hls.isSupported()) {
-            hlsInstance = new Hls();
-            hlsInstance.loadSource(src);
-            hlsInstance.attachMedia(video);
-        } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.setAttribute('playsinline', '');
+        video.setAttribute('webkit-playsinline', '');
+        video.setAttribute('preload', 'auto');
+        video.muted = true;
+
+        if (hlsInstance) {
+            hlsInstance.destroy();
+            hlsInstance = null;
+        }
+        video.pause();
+        video.removeAttribute('src');
+
+        const canNative = video.canPlayType('application/vnd.apple.mpegurl');
+
+        if (canNative) {
             video.src = src;
+            video.load();
+            try {
+                await video.play();
+            } catch (_) {
+                showControls();
+            }
+        } else if (Hls.isSupported()) {
+            hlsInstance = new Hls({ enableWorker: true });
+            hlsInstance.on(Hls.Events.MEDIA_ATTACHED, () => {
+                hlsInstance.loadSource(src);
+            });
+            hlsInstance.on(Hls.Events.MANIFEST_PARSED, async () => {
+                hideLoading();
+                try {
+                    await video.play();
+                } catch (_) {
+                    showControls();
+                }
+            });
+            hlsInstance.on(Hls.Events.LEVEL_LOADED, hideLoading);
+            hlsInstance.on(Hls.Events.ERROR, function (event, data) {
+                if (data.fatal) {
+                    switch (data.type) {
+                        case Hls.ErrorTypes.NETWORK_ERROR:
+                            hlsInstance.startLoad();
+                            break;
+                        case Hls.ErrorTypes.MEDIA_ERROR:
+                            hlsInstance.recoverMediaError();
+                            break;
+                        default:
+                            hlsInstance.destroy();
+                            showControls();
+                            break;
+                    }
+                }
+            });
+            hlsInstance.attachMedia(video);
+        } else {
+            video.src = src;
+            try {
+                await video.play();
+            } catch (_) {
+                showControls();
+            }
         }
 
         video.addEventListener('loadedmetadata', function init() {
@@ -58,9 +113,8 @@
             video.removeEventListener('loadedmetadata', init);
         });
 
-        video.play();
-        if (modal.requestFullscreen) {
-            modal.requestFullscreen();
+        if (!isIOS && modal.requestFullscreen) {
+            modal.requestFullscreen().catch(() => {});
         }
         showControls();
         updateWatchButtonLabel();
@@ -95,6 +149,9 @@
 
     function togglePlay() {
         if (video.paused) {
+            if (video.muted && video.currentTime === 0) {
+                video.muted = false;
+            }
             video.play();
         } else {
             video.pause();
@@ -165,6 +222,7 @@
     video.addEventListener('timeupdate', updateProgress);
     video.addEventListener('loadedmetadata', updateProgress);
     video.addEventListener('loadeddata', hideLoading);
+    video.addEventListener('canplay', hideLoading);
     video.addEventListener('waiting', showLoading);
     video.addEventListener('playing', hideLoading);
     video.addEventListener('ended', () => {

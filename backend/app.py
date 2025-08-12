@@ -4,6 +4,9 @@ from flask_socketio import SocketIO, emit
 import json
 from pathlib import Path
 from uuid import uuid4
+import re
+from urllib.parse import urljoin, quote
+import requests
 from models import db, User
 from utils.app_functions import (
     refresh_stre_domain,
@@ -22,6 +25,13 @@ from utils.fixed_api import API as FixedAPI
 
 BASE_DIR = Path(__file__).resolve().parent
 FRONTEND_DIR = BASE_DIR.parent / "frontend"
+
+USER_AGENT = (
+    "Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) "
+    "AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 "
+    "Mobile/15E148 Safari/604.1"
+)
+DEFAULT_REFERER = "https://streamingcommunityz.life/"
 
 # Wrapper per dominio e API aggiornabile
 
@@ -112,6 +122,74 @@ def get_streaming_links(content_id):
     episode_id = request.args.get("episode_id")
     results = get_links(stre.fixed_sc, content_id, episode_id)
     return jsonify(results)
+
+
+def _build_headers(ref: str):
+    return {
+        "User-Agent": USER_AGENT,
+        "Accept": "*/*",
+        "Connection": "keep-alive",
+        "Referer": ref or DEFAULT_REFERER,
+    }
+
+
+@app.route("/proxy-hls")
+def proxy_hls():
+    src = request.args.get("u")
+    if not src:
+        return Response("Missing u", status=400)
+    ref = request.args.get("ref", DEFAULT_REFERER)
+    r = requests.get(src, headers=_build_headers(ref))
+    if r.status_code != 200:
+        return Response(r.content, status=r.status_code)
+    ref_param = f"&ref={quote(ref, safe='')}" if ref else ""
+
+    def proxify(url: str) -> str:
+        abs_url = urljoin(src, url)
+        return f"/proxy-hls-seg?u={quote(abs_url, safe='')}{ref_param}"
+
+    lines = []
+    for line in r.text.splitlines():
+        if line.startswith("#EXT-X-KEY"):
+            line = re.sub(
+                r'URI="([^"]+)"',
+                lambda m: f'URI="{proxify(m.group(1))}"',
+                line,
+            )
+        elif line and not line.startswith("#"):
+            line = proxify(line.strip())
+        lines.append(line)
+    playlist = "\n".join(lines)
+    resp = Response(playlist, content_type="application/vnd.apple.mpegurl")
+    resp.headers["Access-Control-Allow-Origin"] = "*"
+    return resp
+
+
+@app.route("/proxy-hls-seg")
+def proxy_hls_seg():
+    url = request.args.get("u")
+    if not url:
+        return Response("Missing u", status=400)
+    ref = request.args.get("ref", DEFAULT_REFERER)
+    headers = _build_headers(ref)
+    if "Range" in request.headers:
+        headers["Range"] = request.headers["Range"]
+    upstream = requests.get(url, headers=headers, stream=True)
+
+    def generate():
+        for chunk in upstream.iter_content(chunk_size=8192):
+            if chunk:
+                yield chunk
+
+    resp = Response(generate(), status=upstream.status_code)
+    for h in ["Content-Type", "Content-Length", "Content-Range"]:
+        if h in upstream.headers:
+            resp.headers[h] = upstream.headers[h]
+    resp.headers["Access-Control-Allow-Origin"] = "*"
+    resp.headers["Access-Control-Allow-Headers"] = "Range"
+    resp.headers["Access-Control-Expose-Headers"] = "Content-Length, Content-Range"
+    resp.headers["Cache-Control"] = "no-cache"
+    return resp
 
 
 @app.route("/api/users", methods=["POST"])
