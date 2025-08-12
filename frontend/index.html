@@ -41,10 +41,10 @@
             <!-- form di ricerca -->
             <form class="relative h-1/3 w-full flex items-center justify-center transition-all duration-700">
                 <div class="flex flex-col items-center w-96 -translate-y-32 md:-translate-y-0">
-                    <h1 class="text-4xl text-center mb-10 text-pretty">Cosa vuoi scaricare?</h1>
+                    <h1 id="main-title" class="text-4xl text-center mb-10 text-pretty">Cosa vuoi scaricare?</h1>
                     <div class="flex items-center gap-2 border-2 border-gray-200 rounded-full p-2 pl-8 w-full">
-                        <input type="text" placeholder="Titolo del film / serie tv" autofocus
-                            enterkeyhint="search" class="outline-none w-full">
+                        <input type="text" placeholder="Titolo del film / serie tv" autofocus enterkeyhint="search"
+                            class="outline-none w-full">
                         <button type="submit" id="search-button"
                             class="flex items-center justify-center bg-blue-500 hover:bg-blue-600 text-white p-4 rounded-full transition">
                             <span class="material-symbols-rounded text-[20px]">
@@ -105,7 +105,8 @@
                                 <div id="episodes-container" class="flex gap-4 overflow-x-auto pb-2"></div>
                             </div>
                             <div class="flex gap-3">
-                                <button id="watch-btn" class="bg-gray-200 rounded-[0.5em] text-gray-800 px-4 py-2 font-medium hidden">
+                                <button id="watch-btn"
+                                    class="bg-gray-200 rounded-[0.5em] text-gray-800 px-4 py-2 font-medium hidden">
                                     Guarda
                                 </button>
                                 <button id="download-btn"
@@ -124,10 +125,15 @@
 
     <!-- Download -->
     <div id="download-tab"
-        class="absolute opacity-0 pointer-events-none lg:opacity-100 lg:pointer-events-auto lg:static lg:position bg-white w-full lg:w-auto lg:min-w-96 h-full lg:rounded-[3rem] py-9 px-10 lg:shadow lg:border border-gray-200 flex flex-col transition-opacity">
+        class="absolute opacity-0 pointer-events-none lg:opacity-100 lg:pointer-events-auto lg:relative lg:position bg-white w-full lg:w-auto lg:min-w-96 h-full lg:rounded-[3rem] py-9 px-10 lg:shadow lg:border border-gray-200 flex flex-col transition-opacity">
         <button onclick="toggleMobileMenu()" class="absolute right-10 top-9 lg:hidden">
             <span class="material-symbols-rounded text-3xl">
                 close
+            </span>
+        </button>
+        <button onclick="showLoginModal()" class="absolute right-20 lg:right-10 top-9">
+            <span class="material-symbols-rounded text-3xl text-blue-600">
+                person
             </span>
         </button>
         <h2 class="text-2xl text-pretty">Downloads</h2>
@@ -181,13 +187,34 @@
             </svg>
         </div>
         <video id="video-player" class="w-full h-full object-contain"></video>
-        <div id="player-controls" class="absolute bottom-0 left-0 right-0 flex items-center gap-4 p-4 bg-black/60 transition-opacity duration-300">
+        <div id="player-controls"
+            class="absolute bottom-0 left-0 right-0 flex items-center gap-4 p-4 bg-black/60 transition-opacity duration-300">
             <button id="play-pause" class="text-white material-symbols-rounded text-3xl">play_arrow</button>
             <input id="player-progress" type="range" min="0" value="0" class="flex-1">
             <span id="time-display" class="text-white text-sm w-20 text-center">0:00/0:00</span>
             <button id="fullscreen-btn" class="text-white material-symbols-rounded text-3xl">fullscreen</button>
         </div>
-        <button id="close-player" class="absolute top-2 right-2 text-white material-symbols-rounded text-3xl transition-opacity duration-300">close</button>
+        <button id="close-player"
+            class="absolute top-2 right-2 text-white material-symbols-rounded text-3xl transition-opacity duration-300">close</button>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="login-modal"
+        class="bg-black/50 absolute top-0 left-0 size-full opacity-0 pointer-events-none transition-opacity flex items-center justify-center">
+        <button type="button" onclick="hideLoginModal()" class="absolute top-5 right-5 text-white">
+            <span class="material-symbols-rounded text-3xl">close</span>
+        </button>
+        <form id="login-form" onsubmit="logIn(event)" class="bg-white p-10 rounded-3xl flex flex-col gap-2">
+            <h2 class="text-2xl mb-2">Login</h2>
+            <span id="login-error-message" class="text-red-600"></span>
+            <input type="text" name="username" id="" placeholder="Username" class="rounded-xl border-2 px-3 py-2">
+            <input type="password" name="password" id="" placeholder="Password" class="rounded-xl border-2 px-3 py-2">
+            <button type="button" onclick="signIn()" class="text-blue-600">Crea un account</button>
+            <input type="submit" value="Login" class="bg-blue-500 text-white font-semibold rounded-lg px-3 py-2 cursor-pointer">
+        </form>
+        <div id="logout-container" class="bg-white p-10 rounded-3xl flex flex-col gap-2 hidden">
+            <button type="button" onclick="logOut()" class="bg-blue-500 text-white font-semibold rounded-lg px-3 py-2 cursor-pointer">Logout</button>
+        </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"

@@ -2,5 +2,5 @@ venv/
 downloads/
 __pycache__/
 */__pycache__/
-
 style.css
+instance/
