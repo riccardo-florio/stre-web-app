@@ -129,6 +129,19 @@ def create_user():
     db.session.commit()
     return jsonify({"id": user.id, "username": user.username}), 201
 
+
+@app.route("/api/login", methods=["POST"])
+def login_user():
+    data = request.get_json() or {}
+    username = data.get("username")
+    password = data.get("password")
+    if not username or not password:
+        return jsonify({"error": "username and password required"}), 400
+    user = User.query.filter_by(username=username).first()
+    if not user or not user.check_password(password):
+        return jsonify({"error": "invalid credentials"}), 401
+    return jsonify({"id": user.id, "username": user.username})
+
 @socketio.on("start_download")
 def handle_start_download(data):
     domain = data.get("domain")
