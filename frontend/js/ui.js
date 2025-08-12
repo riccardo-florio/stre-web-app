@@ -7,10 +7,12 @@ function showLoginModal() {
     const modal = document.getElementById('login-modal');
     const form = document.getElementById('login-form');
     const logoutContainer = document.getElementById('logout-container');
+    const closeBtn = modal.querySelector('button[onclick="hideLoginModal()"]');
     const username = localStorage.getItem('username');
     if (username) {
         if (form) form.classList.add('hidden');
         if (logoutContainer) logoutContainer.classList.remove('hidden');
+        if (closeBtn) closeBtn.classList.remove('hidden');
     } else {
         if (logoutContainer) logoutContainer.classList.add('hidden');
         if (form) {
@@ -18,12 +20,15 @@ function showLoginModal() {
             const usernameInput = form.querySelector('input[name="username"]');
             if (usernameInput) usernameInput.focus();
         }
+        if (closeBtn) closeBtn.classList.add('hidden');
     }
     modal.classList.remove('opacity-0');
     modal.classList.remove('pointer-events-none');
 }
 
 function hideLoginModal() {
+    const username = localStorage.getItem('username');
+    if (!username) return;
     const modal = document.getElementById('login-modal');
     modal.classList.add('opacity-0');
     modal.classList.add('pointer-events-none');
@@ -292,33 +297,6 @@ async function populateDownloadSection(slug, title) {
     }
 }
 
-function showPlayer(src) {
-    const modal = document.getElementById('player-modal');
-    const video = document.getElementById('video-player');
-    modal.classList.remove('hidden');
-
-    if (Hls.isSupported()) {
-        const hls = new Hls();
-        hls.loadSource(src);
-        hls.attachMedia(video);
-        video.hlsInstance = hls;
-    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-        video.src = src;
-    }
-}
-
-function hidePlayer() {
-    const modal = document.getElementById('player-modal');
-    const video = document.getElementById('video-player');
-    modal.classList.add('hidden');
-    if (video.hlsInstance) {
-        video.hlsInstance.destroy();
-        video.hlsInstance = null;
-    }
-    video.pause();
-    video.removeAttribute('src');
-}
-
 function updateDownloadProgress(id, percent, eta = null, downloaded = null, total = null, speed = null) {
     const item = downloads[id];
     if (!item) return;
@@ -415,9 +393,10 @@ async function logIn(event) {
         return;
     }
     try {
-        await fetchLogIn(username, password);
-        localStorage.setItem('username', username);
-        updateMainTitle(username);
+        const data = await fetchLogIn(username, password);
+        localStorage.setItem('username', data.username);
+        localStorage.setItem('userId', data.id);
+        updateMainTitle(data.username);
         hideLoginModal();
     } catch (err) {
         errorEl.textContent = err.message;
@@ -453,8 +432,9 @@ async function signIn() {
 
 function logOut() {
     localStorage.removeItem('username');
+    localStorage.removeItem('userId');
     updateMainTitle();
-    hideLoginModal();
+    showLoginModal();
 }
 
 function startSearchLoading() {

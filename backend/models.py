@@ -18,3 +18,12 @@ class User(db.Model):
     def check_password(self, password: str) -> bool:
         """Verify a plaintext password against the stored hash."""
         return check_password_hash(self.password_hash, password)
+
+
+class VideoProgress(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    film_id = db.Column(db.String(100), nullable=False)
+    progress = db.Column(db.Float, default=0.0, nullable=False)
+
+    __table_args__ = (db.UniqueConstraint('user_id', 'film_id', name='uniq_user_film'),)

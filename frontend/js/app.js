@@ -186,6 +186,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const storedUser = localStorage.getItem('username');
     if (storedUser) {
         updateMainTitle(storedUser);
+    } else {
+        showLoginModal();
     }
 
     const form = document.querySelector('form');

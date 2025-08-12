@@ -63,6 +63,20 @@ async function fetchLogIn(username, password) {
     return data;
 }
 
+async function fetchVideoProgress(userId, filmId) {
+    const res = await fetch(`/api/progress/${userId}/${filmId}`);
+    const data = await res.json();
+    return data.progress || 0;
+}
+
+async function saveVideoProgress(userId, filmId, progress) {
+    await fetch(`/api/progress/${userId}/${filmId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ progress })
+    });
+}
+
 async function checkDomainReachable(domain) {
     try {
         const res = await fetch(`/api/check-domain/${domain}`);
