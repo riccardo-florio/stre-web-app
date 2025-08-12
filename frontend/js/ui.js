@@ -5,10 +5,22 @@ function toggleMobileMenu() {
 
 function showLoginModal() {
     const modal = document.getElementById('login-modal');
+    const form = document.getElementById('login-form');
+    const logoutContainer = document.getElementById('logout-container');
+    const username = localStorage.getItem('username');
+    if (username) {
+        if (form) form.classList.add('hidden');
+        if (logoutContainer) logoutContainer.classList.remove('hidden');
+    } else {
+        if (logoutContainer) logoutContainer.classList.add('hidden');
+        if (form) {
+            form.classList.remove('hidden');
+            const usernameInput = form.querySelector('input[name="username"]');
+            if (usernameInput) usernameInput.focus();
+        }
+    }
     modal.classList.remove('opacity-0');
     modal.classList.remove('pointer-events-none');
-    const usernameInput = modal.querySelector('input[name="username"]');
-    if (usernameInput) usernameInput.focus();
 }
 
 function hideLoginModal() {
@@ -21,6 +33,10 @@ function hideLoginModal() {
     if (usernameInput) usernameInput.value = '';
     if (passwordInput) passwordInput.value = '';
     if (errorEl) errorEl.textContent = '';
+    const form = document.getElementById('login-form');
+    const logoutContainer = document.getElementById('logout-container');
+    if (form) form.classList.remove('hidden');
+    if (logoutContainer) logoutContainer.classList.add('hidden');
 }
 
 document.addEventListener('keydown', (event) => {
@@ -433,6 +449,12 @@ async function signIn() {
         errorEl.classList.add('text-red-600');
         errorEl.textContent = err.message;
     }
+}
+
+function logOut() {
+    localStorage.removeItem('username');
+    updateMainTitle();
+    hideLoginModal();
 }
 
 function startSearchLoading() {

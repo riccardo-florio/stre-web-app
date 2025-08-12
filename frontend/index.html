@@ -204,7 +204,7 @@
         <button type="button" onclick="hideLoginModal()" class="absolute top-5 right-5 text-white">
             <span class="material-symbols-rounded text-3xl">close</span>
         </button>
-        <form onsubmit="logIn(event)" class="bg-white p-10 rounded-3xl flex flex-col gap-2">
+        <form id="login-form" onsubmit="logIn(event)" class="bg-white p-10 rounded-3xl flex flex-col gap-2">
             <h2 class="text-2xl mb-2">Login</h2>
             <span id="login-error-message" class="text-red-600"></span>
             <input type="text" name="username" id="" placeholder="Username" class="rounded-xl border-2 px-3 py-2">
@@ -212,6 +212,9 @@
             <button type="button" onclick="signIn()" class="text-blue-600">Crea un account</button>
             <input type="submit" value="Login" class="bg-blue-500 text-white font-semibold rounded-lg px-3 py-2 cursor-pointer">
         </form>
+        <div id="logout-container" class="bg-white p-10 rounded-3xl flex flex-col gap-2 hidden">
+            <button type="button" onclick="logOut()" class="bg-blue-500 text-white font-semibold rounded-lg px-3 py-2 cursor-pointer">Logout</button>
+        </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"
