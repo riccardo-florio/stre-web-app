@@ -218,19 +218,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     });
 
-    watchBtn.addEventListener('click', async () => {
-        try {
-            const links = await fetchStreamingLinks(filmId);
-            const hlsLink = links.find(l => l.includes('playlist') || l.includes('.m3u8'));
-            if (hlsLink) {
-                showPlayer(hlsLink, filmId);
-            } else {
-                alert('Nessun link disponibile');
-            }
-        } catch (err) {
-            console.error('Errore nel recupero dei link', err);
-            alert('Errore nel recupero dei link');
-        }
+    watchBtn.addEventListener('click', () => {
+        fetchStreamingLinks(filmId)
+            .then(links => {
+                const hlsLink = links.find(l => l.includes('playlist') || l.includes('.m3u8'));
+                if (hlsLink) {
+                    showPlayer(hlsLink, filmId);
+                } else {
+                    alert('Nessun link disponibile');
+                }
+            })
+            .catch(err => {
+                console.error('Errore nel recupero dei link', err);
+                alert('Errore nel recupero dei link');
+            });
     });
 
     handleNavigationFromURL();

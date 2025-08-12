@@ -68,12 +68,12 @@
             video.removeEventListener('loadedmetadata', init);
         });
 
-        video.play();
         if (modal.requestFullscreen) {
             modal.requestFullscreen();
         }
         showControls();
         updateWatchButtonLabel();
+        updatePlayButton();
     }
 
     function hidePlayer(popState = false) {
@@ -105,7 +105,12 @@
 
     function togglePlay() {
         if (video.paused) {
-            video.play();
+            const playPromise = video.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(() => {
+                    alert('Riproduzione bloccata, tocca per riprovare.');
+                });
+            }
         } else {
             video.pause();
         }
