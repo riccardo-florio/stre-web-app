@@ -228,11 +228,12 @@ async function populateContinueWatching() {
     items.forEach(item => {
         const percent = item.duration ? Math.min((item.progress / item.duration) * 100, 100) : 0;
         const card = document.createElement('div');
-        card.className = 'w-32 flex-shrink-0 cursor-pointer';
+        card.className = 'w-48 flex-shrink-0 cursor-pointer';
         card.onclick = () => resumeFromProgress(item.film_id, item.slug, item.title, item.cover);
+        console.log(item.film_id, item.slug, item.title, item.cover);
         card.innerHTML = `
             <div class="relative">
-                <img src="${item.cover || ''}" class="w-32 h-48 object-cover rounded-lg"/>
+                <img src="${item.cover || ''}" class="w-48 h-32 object-cover rounded-lg"/>
                 <div class="absolute bottom-0 left-0 h-1 bg-blue-500" style="width:${percent}%"></div>
             </div>
             <span class="block mt-2 text-sm line-clamp-2 text-pretty">${item.title || ''}</span>
