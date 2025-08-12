@@ -392,6 +392,8 @@ async function logIn(event) {
     const password = passwordInput.value.trim();
     const errorEl = document.getElementById('login-error-message');
     errorEl.textContent = '';
+    errorEl.classList.remove('text-green-600');
+    errorEl.classList.add('text-red-600');
     if (!username || !password) {
         errorEl.textContent = 'Username e password sono obbligatori';
         return;
@@ -407,13 +409,14 @@ async function logIn(event) {
 }
 
 async function signIn() {
-    event.preventDefault();
     const usernameInput = document.querySelector('#login-modal input[type="text"]');
     const passwordInput = document.querySelector('#login-modal input[type="password"]');
     const username = usernameInput.value.trim();
     const password = passwordInput.value.trim();
     const errorEl = document.getElementById('login-error-message');
     errorEl.textContent = '';
+    errorEl.classList.remove('text-green-600');
+    errorEl.classList.add('text-red-600');
     if (!username || !password) {
         errorEl.textContent = 'Username e password sono obbligatori';
         return;
@@ -422,7 +425,12 @@ async function signIn() {
         await fetchSignIn(username, password);
         usernameInput.value = '';
         passwordInput.value = '';
+        errorEl.classList.remove('text-red-600');
+        errorEl.classList.add('text-green-600');
+        errorEl.textContent = 'Account creato con successo';
     } catch (err) {
+        errorEl.classList.remove('text-green-600');
+        errorEl.classList.add('text-red-600');
         errorEl.textContent = err.message;
     }
 }
