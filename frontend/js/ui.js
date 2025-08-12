@@ -354,8 +354,25 @@ function logIn() {
 
 }
 
-function signIn() {
-    
+async function signIn() {
+    event.preventDefault();
+    const usernameInput = document.querySelector('#login-modal input[type="text"]');
+    const passwordInput = document.querySelector('#login-modal input[type="password"]');
+    const username = usernameInput.value.trim();
+    const password = passwordInput.value.trim();
+    const errorEl = document.getElementById('login-error-message');
+    errorEl.textContent = '';
+    if (!username || !password) {
+        errorEl.textContent = 'Username e password sono obbligatori';
+        return;
+    }
+    try {
+        await fetchSignIn(username, password);
+        usernameInput.value = '';
+        passwordInput.value = '';
+    } catch (err) {
+        errorEl.textContent = err.message;
+    }
 }
 
 function startSearchLoading() {
