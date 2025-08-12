@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 from uuid import uuid4
 from models import db, User, VideoProgress
+from sqlalchemy import text
 from utils.app_functions import (
     refresh_stre_domain,
     search,
@@ -45,8 +46,31 @@ app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///users.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db.init_app(app)
 
+def ensure_video_progress_columns():
+    info = db.session.execute(text("PRAGMA table_info(video_progress)"))
+    columns = [row[1] for row in info]
+    if "duration" not in columns:
+        db.session.execute(
+            text("ALTER TABLE video_progress ADD COLUMN duration REAL DEFAULT 0")
+        )
+    if "slug" not in columns:
+        db.session.execute(
+            text("ALTER TABLE video_progress ADD COLUMN slug VARCHAR(255)")
+        )
+    if "title" not in columns:
+        db.session.execute(
+            text("ALTER TABLE video_progress ADD COLUMN title VARCHAR(255)")
+        )
+    if "cover" not in columns:
+        db.session.execute(
+            text("ALTER TABLE video_progress ADD COLUMN cover VARCHAR(255)")
+        )
+    db.session.commit()
+
+
 with app.app_context():
     db.create_all()
+    ensure_video_progress_columns()
 
 socketio = SocketIO(app)
 
@@ -151,19 +175,73 @@ def video_progress(user_id, film_id):
 
     entry = VideoProgress.query.filter_by(user_id=user_id, film_id=film_id).first()
     if request.method == "GET":
-        return jsonify({"progress": entry.progress if entry else 0})
+        if not entry:
+            return jsonify({"progress": 0})
+        return jsonify(
+            {
+                "progress": entry.progress,
+                "duration": entry.duration,
+                "slug": entry.slug,
+                "title": entry.title,
+                "cover": entry.cover,
+            }
+        )
 
     data = request.get_json() or {}
     progress = data.get("progress")
     if progress is None:
         return jsonify({"error": "progress required"}), 400
+    slug = data.get("slug")
+    title = data.get("title")
+    cover = data.get("cover")
+    duration = data.get("duration", 0)
     if not entry:
-        entry = VideoProgress(user_id=user_id, film_id=film_id, progress=progress)
+        entry = VideoProgress(
+            user_id=user_id,
+            film_id=film_id,
+            progress=progress,
+            duration=duration,
+            slug=slug,
+            title=title,
+            cover=cover,
+        )
         db.session.add(entry)
     else:
         entry.progress = progress
+        if slug is not None:
+            entry.slug = slug
+        if title is not None:
+            entry.title = title
+        if cover is not None:
+            entry.cover = cover
+        if duration is not None:
+            entry.duration = duration
     db.session.commit()
     return jsonify({"progress": entry.progress})
+
+
+@app.route("/api/progress/<int:user_id>", methods=["GET"])
+def user_progress(user_id):
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({"error": "user not found"}), 404
+    entries = VideoProgress.query.filter_by(user_id=user_id).all()
+    return jsonify(
+        {
+            "progress": [
+                {
+                    "film_id": e.film_id,
+                    "progress": e.progress,
+                    "duration": e.duration,
+                    "slug": e.slug,
+                    "title": e.title,
+                    "cover": e.cover,
+                }
+                for e in entries
+                if e.progress > 0
+            ]
+        }
+    )
 
 @socketio.on("start_download")
 def handle_start_download(data):

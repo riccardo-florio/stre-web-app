@@ -25,5 +25,9 @@ class VideoProgress(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     film_id = db.Column(db.String(100), nullable=False)
     progress = db.Column(db.Float, default=0.0, nullable=False)
+    duration = db.Column(db.Float, default=0.0, nullable=False)
+    slug = db.Column(db.String(255), nullable=True)
+    title = db.Column(db.String(255), nullable=True)
+    cover = db.Column(db.String(255), nullable=True)
 
     __table_args__ = (db.UniqueConstraint('user_id', 'film_id', name='uniq_user_film'),)
