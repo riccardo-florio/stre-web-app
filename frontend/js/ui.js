@@ -3,32 +3,24 @@ function toggleMobileMenu() {
     document.getElementById('download-tab').classList.toggle('pointer-events-none');
 }
 
-function showLoginModal() {
-    const modal = document.getElementById('login-modal');
-    const form = document.getElementById('login-form');
-    const logoutContainer = document.getElementById('logout-container');
-    const closeBtn = modal.querySelector('button[onclick="hideLoginModal()"]');
+function handleAccountModal() {
     const username = localStorage.getItem('username');
     if (username) {
-        if (form) form.classList.add('hidden');
-        if (logoutContainer) logoutContainer.classList.remove('hidden');
-        if (closeBtn) closeBtn.classList.remove('hidden');
+        showLogoutModal();
     } else {
-        if (logoutContainer) logoutContainer.classList.add('hidden');
-        if (form) {
-            form.classList.remove('hidden');
-            const usernameInput = form.querySelector('input[name="username"]');
-            if (usernameInput) usernameInput.focus();
-        }
-        if (closeBtn) closeBtn.classList.add('hidden');
+        showLoginModal();
     }
+}
+
+function showLoginModal() {
+    const modal = document.getElementById('login-modal');
     modal.classList.remove('opacity-0');
     modal.classList.remove('pointer-events-none');
+    const usernameInput = modal.querySelector('input[name="username"]');
+    if (usernameInput) usernameInput.focus();
 }
 
 function hideLoginModal() {
-    const username = localStorage.getItem('username');
-    if (!username) return;
     const modal = document.getElementById('login-modal');
     modal.classList.add('opacity-0');
     modal.classList.add('pointer-events-none');
@@ -38,18 +30,75 @@ function hideLoginModal() {
     if (usernameInput) usernameInput.value = '';
     if (passwordInput) passwordInput.value = '';
     if (errorEl) errorEl.textContent = '';
-    const form = document.getElementById('login-form');
-    const logoutContainer = document.getElementById('logout-container');
-    if (form) form.classList.remove('hidden');
-    if (logoutContainer) logoutContainer.classList.add('hidden');
+}
+
+function showRegisterModal() {
+    hideLoginModal();
+    const modal = document.getElementById('register-modal');
+    modal.classList.remove('opacity-0');
+    modal.classList.remove('pointer-events-none');
+    const nameInput = modal.querySelector('input[name="nome"]');
+    if (nameInput) nameInput.focus();
+}
+
+function hideRegisterModal() {
+    const modal = document.getElementById('register-modal');
+    modal.classList.add('opacity-0');
+    modal.classList.add('pointer-events-none');
+    modal.querySelectorAll('input').forEach(input => {
+        if (input.type !== 'submit') input.value = '';
+    });
+    const errorEl = document.getElementById('register-error-message');
+    if (errorEl) errorEl.textContent = '';
+}
+
+function showLogoutModal() {
+    const modal = document.getElementById('logout-modal');
+    modal.classList.remove('opacity-0');
+    modal.classList.remove('pointer-events-none');
+}
+
+function hideLogoutModal() {
+    const modal = document.getElementById('logout-modal');
+    modal.classList.add('opacity-0');
+    modal.classList.add('pointer-events-none');
+}
+
+async function register(event) {
+    event.preventDefault();
+    const form = document.getElementById('registration-form');
+    const nome = form.querySelector('input[name="nome"]').value.trim();
+    const cognome = form.querySelector('input[name="cognome"]').value.trim();
+    const username = form.querySelector('input[name="username"]').value.trim();
+    const email = form.querySelector('input[name="email"]').value.trim();
+    const password = form.querySelector('input[name="password"]').value.trim();
+    const errorEl = document.getElementById('register-error-message');
+    if (errorEl) {
+        errorEl.textContent = '';
+        errorEl.classList.remove('text-green-600');
+        errorEl.classList.add('text-red-600');
+    }
+    if (!nome || !cognome || !username || !email || !password) {
+        if (errorEl) errorEl.textContent = 'Tutti i campi sono obbligatori';
+        return;
+    }
+    try {
+        const data = await fetchSignIn(nome, cognome, username, email, password);
+        localStorage.setItem('username', data.username);
+        localStorage.setItem('userId', data.id);
+        updateMainTitle(data.username);
+        hideRegisterModal();
+        populateContinueWatching();
+    } catch (err) {
+        if (errorEl) errorEl.textContent = err.message;
+    }
 }
 
 document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') {
-        const modal = document.getElementById('login-modal');
-        if (modal && !modal.classList.contains('pointer-events-none')) {
-            hideLoginModal();
-        }
+        hideLoginModal();
+        hideRegisterModal();
+        hideLogoutModal();
     }
 });
 
@@ -483,38 +532,14 @@ async function logIn(event) {
     }
 }
 
-async function signIn() {
-    const usernameInput = document.querySelector('#login-modal input[type="text"]');
-    const passwordInput = document.querySelector('#login-modal input[type="password"]');
-    const username = usernameInput.value.trim();
-    const password = passwordInput.value.trim();
-    const errorEl = document.getElementById('login-error-message');
-    errorEl.textContent = '';
-    errorEl.classList.remove('text-green-600');
-    errorEl.classList.add('text-red-600');
-    if (!username || !password) {
-        errorEl.textContent = 'Username e password sono obbligatori';
-        return;
-    }
+async function logOut() {
     try {
-        await fetchSignIn(username, password);
-        usernameInput.value = '';
-        passwordInput.value = '';
-        errorEl.classList.remove('text-red-600');
-        errorEl.classList.add('text-green-600');
-        errorEl.textContent = 'Account creato con successo';
-    } catch (err) {
-        errorEl.classList.remove('text-green-600');
-        errorEl.classList.add('text-red-600');
-        errorEl.textContent = err.message;
-    }
-}
-
-function logOut() {
+        await fetch('/api/logout', { method: 'POST' });
+    } catch (_) {}
     localStorage.removeItem('username');
     localStorage.removeItem('userId');
     updateMainTitle();
-    showLoginModal();
+    hideLogoutModal();
     populateContinueWatching();
 }
 

@@ -37,11 +37,11 @@ async function fetchStreamingLinks(id, episodeId = null) {
     return data;
 }
 
-async function fetchSignIn(username, password) {
+async function fetchSignIn(nome, cognome, username, email, password) {
     const res = await fetch('/api/users', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
+        body: JSON.stringify({ nome, cognome, username, email, password })
     });
     const data = await res.json();
     if (!res.ok) {

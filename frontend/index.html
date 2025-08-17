@@ -135,7 +135,7 @@
                 close
             </span>
         </button>
-        <button onclick="showLoginModal()" class="absolute right-20 lg:right-10 top-9">
+        <button onclick="handleAccountModal()" class="absolute right-20 lg:right-10 top-9">
             <span class="material-symbols-rounded text-3xl text-blue-600">
                 person
             </span>
@@ -211,13 +211,41 @@
         <form id="login-form" onsubmit="logIn(event)" class="bg-white p-10 rounded-3xl flex flex-col gap-2">
             <h2 class="text-2xl mb-2">Login</h2>
             <span id="login-error-message" class="text-red-600"></span>
-            <input type="text" name="username" id="" placeholder="Username" class="rounded-xl border-2 px-3 py-2">
-            <input type="password" name="password" id="" placeholder="Password" class="rounded-xl border-2 px-3 py-2">
-            <button type="button" onclick="signIn()" class="text-blue-600">Crea un account</button>
+            <input type="text" name="username" placeholder="Username" class="rounded-xl border-2 px-3 py-2">
+            <input type="password" name="password" placeholder="Password" class="rounded-xl border-2 px-3 py-2">
+            <button type="button" onclick="showRegisterModal()" class="text-blue-600">Crea un account</button>
             <input type="submit" value="Login" class="bg-blue-500 text-white font-semibold rounded-lg px-3 py-2 cursor-pointer">
         </form>
-        <div id="logout-container" class="bg-white p-10 rounded-3xl flex flex-col gap-2 hidden">
-            <button type="button" onclick="logOut()" class="bg-blue-500 text-white font-semibold rounded-lg px-3 py-2 cursor-pointer">Logout</button>
+    </div>
+
+    <!-- Registration Modal -->
+    <div id="register-modal"
+        class="bg-black/50 absolute top-0 left-0 size-full opacity-0 pointer-events-none transition-opacity flex items-center justify-center">
+        <button type="button" onclick="hideRegisterModal()" class="absolute top-5 right-5 text-white">
+            <span class="material-symbols-rounded text-3xl">close</span>
+        </button>
+          <form id="registration-form" onsubmit="register(event)" class="bg-white p-10 rounded-3xl flex flex-col gap-2">
+              <h2 class="text-2xl mb-2">Registrazione</h2>
+              <span id="register-error-message" class="text-red-600"></span>
+              <input type="text" name="nome" placeholder="Nome" class="rounded-xl border-2 px-3 py-2">
+              <input type="text" name="cognome" placeholder="Cognome" class="rounded-xl border-2 px-3 py-2">
+              <input type="text" name="username" placeholder="Username" class="rounded-xl border-2 px-3 py-2">
+              <input type="email" name="email" placeholder="Email" class="rounded-xl border-2 px-3 py-2">
+              <input type="password" name="password" placeholder="Password" class="rounded-xl border-2 px-3 py-2">
+              <button type="button" onclick="hideRegisterModal(); showLoginModal();" class="text-blue-600">Hai già un account? Accedi</button>
+              <input type="submit" value="Registrati" class="bg-blue-500 text-white font-semibold rounded-lg px-3 py-2 cursor-pointer">
+          </form>
+      </div>
+
+    <!-- Logout Modal -->
+    <div id="logout-modal"
+        class="bg-black/50 absolute top-0 left-0 size-full opacity-0 pointer-events-none transition-opacity flex items-center justify-center">
+        <div class="bg-white p-10 rounded-3xl flex flex-col gap-4 items-center">
+            <span class="text-xl">Vuoi uscire?</span>
+            <div class="flex gap-4">
+                <button type="button" onclick="hideLogoutModal()" class="px-3 py-2 rounded-lg border">Annulla</button>
+                <button type="button" onclick="logOut()" class="bg-blue-500 text-white font-semibold rounded-lg px-3 py-2">Logout</button>
+            </div>
         </div>
     </div>
 
