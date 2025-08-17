@@ -45,7 +45,9 @@ function hideRegisterModal() {
     const modal = document.getElementById('register-modal');
     modal.classList.add('opacity-0');
     modal.classList.add('pointer-events-none');
-    modal.querySelectorAll('input').forEach(input => input.value = '');
+    modal.querySelectorAll('input').forEach(input => {
+        if (input.type !== 'submit') input.value = '';
+    });
 }
 
 function showLogoutModal() {
