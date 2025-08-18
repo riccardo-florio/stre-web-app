@@ -62,11 +62,17 @@ function showUserModal() {
     document.getElementById('detail-email').textContent = `Email: ${localStorage.getItem('email') || '-'}`;
     const role = localStorage.getItem('role');
     const roleEl = document.getElementById('detail-role');
+    const adminBtn = document.getElementById('admin-dashboard-btn');
     if (role && role !== 'normal') {
         roleEl.textContent = `Ruolo: ${role}`;
         roleEl.classList.remove('hidden');
     } else {
         roleEl.classList.add('hidden');
+    }
+    if (role === 'admin') {
+        adminBtn.classList.remove('hidden');
+    } else {
+        adminBtn.classList.add('hidden');
     }
 }
 
@@ -74,6 +80,72 @@ function hideUserModal() {
     const modal = document.getElementById('user-modal');
     modal.classList.add('opacity-0');
     modal.classList.add('pointer-events-none');
+}
+
+function showAdminModal() {
+    const modal = document.getElementById('admin-modal');
+    modal.classList.remove('opacity-0');
+    modal.classList.remove('pointer-events-none');
+    populateUserTable();
+}
+
+function hideAdminModal() {
+    const modal = document.getElementById('admin-modal');
+    modal.classList.add('opacity-0');
+    modal.classList.add('pointer-events-none');
+}
+
+async function populateUserTable() {
+    const container = document.getElementById('admin-users');
+    container.innerHTML = '';
+    try {
+        const users = await fetchUsers();
+        users.forEach(u => {
+            const row = document.createElement('div');
+            row.className = 'grid grid-cols-6 gap-2 items-center mb-2';
+            row.innerHTML = `
+                <span>${u.username}</span>
+                <input id="fn-${u.id}" value="${u.first_name}" class="border px-1 py-0.5 rounded" />
+                <input id="ln-${u.id}" value="${u.last_name}" class="border px-1 py-0.5 rounded" />
+                <input id="em-${u.id}" value="${u.email}" class="border px-1 py-0.5 rounded" />
+                <select id="rl-${u.id}" class="border px-1 py-0.5 rounded">
+                    <option value="normal" ${u.role === 'normal' ? 'selected' : ''}>normal</option>
+                    <option value="privileged" ${u.role === 'privileged' ? 'selected' : ''}>privileged</option>
+                    <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>admin</option>
+                </select>
+                <div class="flex gap-1">
+                    <button onclick="updateUserHandler(${u.id})" class="bg-blue-500 text-white px-2 rounded">Salva</button>
+                    <button onclick="deleteUserHandler(${u.id})" class="bg-red-500 text-white px-2 rounded">Elimina</button>
+                </div>
+            `;
+            container.appendChild(row);
+        });
+    } catch (err) {
+        container.innerHTML = `<span class='text-red-600'>${err.message}</span>`;
+    }
+}
+
+async function updateUserHandler(id) {
+    const first_name = document.getElementById(`fn-${id}`).value.trim();
+    const last_name = document.getElementById(`ln-${id}`).value.trim();
+    const email = document.getElementById(`em-${id}`).value.trim();
+    const role = document.getElementById(`rl-${id}`).value;
+    try {
+        await updateUser(id, first_name, last_name, email, role);
+        await populateUserTable();
+    } catch (err) {
+        alert(err.message);
+    }
+}
+
+async function deleteUserHandler(id) {
+    if (!confirm('Sei sicuro di voler eliminare questo utente?')) return;
+    try {
+        await deleteUser(id);
+        await populateUserTable();
+    } catch (err) {
+        alert(err.message);
+    }
 }
 
 async function register(event) {
@@ -116,6 +188,7 @@ document.addEventListener('keydown', (event) => {
         hideLoginModal();
         hideRegisterModal();
         hideUserModal();
+        hideAdminModal();
     }
 });
 
