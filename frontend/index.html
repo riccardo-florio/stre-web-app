@@ -40,8 +40,8 @@
     <div
         class="relative max-w-screen-xl flex-1 lg:h-full w-full bg-white lg:rounded-[4rem] p-4 lg:p-10 lg:shadow lg:border border-gray-200 overflow-hidden">
 
-        <button id="main-account-btn" onclick="handleAccountModal()" class="absolute right-20 lg:right-10 top-9 hidden">
-            <span class="material-symbols-rounded text-3xl text-blue-600">
+        <button id="main-account-btn" onclick="handleAccountModal()" class="absolute right-10 top-9 hidden z-10">
+            <span class="material-symbols-rounded text-3xl text-blue-600 hidden lg:block">
                 person
             </span>
         </button>
@@ -158,7 +158,7 @@
     </div>
 
     <!-- Player Modal -->
-    <div id="player-modal" class="fixed inset-0 bg-black hidden z-50">
+    <div id="player-modal" class="fixed inset-0 bg-black hidden z-20">
         <div id="player-loading" class="absolute inset-0 flex items-center justify-center hidden">
             <svg width="20" height="20" stroke="#ffff" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <style>
@@ -215,7 +215,7 @@
 
     <!-- Login Modal -->
     <div id="login-modal"
-        class="bg-black/50 absolute top-0 left-0 size-full opacity-0 pointer-events-none transition-opacity flex items-center justify-center">
+        class="bg-black/50 absolute top-0 left-0 size-full opacity-0 pointer-events-none transition-opacity flex items-center justify-center z-20">
         <button type="button" onclick="hideLoginModal()" class="absolute top-5 right-5 text-white">
             <span class="material-symbols-rounded text-3xl">close</span>
         </button>
@@ -231,7 +231,7 @@
 
     <!-- Registration Modal -->
     <div id="register-modal"
-        class="bg-black/50 absolute top-0 left-0 size-full opacity-0 pointer-events-none transition-opacity flex items-center justify-center">
+        class="bg-black/50 absolute top-0 left-0 size-full opacity-0 pointer-events-none transition-opacity flex items-center justify-center z-20">
         <button type="button" onclick="hideRegisterModal()" class="absolute top-5 right-5 text-white">
             <span class="material-symbols-rounded text-3xl">close</span>
         </button>
@@ -250,7 +250,7 @@
 
     <!-- User Details Modal -->
     <div id="user-modal"
-        class="bg-black/50 absolute top-0 left-0 size-full opacity-0 pointer-events-none transition-opacity flex items-center justify-center">
+        class="bg-black/50 absolute top-0 left-0 size-full opacity-0 pointer-events-none transition-opacity flex items-center justify-center z-20">
         <button type="button" onclick="hideUserModal()" class="absolute top-5 right-5 text-white">
             <span class="material-symbols-rounded text-3xl">close</span>
         </button>
