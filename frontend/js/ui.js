@@ -6,7 +6,7 @@ function toggleMobileMenu() {
 function handleAccountModal() {
     const username = localStorage.getItem('username');
     if (username) {
-        showLogoutModal();
+        showUserModal();
     } else {
         showLoginModal();
     }
@@ -52,14 +52,18 @@ function hideRegisterModal() {
     if (errorEl) errorEl.textContent = '';
 }
 
-function showLogoutModal() {
-    const modal = document.getElementById('logout-modal');
+function showUserModal() {
+    const modal = document.getElementById('user-modal');
     modal.classList.remove('opacity-0');
     modal.classList.remove('pointer-events-none');
+    document.getElementById('detail-nome').textContent = `Nome: ${localStorage.getItem('first_name') || '-'}`;
+    document.getElementById('detail-cognome').textContent = `Cognome: ${localStorage.getItem('last_name') || '-'}`;
+    document.getElementById('detail-username').textContent = `Username: ${localStorage.getItem('username') || '-'}`;
+    document.getElementById('detail-email').textContent = `Email: ${localStorage.getItem('email') || '-'}`;
 }
 
-function hideLogoutModal() {
-    const modal = document.getElementById('logout-modal');
+function hideUserModal() {
+    const modal = document.getElementById('user-modal');
     modal.classList.add('opacity-0');
     modal.classList.add('pointer-events-none');
 }
@@ -87,6 +91,8 @@ async function register(event) {
         localStorage.setItem('username', data.username);
         localStorage.setItem('userId', data.id);
         localStorage.setItem('first_name', data.first_name || nome);
+        localStorage.setItem('last_name', data.last_name || cognome);
+        localStorage.setItem('email', data.email || email);
         updateMainTitle(data.first_name || nome);
         hideRegisterModal();
         populateContinueWatching();
@@ -99,7 +105,7 @@ document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') {
         hideLoginModal();
         hideRegisterModal();
-        hideLogoutModal();
+        hideUserModal();
     }
 });
 
@@ -527,6 +533,8 @@ async function logIn(event) {
         localStorage.setItem('username', data.username);
         localStorage.setItem('userId', data.id);
         localStorage.setItem('first_name', data.first_name);
+        if (data.last_name) localStorage.setItem('last_name', data.last_name);
+        if (data.email) localStorage.setItem('email', data.email);
         updateMainTitle(data.first_name);
         hideLoginModal();
         populateContinueWatching();
@@ -542,8 +550,10 @@ async function logOut() {
     localStorage.removeItem('username');
     localStorage.removeItem('userId');
     localStorage.removeItem('first_name');
+    localStorage.removeItem('last_name');
+    localStorage.removeItem('email');
     updateMainTitle();
-    hideLogoutModal();
+    hideUserModal();
     populateContinueWatching();
 }
 

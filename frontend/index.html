@@ -237,15 +237,21 @@
           </form>
       </div>
 
-    <!-- Logout Modal -->
-    <div id="logout-modal"
+    <!-- User Details Modal -->
+    <div id="user-modal"
         class="bg-black/50 absolute top-0 left-0 size-full opacity-0 pointer-events-none transition-opacity flex items-center justify-center">
-        <div class="bg-white p-10 rounded-3xl flex flex-col gap-4 items-center">
-            <span class="text-xl">Vuoi uscire?</span>
-            <div class="flex gap-4">
-                <button type="button" onclick="hideLogoutModal()" class="px-3 py-2 rounded-lg border">Annulla</button>
-                <button type="button" onclick="logOut()" class="bg-blue-500 text-white font-semibold rounded-lg px-3 py-2">Logout</button>
+        <button type="button" onclick="hideUserModal()" class="absolute top-5 right-5 text-white">
+            <span class="material-symbols-rounded text-3xl">close</span>
+        </button>
+        <div class="bg-white p-10 rounded-3xl flex flex-col gap-4">
+            <h2 class="text-2xl mb-2">Il tuo account</h2>
+            <div class="flex flex-col gap-1">
+                <span id="detail-nome"></span>
+                <span id="detail-cognome"></span>
+                <span id="detail-username"></span>
+                <span id="detail-email"></span>
             </div>
+            <button type="button" onclick="logOut()" class="bg-blue-500 text-white font-semibold rounded-lg px-3 py-2">Logout</button>
         </div>
     </div>
 
