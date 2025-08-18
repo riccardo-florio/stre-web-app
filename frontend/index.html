@@ -276,7 +276,10 @@
             <span class="material-symbols-rounded text-3xl">close</span>
         </button>
         <div class="bg-white p-10 rounded-3xl w-full max-w-3xl">
-            <h2 class="text-2xl mb-4">Gestione Utenti</h2>
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-2xl">Gestione Utenti</h2>
+                <button type="button" onclick="populateUserTable()" class="bg-gray-500 text-white px-3 py-1 rounded">Ricarica</button>
+            </div>
             <div id="admin-users" class="overflow-y-auto max-h-[60vh]"></div>
         </div>
     </div>
