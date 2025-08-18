@@ -63,15 +63,12 @@ function showUserModal() {
     const role = localStorage.getItem('role');
     const roleEl = document.getElementById('detail-role');
     const adminBtn = document.getElementById('admin-dashboard-btn');
-    if (role && role !== 'normal') {
+    if (role === 'admin') {
         roleEl.textContent = `Ruolo: ${role}`;
         roleEl.classList.remove('hidden');
-    } else {
-        roleEl.classList.add('hidden');
-    }
-    if (role === 'admin') {
         adminBtn.classList.remove('hidden');
     } else {
+        roleEl.classList.add('hidden');
         adminBtn.classList.add('hidden');
     }
 }
@@ -208,7 +205,7 @@ function updateMainTitle(firstName) {
     const title = document.getElementById('main-title');
     if (!title) return;
     const role = localStorage.getItem('role');
-    const action = role === 'normal' ? 'guardare' : 'scaricare';
+    const action = role === 'admin' ? 'scaricare' : 'guardare';
     if (firstName) {
         const formatted = firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase();
         title.textContent = `Ciao ${formatted}, cosa vuoi ${action}?`;
@@ -223,18 +220,18 @@ function updateRoleUI(role = localStorage.getItem('role')) {
     const mainAccountBtn = document.getElementById('main-account-btn');
     const mobileAccountBtn = document.getElementById('mobile-account-btn');
     const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-    if (role === 'normal') {
-        if (downloadBtn) downloadBtn.classList.add('hidden');
-        if (downloadTab) downloadTab.classList.add('hidden');
-        if (mainAccountBtn) mainAccountBtn.classList.remove('hidden');
-        if (mobileAccountBtn) mobileAccountBtn.classList.remove('hidden');
-        if (mobileMenuBtn) mobileMenuBtn.classList.add('hidden');
-    } else {
+    if (role === 'admin') {
         if (downloadBtn) downloadBtn.classList.remove('hidden');
         if (downloadTab) downloadTab.classList.remove('hidden');
         if (mainAccountBtn) mainAccountBtn.classList.add('hidden');
         if (mobileAccountBtn) mobileAccountBtn.classList.add('hidden');
         if (mobileMenuBtn) mobileMenuBtn.classList.remove('hidden');
+    } else {
+        if (downloadBtn) downloadBtn.classList.add('hidden');
+        if (downloadTab) downloadTab.classList.add('hidden');
+        if (mainAccountBtn) mainAccountBtn.classList.remove('hidden');
+        if (mobileAccountBtn) mobileAccountBtn.classList.remove('hidden');
+        if (mobileMenuBtn) mobileMenuBtn.classList.add('hidden');
     }
 }
 
@@ -438,7 +435,7 @@ async function populateDownloadSection(slug, title) {
 
     const downloadBtn = document.getElementById('download-btn');
     const watchBtn = document.getElementById('watch-btn');
-    const isNormal = localStorage.getItem('role') === 'normal';
+    const isNormal = localStorage.getItem('role') !== 'admin';
 
     if (data.type == "tv") {
         const wrapper = document.getElementById('choose-episodes');

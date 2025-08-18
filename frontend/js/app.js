@@ -206,7 +206,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
     } else {
-        showLoginModal();
+        localStorage.removeItem('role');
+        updateMainTitle();
     }
     updateRoleUI(localStorage.getItem('role'));
     populateContinueWatching();
