@@ -13,6 +13,7 @@ class User(db.Model):
     first_name = db.Column(db.String(120), nullable=False)
     last_name = db.Column(db.String(120), nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
+    role = db.Column(db.String(20), nullable=False, default="normal")
 
     def set_password(self, password: str) -> None:
         """Hash and store the provided password."""
