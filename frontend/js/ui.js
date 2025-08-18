@@ -60,6 +60,14 @@ function showUserModal() {
     document.getElementById('detail-cognome').textContent = `Cognome: ${localStorage.getItem('last_name') || '-'}`;
     document.getElementById('detail-username').textContent = `Username: ${localStorage.getItem('username') || '-'}`;
     document.getElementById('detail-email').textContent = `Email: ${localStorage.getItem('email') || '-'}`;
+    const role = localStorage.getItem('role');
+    const roleEl = document.getElementById('detail-role');
+    if (role && role !== 'normal') {
+        roleEl.textContent = `Ruolo: ${role}`;
+        roleEl.classList.remove('hidden');
+    } else {
+        roleEl.classList.add('hidden');
+    }
 }
 
 function hideUserModal() {
@@ -93,6 +101,7 @@ async function register(event) {
         localStorage.setItem('first_name', data.first_name);
         localStorage.setItem('last_name', data.last_name);
         localStorage.setItem('email', data.email);
+        localStorage.setItem('role', data.role);
         updateMainTitle(data.first_name);
         hideRegisterModal();
         populateContinueWatching();
@@ -535,6 +544,7 @@ async function logIn(event) {
         localStorage.setItem('first_name', data.first_name);
         localStorage.setItem('last_name', data.last_name);
         localStorage.setItem('email', data.email);
+        localStorage.setItem('role', data.role);
         updateMainTitle(data.first_name);
         hideLoginModal();
         populateContinueWatching();
@@ -552,6 +562,7 @@ async function logOut() {
     localStorage.removeItem('first_name');
     localStorage.removeItem('last_name');
     localStorage.removeItem('email');
+    localStorage.removeItem('role');
     updateMainTitle();
     hideUserModal();
     populateContinueWatching();
