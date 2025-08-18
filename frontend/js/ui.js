@@ -90,10 +90,10 @@ async function register(event) {
         const data = await fetchSignIn(nome, cognome, username, email, password);
         localStorage.setItem('username', data.username);
         localStorage.setItem('userId', data.id);
-        localStorage.setItem('first_name', data.first_name || nome);
-        localStorage.setItem('last_name', data.last_name || cognome);
-        localStorage.setItem('email', data.email || email);
-        updateMainTitle(data.first_name || nome);
+        localStorage.setItem('first_name', data.first_name);
+        localStorage.setItem('last_name', data.last_name);
+        localStorage.setItem('email', data.email);
+        updateMainTitle(data.first_name);
         hideRegisterModal();
         populateContinueWatching();
     } catch (err) {
@@ -533,8 +533,8 @@ async function logIn(event) {
         localStorage.setItem('username', data.username);
         localStorage.setItem('userId', data.id);
         localStorage.setItem('first_name', data.first_name);
-        if (data.last_name) localStorage.setItem('last_name', data.last_name);
-        if (data.email) localStorage.setItem('email', data.email);
+        localStorage.setItem('last_name', data.last_name);
+        localStorage.setItem('email', data.email);
         updateMainTitle(data.first_name);
         hideLoginModal();
         populateContinueWatching();

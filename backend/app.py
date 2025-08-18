@@ -187,6 +187,8 @@ def create_user():
         "id": user.id,
         "username": user.username,
         "first_name": user.first_name,
+        "last_name": user.last_name,
+        "email": user.email,
         "role": user.role,
     }), 201
 
@@ -205,6 +207,8 @@ def login_user():
         "id": user.id,
         "username": user.username,
         "first_name": user.first_name,
+        "last_name": user.last_name,
+        "email": user.email,
         "role": user.role,
     })
 
