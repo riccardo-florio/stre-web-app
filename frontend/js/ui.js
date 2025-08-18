@@ -135,12 +135,21 @@ function updateMainTitle(firstName) {
 function updateRoleUI(role = localStorage.getItem('role')) {
     const downloadBtn = document.getElementById('download-btn');
     const downloadTab = document.getElementById('download-tab');
+    const mainAccountBtn = document.getElementById('main-account-btn');
+    const mobileAccountBtn = document.getElementById('mobile-account-btn');
+    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
     if (role === 'normal') {
         if (downloadBtn) downloadBtn.classList.add('hidden');
         if (downloadTab) downloadTab.classList.add('hidden');
+        if (mainAccountBtn) mainAccountBtn.classList.remove('hidden');
+        if (mobileAccountBtn) mobileAccountBtn.classList.remove('hidden');
+        if (mobileMenuBtn) mobileMenuBtn.classList.add('hidden');
     } else {
         if (downloadBtn) downloadBtn.classList.remove('hidden');
         if (downloadTab) downloadTab.classList.remove('hidden');
+        if (mainAccountBtn) mainAccountBtn.classList.add('hidden');
+        if (mobileAccountBtn) mobileAccountBtn.classList.add('hidden');
+        if (mobileMenuBtn) mobileMenuBtn.classList.remove('hidden');
     }
 }
 

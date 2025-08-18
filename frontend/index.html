@@ -23,17 +23,28 @@
             <img src="/assets/icon.svg" alt="Stre Api Downloader" class="size-7">
             <h2 class="text-pretty text-xl">Stre Api Downloader</h2>
         </div>
-        <button onclick="toggleMobileMenu()" class="relative self-end">
+        <button id="mobile-menu-btn" onclick="toggleMobileMenu()" class="relative self-end">
             <span id="download-indicator" class="absolute top-1 bg-red-500 w-2 h-2 rounded-full hidden"></span>
             <span class="material-symbols-rounded text-2xl text-gray-700">
                 menu
+            </span>
+        </button>
+        <button id="mobile-account-btn" onclick="handleAccountModal()" class="relative self-end hidden">
+            <span class="material-symbols-rounded text-2xl text-blue-600">
+                person
             </span>
         </button>
     </div>
 
     <!-- contenitore principale -->
     <div
-        class="max-w-screen-xl flex-1 lg:h-full w-full bg-white lg:rounded-[4rem] p-4 lg:p-10 lg:shadow lg:border border-gray-200 overflow-hidden">
+        class="relative max-w-screen-xl flex-1 lg:h-full w-full bg-white lg:rounded-[4rem] p-4 lg:p-10 lg:shadow lg:border border-gray-200 overflow-hidden">
+
+        <button id="main-account-btn" onclick="handleAccountModal()" class="absolute right-20 lg:right-10 top-9 hidden">
+            <span class="material-symbols-rounded text-3xl text-blue-600">
+                person
+            </span>
+        </button>
 
         <!-- sliding container -->
         <div id="sliding-container" class="w-full h-[300%] transition-all duration-700">
