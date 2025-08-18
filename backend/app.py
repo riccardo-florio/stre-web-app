@@ -68,9 +68,22 @@ def ensure_video_progress_columns():
     db.session.commit()
 
 
+def ensure_user_columns():
+    info = db.session.execute(text("PRAGMA table_info(user)"))
+    columns = [row[1] for row in info]
+    if "email" not in columns:
+        db.session.execute(text("ALTER TABLE user ADD COLUMN email VARCHAR(120)"))
+    if "first_name" not in columns:
+        db.session.execute(text("ALTER TABLE user ADD COLUMN first_name VARCHAR(120)"))
+    if "last_name" not in columns:
+        db.session.execute(text("ALTER TABLE user ADD COLUMN last_name VARCHAR(120)"))
+    db.session.commit()
+
+
 with app.app_context():
     db.create_all()
     ensure_video_progress_columns()
+    ensure_user_columns()
 
 socketio = SocketIO(app)
 
@@ -143,15 +156,25 @@ def create_user():
     data = request.get_json() or {}
     username = data.get("username")
     password = data.get("password")
-    if not username or not password:
-        return jsonify({"error": "username and password required"}), 400
+    nome = data.get("nome")
+    cognome = data.get("cognome")
+    email = data.get("email")
+    if not all([username, password, nome, cognome, email]):
+        return jsonify({"error": "missing required fields"}), 400
     if User.query.filter_by(username=username).first():
         return jsonify({"error": "username already exists"}), 400
-    user = User(username=username)
+    if User.query.filter_by(email=email).first():
+        return jsonify({"error": "email already exists"}), 400
+    user = User(
+        username=username,
+        email=email,
+        first_name=nome,
+        last_name=cognome,
+    )
     user.set_password(password)
     db.session.add(user)
     db.session.commit()
-    return jsonify({"id": user.id, "username": user.username}), 201
+    return jsonify({"id": user.id, "username": user.username, "first_name": user.first_name}), 201
 
 
 @app.route("/api/login", methods=["POST"])
@@ -164,7 +187,12 @@ def login_user():
     user = User.query.filter_by(username=username).first()
     if not user or not user.check_password(password):
         return jsonify({"error": "invalid credentials"}), 401
-    return jsonify({"id": user.id, "username": user.username})
+    return jsonify({"id": user.id, "username": user.username, "first_name": user.first_name})
+
+
+@app.route("/api/logout", methods=["POST"])
+def logout_user():
+    return jsonify({"status": "logged out"})
 
 
 @app.route("/api/progress/<int:user_id>/<film_id>", methods=["GET", "POST"])

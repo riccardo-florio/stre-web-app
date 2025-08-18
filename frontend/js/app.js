@@ -185,8 +185,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     updateNoDownloadsMessage();
     checkVersions();
     const storedUser = localStorage.getItem('username');
-    if (storedUser) {
-        updateMainTitle(storedUser);
+    const storedName = localStorage.getItem('first_name');
+    if (storedUser && storedName) {
+        updateMainTitle(storedName);
     } else {
         showLoginModal();
     }
