@@ -187,7 +187,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     const storedUser = localStorage.getItem('username');
     const storedName = localStorage.getItem('first_name');
     const storedRole = localStorage.getItem('role');
+    const storedId = localStorage.getItem('userId');
     if (storedUser && storedName) {
+        if (storedId) {
+            try {
+                const current = await fetchUser(storedId);
+                if (!current || current.role !== storedRole) {
+                    await logOut();
+                    showLoginModal();
+                    return;
+                }
+            } catch (err) {
+                await logOut();
+                showLoginModal();
+                return;
+            }
+        }
         updateMainTitle(storedName);
     } else {
         showLoginModal();

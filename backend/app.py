@@ -218,13 +218,24 @@ def create_user():
     ), 201
 
 
-@app.route("/api/users/<int:user_id>", methods=["PUT", "DELETE"])
+@app.route("/api/users/<int:user_id>", methods=["GET", "PUT", "DELETE"])
 def manage_user(user_id):
-    if not is_admin_request():
-        return jsonify({"error": "forbidden"}), 403
     user = User.query.get(user_id)
     if not user:
         return jsonify({"error": "user not found"}), 404
+
+    if request.method == "GET":
+        return jsonify({
+            "id": user.id,
+            "username": user.username,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "email": user.email,
+            "role": user.role,
+        })
+
+    if not is_admin_request():
+        return jsonify({"error": "forbidden"}), 403
 
     if request.method == "DELETE":
         db.session.delete(user)

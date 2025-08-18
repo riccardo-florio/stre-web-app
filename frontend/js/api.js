@@ -122,6 +122,16 @@ async function deleteUser(id) {
     return data;
 }
 
+
+async function fetchUser(id) {
+    const res = await fetch(`/api/users/${id}`);
+    const data = await res.json();
+    if (!res.ok) {
+        throw new Error(data.error || 'Errore nel recupero utente');
+    }
+    return data;
+}
+
 async function checkDomainReachable(domain) {
     try {
         const res = await fetch(`/api/check-domain/${domain}`);
