@@ -185,11 +185,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     updateNoDownloadsMessage();
     checkVersions();
     const storedUser = localStorage.getItem('username');
-    if (storedUser) {
-        updateMainTitle(storedUser);
+    const storedName = localStorage.getItem('first_name');
+    const storedRole = localStorage.getItem('role');
+    if (storedUser && storedName) {
+        updateMainTitle(storedName);
     } else {
         showLoginModal();
     }
+    updateRoleUI(storedRole);
     populateContinueWatching();
 
     const form = document.querySelector('form');

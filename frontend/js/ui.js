@@ -3,32 +3,24 @@ function toggleMobileMenu() {
     document.getElementById('download-tab').classList.toggle('pointer-events-none');
 }
 
-function showLoginModal() {
-    const modal = document.getElementById('login-modal');
-    const form = document.getElementById('login-form');
-    const logoutContainer = document.getElementById('logout-container');
-    const closeBtn = modal.querySelector('button[onclick="hideLoginModal()"]');
+function handleAccountModal() {
     const username = localStorage.getItem('username');
     if (username) {
-        if (form) form.classList.add('hidden');
-        if (logoutContainer) logoutContainer.classList.remove('hidden');
-        if (closeBtn) closeBtn.classList.remove('hidden');
+        showUserModal();
     } else {
-        if (logoutContainer) logoutContainer.classList.add('hidden');
-        if (form) {
-            form.classList.remove('hidden');
-            const usernameInput = form.querySelector('input[name="username"]');
-            if (usernameInput) usernameInput.focus();
-        }
-        if (closeBtn) closeBtn.classList.add('hidden');
+        showLoginModal();
     }
+}
+
+function showLoginModal() {
+    const modal = document.getElementById('login-modal');
     modal.classList.remove('opacity-0');
     modal.classList.remove('pointer-events-none');
+    const usernameInput = modal.querySelector('input[name="username"]');
+    if (usernameInput) usernameInput.focus();
 }
 
 function hideLoginModal() {
-    const username = localStorage.getItem('username');
-    if (!username) return;
     const modal = document.getElementById('login-modal');
     modal.classList.add('opacity-0');
     modal.classList.add('pointer-events-none');
@@ -38,28 +30,126 @@ function hideLoginModal() {
     if (usernameInput) usernameInput.value = '';
     if (passwordInput) passwordInput.value = '';
     if (errorEl) errorEl.textContent = '';
-    const form = document.getElementById('login-form');
-    const logoutContainer = document.getElementById('logout-container');
-    if (form) form.classList.remove('hidden');
-    if (logoutContainer) logoutContainer.classList.add('hidden');
+}
+
+function showRegisterModal() {
+    hideLoginModal();
+    const modal = document.getElementById('register-modal');
+    modal.classList.remove('opacity-0');
+    modal.classList.remove('pointer-events-none');
+    const nameInput = modal.querySelector('input[name="nome"]');
+    if (nameInput) nameInput.focus();
+}
+
+function hideRegisterModal() {
+    const modal = document.getElementById('register-modal');
+    modal.classList.add('opacity-0');
+    modal.classList.add('pointer-events-none');
+    modal.querySelectorAll('input').forEach(input => {
+        if (input.type !== 'submit') input.value = '';
+    });
+    const errorEl = document.getElementById('register-error-message');
+    if (errorEl) errorEl.textContent = '';
+}
+
+function showUserModal() {
+    const modal = document.getElementById('user-modal');
+    modal.classList.remove('opacity-0');
+    modal.classList.remove('pointer-events-none');
+    document.getElementById('detail-nome').textContent = `Nome: ${localStorage.getItem('first_name') || '-'}`;
+    document.getElementById('detail-cognome').textContent = `Cognome: ${localStorage.getItem('last_name') || '-'}`;
+    document.getElementById('detail-username').textContent = `Username: ${localStorage.getItem('username') || '-'}`;
+    document.getElementById('detail-email').textContent = `Email: ${localStorage.getItem('email') || '-'}`;
+    const role = localStorage.getItem('role');
+    const roleEl = document.getElementById('detail-role');
+    if (role && role !== 'normal') {
+        roleEl.textContent = `Ruolo: ${role}`;
+        roleEl.classList.remove('hidden');
+    } else {
+        roleEl.classList.add('hidden');
+    }
+}
+
+function hideUserModal() {
+    const modal = document.getElementById('user-modal');
+    modal.classList.add('opacity-0');
+    modal.classList.add('pointer-events-none');
+}
+
+async function register(event) {
+    event.preventDefault();
+    const form = document.getElementById('registration-form');
+    const nome = form.querySelector('input[name="nome"]').value.trim();
+    const cognome = form.querySelector('input[name="cognome"]').value.trim();
+    const username = form.querySelector('input[name="username"]').value.trim();
+    const email = form.querySelector('input[name="email"]').value.trim();
+    const password = form.querySelector('input[name="password"]').value.trim();
+    const errorEl = document.getElementById('register-error-message');
+    if (errorEl) {
+        errorEl.textContent = '';
+        errorEl.classList.remove('text-green-600');
+        errorEl.classList.add('text-red-600');
+    }
+    if (!nome || !cognome || !username || !email || !password) {
+        if (errorEl) errorEl.textContent = 'Tutti i campi sono obbligatori';
+        return;
+    }
+    try {
+        const data = await fetchSignIn(nome, cognome, username, email, password);
+        localStorage.setItem('username', data.username);
+        localStorage.setItem('userId', data.id);
+        localStorage.setItem('first_name', data.first_name);
+        localStorage.setItem('last_name', data.last_name);
+        localStorage.setItem('email', data.email);
+        localStorage.setItem('role', data.role);
+        updateRoleUI(data.role);
+        updateMainTitle(data.first_name);
+        hideRegisterModal();
+        populateContinueWatching();
+    } catch (err) {
+        if (errorEl) errorEl.textContent = err.message;
+    }
 }
 
 document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') {
-        const modal = document.getElementById('login-modal');
-        if (modal && !modal.classList.contains('pointer-events-none')) {
-            hideLoginModal();
-        }
+        hideLoginModal();
+        hideRegisterModal();
+        hideUserModal();
     }
 });
 
-function updateMainTitle(username) {
+function updateMainTitle(firstName) {
     const title = document.getElementById('main-title');
     if (!title) return;
-    if (username) {
-        title.textContent = `Ciao ${username}, cosa vuoi scaricare?`;
+    const role = localStorage.getItem('role');
+    const action = role === 'normal' ? 'guardare' : 'scaricare';
+    if (firstName) {
+        const formatted = firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase();
+        title.textContent = `Ciao ${formatted}, cosa vuoi ${action}?`;
     } else {
-        title.textContent = 'Cosa vuoi scaricare?';
+        title.textContent = `Cosa vuoi ${action}?`;
+    }
+}
+
+function updateRoleUI(role = localStorage.getItem('role')) {
+    const downloadBtn = document.getElementById('download-btn');
+    const downloadTab = document.getElementById('download-tab');
+    const mainAccountBtn = document.getElementById('main-account-btn');
+    const mobileAccountBtn = document.getElementById('mobile-account-btn');
+    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+    if (role === 'normal') {
+        if (downloadBtn) downloadBtn.classList.add('hidden');
+        if (downloadTab) downloadTab.classList.add('hidden');
+        if (mainAccountBtn) mainAccountBtn.classList.remove('hidden');
+        if (mobileAccountBtn) mobileAccountBtn.classList.remove('hidden');
+        if (mobileMenuBtn) mobileMenuBtn.classList.add('hidden');
+    } else {
+        if (downloadBtn) downloadBtn.classList.remove('hidden');
+        if (downloadTab) downloadTab.classList.remove('hidden');
+        if (mainAccountBtn) mainAccountBtn.classList.add('hidden');
+        if (mobileAccountBtn) mobileAccountBtn.classList.add('hidden');
+        if (mobileMenuBtn) mobileMenuBtn.classList.remove('hidden');
     }
 }
 
@@ -263,6 +353,7 @@ async function populateDownloadSection(slug, title) {
 
     const downloadBtn = document.getElementById('download-btn');
     const watchBtn = document.getElementById('watch-btn');
+    const isNormal = localStorage.getItem('role') === 'normal';
 
     if (data.type == "tv") {
         const wrapper = document.getElementById('choose-episodes');
@@ -357,7 +448,9 @@ async function populateDownloadSection(slug, title) {
                     });
                 };
                 btnContainer.appendChild(watchEpBtn);
-                btnContainer.appendChild(downloadEpBtn);
+                if (!isNormal) {
+                    btnContainer.appendChild(downloadEpBtn);
+                }
                 body.appendChild(btnContainer);
 
                 card.appendChild(body);
@@ -370,7 +463,11 @@ async function populateDownloadSection(slug, title) {
         renderSeason(select.value || Object.keys(episodesBySeason)[0]);
     } else {
         document.getElementById('choose-episodes').classList.add('hidden');
-        downloadBtn.classList.remove('hidden');
+        if (isNormal) {
+            downloadBtn.classList.add('hidden');
+        } else {
+            downloadBtn.classList.remove('hidden');
+        }
         watchBtn.classList.remove('hidden');
         updateWatchButtonLabel(filmId);
     }
@@ -475,7 +572,12 @@ async function logIn(event) {
         const data = await fetchLogIn(username, password);
         localStorage.setItem('username', data.username);
         localStorage.setItem('userId', data.id);
-        updateMainTitle(data.username);
+        localStorage.setItem('first_name', data.first_name);
+        localStorage.setItem('last_name', data.last_name);
+        localStorage.setItem('email', data.email);
+        localStorage.setItem('role', data.role);
+        updateRoleUI(data.role);
+        updateMainTitle(data.first_name);
         hideLoginModal();
         populateContinueWatching();
     } catch (err) {
@@ -483,38 +585,19 @@ async function logIn(event) {
     }
 }
 
-async function signIn() {
-    const usernameInput = document.querySelector('#login-modal input[type="text"]');
-    const passwordInput = document.querySelector('#login-modal input[type="password"]');
-    const username = usernameInput.value.trim();
-    const password = passwordInput.value.trim();
-    const errorEl = document.getElementById('login-error-message');
-    errorEl.textContent = '';
-    errorEl.classList.remove('text-green-600');
-    errorEl.classList.add('text-red-600');
-    if (!username || !password) {
-        errorEl.textContent = 'Username e password sono obbligatori';
-        return;
-    }
+async function logOut() {
     try {
-        await fetchSignIn(username, password);
-        usernameInput.value = '';
-        passwordInput.value = '';
-        errorEl.classList.remove('text-red-600');
-        errorEl.classList.add('text-green-600');
-        errorEl.textContent = 'Account creato con successo';
-    } catch (err) {
-        errorEl.classList.remove('text-green-600');
-        errorEl.classList.add('text-red-600');
-        errorEl.textContent = err.message;
-    }
-}
-
-function logOut() {
+        await fetch('/api/logout', { method: 'POST' });
+    } catch (_) {}
     localStorage.removeItem('username');
     localStorage.removeItem('userId');
+    localStorage.removeItem('first_name');
+    localStorage.removeItem('last_name');
+    localStorage.removeItem('email');
+    localStorage.removeItem('role');
+    updateRoleUI();
     updateMainTitle();
-    showLoginModal();
+    hideUserModal();
     populateContinueWatching();
 }
 
