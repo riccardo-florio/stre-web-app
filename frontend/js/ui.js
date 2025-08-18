@@ -131,7 +131,19 @@ async function updateUserHandler(id) {
     const email = document.getElementById(`em-${id}`).value.trim();
     const role = document.getElementById(`rl-${id}`).value;
     try {
-        await updateUser(id, first_name, last_name, email, role);
+        const updated = await updateUser(id, first_name, last_name, email, role);
+        if (String(id) === localStorage.getItem('userId')) {
+            localStorage.setItem('first_name', updated.first_name);
+            localStorage.setItem('last_name', updated.last_name);
+            localStorage.setItem('email', updated.email);
+            localStorage.setItem('role', updated.role);
+            localStorage.setItem('username', updated.username);
+            updateMainTitle(updated.first_name);
+            updateRoleUI(updated.role);
+            if (updated.role !== 'admin') {
+                hideAdminModal();
+            }
+        }
         await populateUserTable();
     } catch (err) {
         alert(err.message);
