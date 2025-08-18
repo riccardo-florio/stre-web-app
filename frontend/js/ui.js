@@ -667,6 +667,12 @@ async function logIn(event) {
     }
 }
 
+async function confirmLogOut() {
+    if (confirm('Sei sicuro di voler uscire?')) {
+        await logOut();
+    }
+}
+
 async function logOut() {
     try {
         await fetch('/api/logout', { method: 'POST' });
