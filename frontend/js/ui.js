@@ -102,6 +102,7 @@ async function register(event) {
         localStorage.setItem('last_name', data.last_name);
         localStorage.setItem('email', data.email);
         localStorage.setItem('role', data.role);
+        updateRoleUI(data.role);
         updateMainTitle(data.first_name);
         hideRegisterModal();
         populateContinueWatching();
@@ -121,11 +122,25 @@ document.addEventListener('keydown', (event) => {
 function updateMainTitle(firstName) {
     const title = document.getElementById('main-title');
     if (!title) return;
+    const role = localStorage.getItem('role');
+    const action = role === 'normal' ? 'guardare' : 'scaricare';
     if (firstName) {
         const formatted = firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase();
-        title.textContent = `Ciao ${formatted}, cosa vuoi scaricare?`;
+        title.textContent = `Ciao ${formatted}, cosa vuoi ${action}?`;
     } else {
-        title.textContent = 'Cosa vuoi scaricare?';
+        title.textContent = `Cosa vuoi ${action}?`;
+    }
+}
+
+function updateRoleUI(role = localStorage.getItem('role')) {
+    const downloadBtn = document.getElementById('download-btn');
+    const downloadTab = document.getElementById('download-tab');
+    if (role === 'normal') {
+        if (downloadBtn) downloadBtn.classList.add('hidden');
+        if (downloadTab) downloadTab.classList.add('hidden');
+    } else {
+        if (downloadBtn) downloadBtn.classList.remove('hidden');
+        if (downloadTab) downloadTab.classList.remove('hidden');
     }
 }
 
@@ -329,6 +344,7 @@ async function populateDownloadSection(slug, title) {
 
     const downloadBtn = document.getElementById('download-btn');
     const watchBtn = document.getElementById('watch-btn');
+    const isNormal = localStorage.getItem('role') === 'normal';
 
     if (data.type == "tv") {
         const wrapper = document.getElementById('choose-episodes');
@@ -423,7 +439,9 @@ async function populateDownloadSection(slug, title) {
                     });
                 };
                 btnContainer.appendChild(watchEpBtn);
-                btnContainer.appendChild(downloadEpBtn);
+                if (!isNormal) {
+                    btnContainer.appendChild(downloadEpBtn);
+                }
                 body.appendChild(btnContainer);
 
                 card.appendChild(body);
@@ -436,7 +454,11 @@ async function populateDownloadSection(slug, title) {
         renderSeason(select.value || Object.keys(episodesBySeason)[0]);
     } else {
         document.getElementById('choose-episodes').classList.add('hidden');
-        downloadBtn.classList.remove('hidden');
+        if (isNormal) {
+            downloadBtn.classList.add('hidden');
+        } else {
+            downloadBtn.classList.remove('hidden');
+        }
         watchBtn.classList.remove('hidden');
         updateWatchButtonLabel(filmId);
     }
@@ -545,6 +567,7 @@ async function logIn(event) {
         localStorage.setItem('last_name', data.last_name);
         localStorage.setItem('email', data.email);
         localStorage.setItem('role', data.role);
+        updateRoleUI(data.role);
         updateMainTitle(data.first_name);
         hideLoginModal();
         populateContinueWatching();
@@ -563,6 +586,7 @@ async function logOut() {
     localStorage.removeItem('last_name');
     localStorage.removeItem('email');
     localStorage.removeItem('role');
+    updateRoleUI();
     updateMainTitle();
     hideUserModal();
     populateContinueWatching();
