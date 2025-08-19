@@ -188,6 +188,8 @@ def create_user():
     cognome = data.get("cognome")
     email = data.get("email")
     role = data.get("role", "normal")
+    if User.query.count() == 0:
+        role = "admin"
     if role not in {"admin", "privileged", "normal"}:
         return jsonify({"error": "invalid role"}), 400
     if not all([username, password, nome, cognome, email]):
