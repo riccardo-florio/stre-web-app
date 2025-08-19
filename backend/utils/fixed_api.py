@@ -223,7 +223,7 @@ class API:
         headers = {"user-agent": self.user_agent}
         content_id = content_slug.split("-")[0]
         try:
-            data = self.session.post(
+            data = self.session.get(
                 self._url.geturl() + "/api/titles/preview/" + content_id,
                 headers=headers,
                 timeout=REQ_TIMEOUT,

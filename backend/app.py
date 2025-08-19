@@ -145,7 +145,7 @@ def search_query(query):
 
 @app.route("/api/getinfo/<slug>")
 def get_title_info(slug):
-    results = get_info(stre.sc, slug)
+    results = get_info(stre.fixed_sc, slug)
     return jsonify(results)
 
 @app.route("/api/get-extended-info/<slug>")
