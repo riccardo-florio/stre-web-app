@@ -29,6 +29,7 @@ def download_sc_video(url, queue, cancel_event: threading.Event, output_path="do
         'noplaylist': True,
         'merge_output_format': 'mp4',
         'progress_hooks': [hook],
+        'nocheckcertificate': True,
     }
 
     with YoutubeDL(ydl_opts) as ydl:

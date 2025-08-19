@@ -68,18 +68,34 @@ def refresh_stre_domain():
     return stre_domain
 
 def search(sc, query):
+    try:
+        sc.session.verify = False
+    except AttributeError:
+        pass
     results = sc.search(query)
     return results
 
 def get_info(sc, slug):
+    try:
+        sc.session.verify = False
+    except AttributeError:
+        pass
     results = sc.preview(slug)
     return results
 
 def get_extended_info(sc, slug):
+    try:
+        sc.session.verify = False
+    except AttributeError:
+        pass
     results = sc.load(slug)
     return results
 
 def get_links(sc, content_id, episode_id=None):
+    try:
+        sc.session.verify = False
+    except AttributeError:
+        pass
     results = sc.get_links(content_id, episode_id)
     return results
 

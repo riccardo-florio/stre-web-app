@@ -16,7 +16,7 @@ def get_available_domains():
     domains = []
 
     try:
-        response = requests.get(domains_url, timeout=10)
+        response = requests.get(domains_url, timeout=10, verify=False)
         response.raise_for_status()  # Raise an exception for bad status codes (4xx or 5xx)
         
         site_data = response.json()
