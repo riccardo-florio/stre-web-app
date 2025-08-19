@@ -156,8 +156,31 @@ def get_streaming_links(content_id):
     return jsonify(results)
 
 
-@app.route("/api/users", methods=["POST"])
+def is_admin_request() -> bool:
+    """Return True if the request is performed by an admin user."""
+    return request.headers.get("X-Role") == "admin"
+
+
+@app.route("/api/users", methods=["POST", "GET"])
 def create_user():
+    if request.method == "GET":
+        if not is_admin_request():
+            return jsonify({"error": "forbidden"}), 403
+        users = User.query.all()
+        return jsonify(
+            [
+                {
+                    "id": u.id,
+                    "username": u.username,
+                    "first_name": u.first_name,
+                    "last_name": u.last_name,
+                    "email": u.email,
+                    "role": u.role,
+                }
+                for u in users
+            ]
+        )
+
     data = request.get_json() or {}
     username = data.get("username")
     password = data.get("password")
@@ -183,14 +206,70 @@ def create_user():
     user.set_password(password)
     db.session.add(user)
     db.session.commit()
-    return jsonify({
-        "id": user.id,
-        "username": user.username,
-        "first_name": user.first_name,
-        "last_name": user.last_name,
-        "email": user.email,
-        "role": user.role,
-    }), 201
+    return jsonify(
+        {
+            "id": user.id,
+            "username": user.username,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "email": user.email,
+            "role": user.role,
+        }
+    ), 201
+
+
+@app.route("/api/users/<int:user_id>", methods=["GET", "PUT", "DELETE"])
+def manage_user(user_id):
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({"error": "user not found"}), 404
+
+    if request.method == "GET":
+        return jsonify({
+            "id": user.id,
+            "username": user.username,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "email": user.email,
+            "role": user.role,
+        })
+
+    if not is_admin_request():
+        return jsonify({"error": "forbidden"}), 403
+
+    if request.method == "DELETE":
+        db.session.delete(user)
+        db.session.commit()
+        return jsonify({"status": "deleted"})
+
+    data = request.get_json() or {}
+    first_name = data.get("first_name")
+    last_name = data.get("last_name")
+    email = data.get("email")
+    role = data.get("role")
+    if role and role not in {"admin", "privileged", "normal"}:
+        return jsonify({"error": "invalid role"}), 400
+    if first_name is not None:
+        user.first_name = first_name
+    if last_name is not None:
+        user.last_name = last_name
+    if email is not None:
+        if User.query.filter_by(email=email).filter(User.id != user_id).first():
+            return jsonify({"error": "email already exists"}), 400
+        user.email = email
+    if role is not None:
+        user.role = role
+    db.session.commit()
+    return jsonify(
+        {
+            "id": user.id,
+            "username": user.username,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "email": user.email,
+            "role": user.role,
+        }
+    )
 
 
 @app.route("/api/login", methods=["POST"])

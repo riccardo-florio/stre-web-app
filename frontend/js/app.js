@@ -184,15 +184,32 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     updateNoDownloadsMessage();
     checkVersions();
-    const storedUser = localStorage.getItem('username');
-    const storedName = localStorage.getItem('first_name');
+    const storedId = localStorage.getItem('userId');
     const storedRole = localStorage.getItem('role');
-    if (storedUser && storedName) {
-        updateMainTitle(storedName);
+    if (storedId) {
+        try {
+            const current = await fetchUser(storedId);
+            if (!current || current.role !== storedRole) {
+                await logOut();
+                showLoginModal();
+                return;
+            }
+            localStorage.setItem('username', current.username);
+            localStorage.setItem('first_name', current.first_name);
+            localStorage.setItem('last_name', current.last_name);
+            localStorage.setItem('email', current.email);
+            localStorage.setItem('role', current.role);
+            updateMainTitle(current.first_name);
+        } catch (err) {
+            await logOut();
+            showLoginModal();
+            return;
+        }
     } else {
-        showLoginModal();
+        localStorage.removeItem('role');
+        updateMainTitle();
     }
-    updateRoleUI(storedRole);
+    updateRoleUI(localStorage.getItem('role'));
     populateContinueWatching();
 
     const form = document.querySelector('form');

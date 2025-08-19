@@ -83,6 +83,55 @@ async function saveVideoProgress(userId, filmId, progress, slug, title, cover, d
     });
 }
 
+async function fetchUsers() {
+    const res = await fetch('/api/users', {
+        headers: { 'X-Role': localStorage.getItem('role') || '' }
+    });
+    const data = await res.json();
+    if (!res.ok) {
+        throw new Error(data.error || 'Errore nel recupero degli utenti');
+    }
+    return data;
+}
+
+async function updateUser(id, first_name, last_name, email, role) {
+    const res = await fetch(`/api/users/${id}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Role': localStorage.getItem('role') || ''
+        },
+        body: JSON.stringify({ first_name, last_name, email, role })
+    });
+    const data = await res.json();
+    if (!res.ok) {
+        throw new Error(data.error || 'Errore nella modifica utente');
+    }
+    return data;
+}
+
+async function deleteUser(id) {
+    const res = await fetch(`/api/users/${id}`, {
+        method: 'DELETE',
+        headers: { 'X-Role': localStorage.getItem('role') || '' }
+    });
+    const data = await res.json();
+    if (!res.ok) {
+        throw new Error(data.error || 'Errore nella cancellazione utente');
+    }
+    return data;
+}
+
+
+async function fetchUser(id) {
+    const res = await fetch(`/api/users/${id}`);
+    const data = await res.json();
+    if (!res.ok) {
+        throw new Error(data.error || 'Errore nel recupero utente');
+    }
+    return data;
+}
+
 async function checkDomainReachable(domain) {
     try {
         const res = await fetch(`/api/check-domain/${domain}`);

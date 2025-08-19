@@ -62,11 +62,14 @@ function showUserModal() {
     document.getElementById('detail-email').textContent = `Email: ${localStorage.getItem('email') || '-'}`;
     const role = localStorage.getItem('role');
     const roleEl = document.getElementById('detail-role');
-    if (role && role !== 'normal') {
+    const adminBtn = document.getElementById('admin-dashboard-btn');
+    if (role === 'admin') {
         roleEl.textContent = `Ruolo: ${role}`;
         roleEl.classList.remove('hidden');
+        adminBtn.classList.remove('hidden');
     } else {
         roleEl.classList.add('hidden');
+        adminBtn.classList.add('hidden');
     }
 }
 
@@ -74,6 +77,84 @@ function hideUserModal() {
     const modal = document.getElementById('user-modal');
     modal.classList.add('opacity-0');
     modal.classList.add('pointer-events-none');
+}
+
+function showAdminModal() {
+    const modal = document.getElementById('admin-modal');
+    modal.classList.remove('opacity-0');
+    modal.classList.remove('pointer-events-none');
+    populateUserTable();
+}
+
+function hideAdminModal() {
+    const modal = document.getElementById('admin-modal');
+    modal.classList.add('opacity-0');
+    modal.classList.add('pointer-events-none');
+}
+
+async function populateUserTable() {
+    const container = document.getElementById('admin-users');
+    container.innerHTML = '';
+    try {
+        const users = await fetchUsers();
+        users.forEach(u => {
+            const row = document.createElement('div');
+            row.className = 'grid grid-cols-6 gap-2 items-center mb-2';
+            row.innerHTML = `
+                <span>${u.username}</span>
+                <input id="fn-${u.id}" value="${u.first_name}" class="border px-1 py-0.5 rounded" />
+                <input id="ln-${u.id}" value="${u.last_name}" class="border px-1 py-0.5 rounded" />
+                <input id="em-${u.id}" value="${u.email}" class="border px-1 py-0.5 rounded" />
+                <select id="rl-${u.id}" class="border px-1 py-0.5 rounded">
+                    <option value="normal" ${u.role === 'normal' ? 'selected' : ''}>normal</option>
+                    <option value="privileged" ${u.role === 'privileged' ? 'selected' : ''}>privileged</option>
+                    <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>admin</option>
+                </select>
+                <div class="flex gap-1">
+                    <button onclick="updateUserHandler(${u.id})" class="bg-blue-500 text-white px-2 rounded">Salva</button>
+                    <button onclick="deleteUserHandler(${u.id})" class="bg-red-500 text-white px-2 rounded">Elimina</button>
+                </div>
+            `;
+            container.appendChild(row);
+        });
+    } catch (err) {
+        container.innerHTML = `<span class='text-red-600'>${err.message}</span>`;
+    }
+}
+
+async function updateUserHandler(id) {
+    const first_name = document.getElementById(`fn-${id}`).value.trim();
+    const last_name = document.getElementById(`ln-${id}`).value.trim();
+    const email = document.getElementById(`em-${id}`).value.trim();
+    const role = document.getElementById(`rl-${id}`).value;
+    try {
+        const updated = await updateUser(id, first_name, last_name, email, role);
+        if (String(id) === localStorage.getItem('userId')) {
+            localStorage.setItem('first_name', updated.first_name);
+            localStorage.setItem('last_name', updated.last_name);
+            localStorage.setItem('email', updated.email);
+            localStorage.setItem('role', updated.role);
+            localStorage.setItem('username', updated.username);
+            updateMainTitle(updated.first_name);
+            updateRoleUI(updated.role);
+            if (updated.role !== 'admin') {
+                hideAdminModal();
+            }
+        }
+        await populateUserTable();
+    } catch (err) {
+        alert(err.message);
+    }
+}
+
+async function deleteUserHandler(id) {
+    if (!confirm('Sei sicuro di voler eliminare questo utente?')) return;
+    try {
+        await deleteUser(id);
+        await populateUserTable();
+    } catch (err) {
+        alert(err.message);
+    }
 }
 
 async function register(event) {
@@ -116,6 +197,7 @@ document.addEventListener('keydown', (event) => {
         hideLoginModal();
         hideRegisterModal();
         hideUserModal();
+        hideAdminModal();
     }
 });
 
@@ -123,7 +205,7 @@ function updateMainTitle(firstName) {
     const title = document.getElementById('main-title');
     if (!title) return;
     const role = localStorage.getItem('role');
-    const action = role === 'normal' ? 'guardare' : 'scaricare';
+    const action = role === 'admin' ? 'scaricare' : 'guardare';
     if (firstName) {
         const formatted = firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase();
         title.textContent = `Ciao ${formatted}, cosa vuoi ${action}?`;
@@ -138,18 +220,18 @@ function updateRoleUI(role = localStorage.getItem('role')) {
     const mainAccountBtn = document.getElementById('main-account-btn');
     const mobileAccountBtn = document.getElementById('mobile-account-btn');
     const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-    if (role === 'normal') {
-        if (downloadBtn) downloadBtn.classList.add('hidden');
-        if (downloadTab) downloadTab.classList.add('hidden');
-        if (mainAccountBtn) mainAccountBtn.classList.remove('hidden');
-        if (mobileAccountBtn) mobileAccountBtn.classList.remove('hidden');
-        if (mobileMenuBtn) mobileMenuBtn.classList.add('hidden');
-    } else {
+    if (role === 'admin') {
         if (downloadBtn) downloadBtn.classList.remove('hidden');
         if (downloadTab) downloadTab.classList.remove('hidden');
         if (mainAccountBtn) mainAccountBtn.classList.add('hidden');
         if (mobileAccountBtn) mobileAccountBtn.classList.add('hidden');
         if (mobileMenuBtn) mobileMenuBtn.classList.remove('hidden');
+    } else {
+        if (downloadBtn) downloadBtn.classList.add('hidden');
+        if (downloadTab) downloadTab.classList.add('hidden');
+        if (mainAccountBtn) mainAccountBtn.classList.remove('hidden');
+        if (mobileAccountBtn) mobileAccountBtn.classList.remove('hidden');
+        if (mobileMenuBtn) mobileMenuBtn.classList.add('hidden');
     }
 }
 
@@ -353,7 +435,7 @@ async function populateDownloadSection(slug, title) {
 
     const downloadBtn = document.getElementById('download-btn');
     const watchBtn = document.getElementById('watch-btn');
-    const isNormal = localStorage.getItem('role') === 'normal';
+    const isNormal = localStorage.getItem('role') !== 'admin';
 
     if (data.type == "tv") {
         const wrapper = document.getElementById('choose-episodes');
@@ -582,6 +664,12 @@ async function logIn(event) {
         populateContinueWatching();
     } catch (err) {
         errorEl.textContent = err.message;
+    }
+}
+
+async function confirmLogOut() {
+    if (confirm('Sei sicuro di voler uscire?')) {
+        await logOut();
     }
 }
 
