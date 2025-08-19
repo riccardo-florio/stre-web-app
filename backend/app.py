@@ -31,12 +31,16 @@ class StreAPI:
     def __init__(self):
         self.domain = refresh_stre_domain()
         self.sc = API(self.domain)
+        self.sc.session.verify = False
         self.fixed_sc = FixedAPI(self.domain)
+        self.fixed_sc.session.verify = False
 
     def refresh(self):
         self.domain = refresh_stre_domain()
         self.sc = API(self.domain)
+        self.sc.session.verify = False
         self.fixed_sc = FixedAPI(self.domain)
+        self.fixed_sc.session.verify = False
 
 
 stre = StreAPI()
