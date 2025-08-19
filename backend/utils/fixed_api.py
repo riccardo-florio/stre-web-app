@@ -131,6 +131,7 @@ class API:
         self.domain = domain
         self._url = urlparse("https://" + self.domain)
         self.session = requests.Session()
+        self.session.verify = False
 
     def _wbpage_as_text(self, url):
         try:
