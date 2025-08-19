@@ -205,7 +205,7 @@ function updateMainTitle(firstName) {
     const title = document.getElementById('main-title');
     if (!title) return;
     const role = localStorage.getItem('role');
-    const action = role === 'admin' ? 'scaricare' : 'guardare';
+    const action = role === 'admin' ? 'fare oggi' : 'guardare';
     if (firstName) {
         const formatted = firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase();
         title.textContent = `Ciao ${formatted}, cosa vuoi ${action}?`;
