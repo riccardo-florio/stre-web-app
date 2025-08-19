@@ -170,4 +170,6 @@ sessioni.
 ## TODO
 
 - implementare cronologia (es. download completati, interrotti, ecc..)
+- implementare tracciamento (es. chi scarica cosa, chi guarda cosa, ecc..)
+- implementare possibilità di aggiornare l'app dalla ui
 - aggiungere possibilità di usare custom url (non necessario al momento)
