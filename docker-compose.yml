@@ -7,3 +7,4 @@ services:
       - "${HOST_PORT:-5000}:5000"
     volumes:
       - ${HOST_DOWNLOAD_DIR:-./downloads}:/app/downloads
+      - ${HOST_DB_DIR:-./instance}:/app/instance

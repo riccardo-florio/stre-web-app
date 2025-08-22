@@ -42,7 +42,7 @@ git clone https://github.com/riccardo-florio/stre-web-app.git
 cd stre-web-app
 ```
 
-Controllare se modificare il valore di `HOST_DOWNLOAD_DIR` e di `HOST_PORT` nel file `.env`.
+Controllare se modificare il valore di `HOST_DOWNLOAD_DIR`, `HOST_DB_DIR` e di `HOST_PORT` nel file `.env`.
 
 Quindi lanciare:
 
@@ -53,8 +53,9 @@ docker compose up --build -d
 Il servizio sarà raggiungibile su `http://localhost:5000` come nella modalità classica.
 
 Docker Compose carica automaticamente le variabili definite nel file `.env` presente nella repository.
-Imposta il valore di `HOST_DOWNLOAD_DIR` in questo file per scegliere dove salvare i file sul tuo computer.
-Se lasci la variabile vuota verrà utilizzato il percorso predefinito `./downloads`.
+Imposta i valori di `HOST_DOWNLOAD_DIR` e `HOST_DB_DIR` in questo file per scegliere dove salvare i file sul tuo computer e dove memorizzare la directory `instance`, che contiene il database.
+Se lasci `HOST_DOWNLOAD_DIR` vuoto verrà utilizzato il percorso predefinito `./downloads`.
+Se lasci `HOST_DB_DIR` vuoto verrà utilizzato il percorso predefinito `./instance`.
 Puoi inoltre personalizzare la porta esposta all'host impostando `HOST_PORT`.
 Se non definita, la porta predefinita sarà `5000`.
 
