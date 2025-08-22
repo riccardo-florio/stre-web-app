@@ -122,6 +122,29 @@ async function deleteUser(id) {
     return data;
 }
 
+async function fetchAllProgress() {
+    const res = await fetch('/api/progress', {
+        headers: { 'X-Role': localStorage.getItem('role') || '' }
+    });
+    const data = await res.json();
+    if (!res.ok) {
+        throw new Error(data.error || 'Errore nel recupero del progresso');
+    }
+    return data.progress || [];
+}
+
+async function deleteProgress(userId, filmId) {
+    const res = await fetch(`/api/progress/${userId}/${filmId}`, {
+        method: 'DELETE',
+        headers: { 'X-Role': localStorage.getItem('role') || '' }
+    });
+    const data = await res.json();
+    if (!res.ok) {
+        throw new Error(data.error || 'Errore nella cancellazione del progresso');
+    }
+    return data;
+}
+
 
 async function fetchUser(id) {
     const res = await fetch(`/api/users/${id}`);

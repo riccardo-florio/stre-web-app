@@ -271,16 +271,35 @@
 
     <!-- Admin Dashboard Modal -->
     <div id="admin-modal"
-        class="bg-black/50 absolute top-0 left-0 size-full opacity-0 pointer-events-none transition-opacity flex items-center justify-center z-30">
+        class="fixed inset-0 bg-black/50 opacity-0 pointer-events-none transition-opacity z-30">
         <button type="button" onclick="hideAdminModal()" class="absolute top-5 right-5 text-white">
             <span class="material-symbols-rounded text-3xl">close</span>
         </button>
-        <div class="bg-white p-10 rounded-3xl w-full max-w-3xl">
-            <div class="flex items-center justify-between mb-4">
-                <h2 class="text-2xl">Gestione Utenti</h2>
-                <button type="button" onclick="populateUserTable()" class="bg-gray-500 text-white px-3 py-1 rounded">Ricarica</button>
+        <div class="bg-white w-full h-full flex">
+            <div id="admin-sidebar" class="w-48 bg-gray-100 p-4 flex flex-col gap-2">
+                <button id="admin-users-link" class="text-left px-2 py-1 rounded bg-gray-200"
+                    onclick="showAdminSection('users')">Utenti</button>
+                <button id="admin-progress-link" class="text-left px-2 py-1 rounded"
+                    onclick="showAdminSection('progress')">Video Progress</button>
             </div>
-            <div id="admin-users" class="overflow-y-auto max-h-[60vh]"></div>
+            <div class="flex-1 p-6 overflow-y-auto">
+                <div id="admin-users-section" class="w-full">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-2xl">Gestione Utenti</h2>
+                        <button type="button" onclick="populateUserTable()"
+                            class="bg-gray-500 text-white px-3 py-1 rounded">Ricarica</button>
+                    </div>
+                    <div id="admin-users" class="overflow-y-auto max-h-[70vh]"></div>
+                </div>
+                <div id="admin-progress-section" class="w-full hidden">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-2xl">Video Progress</h2>
+                        <button type="button" onclick="populateProgressTable()"
+                            class="bg-gray-500 text-white px-3 py-1 rounded">Ricarica</button>
+                    </div>
+                    <div id="admin-progress" class="overflow-y-auto max-h-[70vh]"></div>
+                </div>
+            </div>
         </div>
     </div>
 

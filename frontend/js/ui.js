@@ -83,13 +83,35 @@ function showAdminModal() {
     const modal = document.getElementById('admin-modal');
     modal.classList.remove('opacity-0');
     modal.classList.remove('pointer-events-none');
-    populateUserTable();
+    showAdminSection('users');
 }
 
 function hideAdminModal() {
     const modal = document.getElementById('admin-modal');
     modal.classList.add('opacity-0');
     modal.classList.add('pointer-events-none');
+}
+
+function showAdminSection(section) {
+    const usersLink = document.getElementById('admin-users-link');
+    const progressLink = document.getElementById('admin-progress-link');
+    const usersSection = document.getElementById('admin-users-section');
+    const progressSection = document.getElementById('admin-progress-section');
+
+    usersLink.classList.remove('bg-gray-200');
+    progressLink.classList.remove('bg-gray-200');
+    usersSection.classList.add('hidden');
+    progressSection.classList.add('hidden');
+
+    if (section === 'users') {
+        usersLink.classList.add('bg-gray-200');
+        usersSection.classList.remove('hidden');
+        populateUserTable();
+    } else if (section === 'progress') {
+        progressLink.classList.add('bg-gray-200');
+        progressSection.classList.remove('hidden');
+        populateProgressTable();
+    }
 }
 
 async function populateUserTable() {
@@ -152,6 +174,40 @@ async function deleteUserHandler(id) {
     try {
         await deleteUser(id);
         await populateUserTable();
+    } catch (err) {
+        alert(err.message);
+    }
+}
+
+async function populateProgressTable() {
+    const container = document.getElementById('admin-progress');
+    container.innerHTML = '';
+    try {
+        const entries = await fetchAllProgress();
+        entries.forEach(e => {
+            const row = document.createElement('div');
+            row.className = 'grid grid-cols-6 gap-2 items-center mb-2';
+            const percent = e.duration ? Math.round((e.progress / e.duration) * 100) : 0;
+            row.innerHTML = `
+                <span>${e.username}</span>
+                <span>${e.title || e.slug || e.film_id}</span>
+                <span>${percent}%</span>
+                <span>${e.film_id}</span>
+                <span>${e.user_id}</span>
+                <button onclick="deleteProgressHandler(${e.user_id}, '${e.film_id}')" class="bg-red-500 text-white px-2 rounded">Elimina</button>
+            `;
+            container.appendChild(row);
+        });
+    } catch (err) {
+        container.innerHTML = `<span class='text-red-600'>${err.message}</span>`;
+    }
+}
+
+async function deleteProgressHandler(userId, filmId) {
+    if (!confirm('Eliminare questo progresso?')) return;
+    try {
+        await deleteProgress(userId, filmId);
+        await populateProgressTable();
     } catch (err) {
         alert(err.message);
     }

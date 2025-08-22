@@ -303,13 +303,14 @@ def logout_user():
     return jsonify({"status": "logged out"})
 
 
-@app.route("/api/progress/<int:user_id>/<film_id>", methods=["GET", "POST"])
+@app.route("/api/progress/<int:user_id>/<film_id>", methods=["GET", "POST", "DELETE"])
 def video_progress(user_id, film_id):
     user = User.query.get(user_id)
     if not user:
         return jsonify({"error": "user not found"}), 404
 
     entry = VideoProgress.query.filter_by(user_id=user_id, film_id=film_id).first()
+
     if request.method == "GET":
         if not entry:
             return jsonify({"progress": 0})
@@ -322,6 +323,15 @@ def video_progress(user_id, film_id):
                 "cover": entry.cover,
             }
         )
+
+    if request.method == "DELETE":
+        if not is_admin_request():
+            return jsonify({"error": "forbidden"}), 403
+        if not entry:
+            return jsonify({"error": "progress not found"}), 404
+        db.session.delete(entry)
+        db.session.commit()
+        return jsonify({"status": "deleted"})
 
     data = request.get_json() or {}
     progress = data.get("progress")
@@ -354,6 +364,35 @@ def video_progress(user_id, film_id):
             entry.duration = duration
     db.session.commit()
     return jsonify({"progress": entry.progress})
+
+
+@app.route("/api/progress", methods=["GET"])
+def all_progress():
+    if not is_admin_request():
+        return jsonify({"error": "forbidden"}), 403
+    entries = (
+        db.session.query(VideoProgress, User.username)
+        .join(User, VideoProgress.user_id == User.id)
+        .all()
+    )
+    return jsonify(
+        {
+            "progress": [
+                {
+                    "id": vp.id,
+                    "user_id": vp.user_id,
+                    "username": username,
+                    "film_id": vp.film_id,
+                    "progress": vp.progress,
+                    "duration": vp.duration,
+                    "slug": vp.slug,
+                    "title": vp.title,
+                    "cover": vp.cover,
+                }
+                for vp, username in entries
+            ]
+        }
+    )
 
 
 @app.route("/api/progress/<int:user_id>", methods=["GET"])
