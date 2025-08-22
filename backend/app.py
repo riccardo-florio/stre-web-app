@@ -424,7 +424,8 @@ def export_db():
     """Allow an admin to download the raw SQLite database file."""
     if not is_admin_request():
         return jsonify({"error": "forbidden"}), 403
-    db_path = BASE_DIR / "users.db"
+    db_path = BASE_DIR.parent / "instance/users.db"
+    print(db_path)
     if not db_path.exists():
         return jsonify({"error": "db not found"}), 404
     return send_file(db_path, as_attachment=True, download_name="users.db")
