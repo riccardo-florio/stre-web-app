@@ -145,6 +145,17 @@ async function deleteProgress(userId, filmId) {
     return data;
 }
 
+async function exportDatabase() {
+    const res = await fetch('/api/export-db', {
+        headers: { 'X-Role': localStorage.getItem('role') || '' }
+    });
+    if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || 'Errore nell\'esportazione del DB');
+    }
+    return await res.blob();
+}
+
 
 async function fetchUser(id) {
     const res = await fetch(`/api/users/${id}`);

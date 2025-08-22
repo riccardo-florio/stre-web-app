@@ -1,4 +1,4 @@
-from flask import Flask, send_from_directory, jsonify, Response, request
+from flask import Flask, send_from_directory, send_file, jsonify, Response, request
 from asyncio import sleep
 from flask_socketio import SocketIO, emit
 import json
@@ -417,6 +417,17 @@ def user_progress(user_id):
             ]
         }
     )
+
+
+@app.route("/api/export-db", methods=["GET"])
+def export_db():
+    """Allow an admin to download the raw SQLite database file."""
+    if not is_admin_request():
+        return jsonify({"error": "forbidden"}), 403
+    db_path = BASE_DIR / "users.db"
+    if not db_path.exists():
+        return jsonify({"error": "db not found"}), 404
+    return send_file(db_path, as_attachment=True, download_name="users.db")
 
 @socketio.on("start_download")
 def handle_start_download(data):

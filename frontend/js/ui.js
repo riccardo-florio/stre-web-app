@@ -247,6 +247,22 @@ async function deleteProgressHandler(userId, filmId) {
     }
 }
 
+async function handleExportDb() {
+    try {
+        const blob = await exportDatabase();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'users.db';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+    } catch (err) {
+        alert(err.message);
+    }
+}
+
 async function register(event) {
     event.preventDefault();
     const form = document.getElementById('registration-form');
