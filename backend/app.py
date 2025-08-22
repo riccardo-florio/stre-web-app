@@ -1,4 +1,4 @@
-from flask import Flask, send_from_directory, jsonify, Response, request
+from flask import Flask, send_from_directory, send_file, jsonify, Response, request
 from asyncio import sleep
 from flask_socketio import SocketIO, emit
 import json
@@ -303,13 +303,14 @@ def logout_user():
     return jsonify({"status": "logged out"})
 
 
-@app.route("/api/progress/<int:user_id>/<film_id>", methods=["GET", "POST"])
+@app.route("/api/progress/<int:user_id>/<film_id>", methods=["GET", "POST", "DELETE"])
 def video_progress(user_id, film_id):
     user = User.query.get(user_id)
     if not user:
         return jsonify({"error": "user not found"}), 404
 
     entry = VideoProgress.query.filter_by(user_id=user_id, film_id=film_id).first()
+
     if request.method == "GET":
         if not entry:
             return jsonify({"progress": 0})
@@ -322,6 +323,15 @@ def video_progress(user_id, film_id):
                 "cover": entry.cover,
             }
         )
+
+    if request.method == "DELETE":
+        if not is_admin_request():
+            return jsonify({"error": "forbidden"}), 403
+        if not entry:
+            return jsonify({"error": "progress not found"}), 404
+        db.session.delete(entry)
+        db.session.commit()
+        return jsonify({"status": "deleted"})
 
     data = request.get_json() or {}
     progress = data.get("progress")
@@ -356,6 +366,35 @@ def video_progress(user_id, film_id):
     return jsonify({"progress": entry.progress})
 
 
+@app.route("/api/progress", methods=["GET"])
+def all_progress():
+    if not is_admin_request():
+        return jsonify({"error": "forbidden"}), 403
+    entries = (
+        db.session.query(VideoProgress, User.username)
+        .join(User, VideoProgress.user_id == User.id)
+        .all()
+    )
+    return jsonify(
+        {
+            "progress": [
+                {
+                    "id": vp.id,
+                    "user_id": vp.user_id,
+                    "username": username,
+                    "film_id": vp.film_id,
+                    "progress": vp.progress,
+                    "duration": vp.duration,
+                    "slug": vp.slug,
+                    "title": vp.title,
+                    "cover": vp.cover,
+                }
+                for vp, username in entries
+            ]
+        }
+    )
+
+
 @app.route("/api/progress/<int:user_id>", methods=["GET"])
 def user_progress(user_id):
     user = User.query.get(user_id)
@@ -378,6 +417,18 @@ def user_progress(user_id):
             ]
         }
     )
+
+
+@app.route("/api/export-db", methods=["GET"])
+def export_db():
+    """Allow an admin to download the raw SQLite database file."""
+    if not is_admin_request():
+        return jsonify({"error": "forbidden"}), 403
+    db_path = BASE_DIR.parent / "instance/users.db"
+    print(db_path)
+    if not db_path.exists():
+        return jsonify({"error": "db not found"}), 404
+    return send_file(db_path, as_attachment=True, download_name="users.db")
 
 @socketio.on("start_download")
 def handle_start_download(data):

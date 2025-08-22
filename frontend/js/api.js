@@ -122,6 +122,40 @@ async function deleteUser(id) {
     return data;
 }
 
+async function fetchAllProgress() {
+    const res = await fetch('/api/progress', {
+        headers: { 'X-Role': localStorage.getItem('role') || '' }
+    });
+    const data = await res.json();
+    if (!res.ok) {
+        throw new Error(data.error || 'Errore nel recupero del progresso');
+    }
+    return data.progress || [];
+}
+
+async function deleteProgress(userId, filmId) {
+    const res = await fetch(`/api/progress/${userId}/${filmId}`, {
+        method: 'DELETE',
+        headers: { 'X-Role': localStorage.getItem('role') || '' }
+    });
+    const data = await res.json();
+    if (!res.ok) {
+        throw new Error(data.error || 'Errore nella cancellazione del progresso');
+    }
+    return data;
+}
+
+async function exportDatabase() {
+    const res = await fetch('/api/export-db', {
+        headers: { 'X-Role': localStorage.getItem('role') || '' }
+    });
+    if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || 'Errore nell\'esportazione del DB');
+    }
+    return await res.blob();
+}
+
 
 async function fetchUser(id) {
     const res = await fetch(`/api/users/${id}`);

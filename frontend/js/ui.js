@@ -83,7 +83,7 @@ function showAdminModal() {
     const modal = document.getElementById('admin-modal');
     modal.classList.remove('opacity-0');
     modal.classList.remove('pointer-events-none');
-    populateUserTable();
+    showAdminSection('users');
 }
 
 function hideAdminModal() {
@@ -92,31 +92,71 @@ function hideAdminModal() {
     modal.classList.add('pointer-events-none');
 }
 
+function showAdminSection(section) {
+    const usersLink = document.getElementById('admin-users-link');
+    const progressLink = document.getElementById('admin-progress-link');
+    const usersSection = document.getElementById('admin-users-section');
+    const progressSection = document.getElementById('admin-progress-section');
+
+    usersLink.classList.remove('bg-gray-200');
+    progressLink.classList.remove('bg-gray-200');
+    usersSection.classList.add('hidden');
+    progressSection.classList.add('hidden');
+
+    if (section === 'users') {
+        usersLink.classList.add('bg-gray-200');
+        usersSection.classList.remove('hidden');
+        populateUserTable();
+    } else if (section === 'progress') {
+        progressLink.classList.add('bg-gray-200');
+        progressSection.classList.remove('hidden');
+        populateProgressTable();
+    }
+}
+
 async function populateUserTable() {
     const container = document.getElementById('admin-users');
     container.innerHTML = '';
     try {
         const users = await fetchUsers();
+        const table = document.createElement('table');
+        table.className = 'min-w-full text-sm border border-gray-300';
+        table.innerHTML = `
+            <thead class="bg-gray-100">
+                <tr>
+                    <th class="border-b px-2 py-1 text-left">Username</th>
+                    <th class="border-b px-2 py-1 text-left">Nome</th>
+                    <th class="border-b px-2 py-1 text-left">Cognome</th>
+                    <th class="border-b px-2 py-1 text-left">Email</th>
+                    <th class="border-b px-2 py-1 text-left">Ruolo</th>
+                    <th class="border-b px-2 py-1 text-left">Azioni</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        `;
+        const tbody = table.querySelector('tbody');
         users.forEach(u => {
-            const row = document.createElement('div');
-            row.className = 'grid grid-cols-6 gap-2 items-center mb-2';
+            const row = document.createElement('tr');
             row.innerHTML = `
-                <span>${u.username}</span>
-                <input id="fn-${u.id}" value="${u.first_name}" class="border px-1 py-0.5 rounded" />
-                <input id="ln-${u.id}" value="${u.last_name}" class="border px-1 py-0.5 rounded" />
-                <input id="em-${u.id}" value="${u.email}" class="border px-1 py-0.5 rounded" />
-                <select id="rl-${u.id}" class="border px-1 py-0.5 rounded">
+                <td class="border-b px-2 py-1">${u.username}</td>
+                <td class="border-b px-2 py-1"><input id="fn-${u.id}" value="${u.first_name}" class="border px-1 py-0.5 rounded w-full" /></td>
+                <td class="border-b px-2 py-1"><input id="ln-${u.id}" value="${u.last_name}" class="border px-1 py-0.5 rounded w-full" /></td>
+                <td class="border-b px-2 py-1"><input id="em-${u.id}" value="${u.email}" class="border px-1 py-0.5 rounded w-full" /></td>
+                <td class="border-b px-2 py-1"><select id="rl-${u.id}" class="border px-1 py-0.5 rounded w-full">
                     <option value="normal" ${u.role === 'normal' ? 'selected' : ''}>normal</option>
                     <option value="privileged" ${u.role === 'privileged' ? 'selected' : ''}>privileged</option>
                     <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>admin</option>
-                </select>
-                <div class="flex gap-1">
-                    <button onclick="updateUserHandler(${u.id})" class="bg-blue-500 text-white px-2 rounded">Salva</button>
-                    <button onclick="deleteUserHandler(${u.id})" class="bg-red-500 text-white px-2 rounded">Elimina</button>
-                </div>
+                </select></td>
+                <td class="border-b px-2 py-1">
+                    <div class="flex gap-1">
+                        <button onclick="updateUserHandler(${u.id})" class="bg-blue-500 text-white px-2 rounded">Salva</button>
+                        <button onclick="deleteUserHandler(${u.id})" class="bg-red-500 text-white px-2 rounded">Elimina</button>
+                    </div>
+                </td>
             `;
-            container.appendChild(row);
+            tbody.appendChild(row);
         });
+        container.appendChild(table);
     } catch (err) {
         container.innerHTML = `<span class='text-red-600'>${err.message}</span>`;
     }
@@ -152,6 +192,72 @@ async function deleteUserHandler(id) {
     try {
         await deleteUser(id);
         await populateUserTable();
+    } catch (err) {
+        alert(err.message);
+    }
+}
+
+async function populateProgressTable() {
+    const container = document.getElementById('admin-progress');
+    container.innerHTML = '';
+    try {
+        const entries = await fetchAllProgress();
+        const table = document.createElement('table');
+        table.className = 'min-w-full text-sm border border-gray-300';
+        table.innerHTML = `
+            <thead class="bg-gray-100">
+                <tr>
+                    <th class="border-b px-2 py-1 text-left">Username</th>
+                    <th class="border-b px-2 py-1 text-left">Titolo</th>
+                    <th class="border-b px-2 py-1 text-left">Progresso</th>
+                    <th class="border-b px-2 py-1 text-left">Film ID</th>
+                    <th class="border-b px-2 py-1 text-left">User ID</th>
+                    <th class="border-b px-2 py-1 text-left">Azioni</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        `;
+        const tbody = table.querySelector('tbody');
+        entries.forEach(e => {
+            const percent = e.duration ? Math.round((e.progress / e.duration) * 100) : 0;
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td class="border-b px-2 py-1">${e.username}</td>
+                <td class="border-b px-2 py-1">${e.title || e.slug || e.film_id}</td>
+                <td class="border-b px-2 py-1">${percent}%</td>
+                <td class="border-b px-2 py-1">${e.film_id}</td>
+                <td class="border-b px-2 py-1">${e.user_id}</td>
+                <td class="border-b px-2 py-1"><button onclick="deleteProgressHandler(${e.user_id}, '${e.film_id}')" class="bg-red-500 text-white px-2 rounded">Elimina</button></td>
+            `;
+            tbody.appendChild(row);
+        });
+        container.appendChild(table);
+    } catch (err) {
+        container.innerHTML = `<span class='text-red-600'>${err.message}</span>`;
+    }
+}
+
+async function deleteProgressHandler(userId, filmId) {
+    if (!confirm('Eliminare questo progresso?')) return;
+    try {
+        await deleteProgress(userId, filmId);
+        await populateProgressTable();
+    } catch (err) {
+        alert(err.message);
+    }
+}
+
+async function handleExportDb() {
+    try {
+        const blob = await exportDatabase();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'users.db';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
     } catch (err) {
         alert(err.message);
     }
