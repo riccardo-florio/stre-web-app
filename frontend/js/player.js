@@ -9,6 +9,7 @@
     const timeDisplay = document.getElementById('time-display');
     const loading = document.getElementById('player-loading');
     const nextEpisodeBtn = document.getElementById('next-episode');
+    const titleDisplay = document.getElementById('player-title');
     const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     let hideControlsTimeout = null;
     let hlsInstance = null;
@@ -50,6 +51,7 @@
         currentFilmTitle = title;
         currentFilmCover = cover;
         currentSeriesTitle = title ? title.split(' - S')[0] : null;
+        titleDisplay.textContent = title || '';
         if (String(filmId).includes('-')) {
             const [baseId, episodeId] = String(filmId).split('-');
             await prepareNextEpisode(baseId, episodeId, slug);
@@ -111,6 +113,7 @@
         video.removeAttribute('src');
         progressBar.value = 0;
         timeDisplay.textContent = '0:00/0:00';
+        titleDisplay.textContent = '';
         updateWatchButtonLabel();
         currentFilmId = null;
         currentFilmSlug = null;
