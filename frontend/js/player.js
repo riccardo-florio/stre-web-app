@@ -8,6 +8,8 @@
     const controls = document.getElementById('player-controls');
     const timeDisplay = document.getElementById('time-display');
     const loading = document.getElementById('player-loading');
+    const nextEpisodeBtn = document.getElementById('next-episode');
+    const titleDisplay = document.getElementById('player-title');
     const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     let hideControlsTimeout = null;
     let hlsInstance = null;
@@ -15,18 +17,22 @@
     let currentFilmSlug = null;
     let currentFilmTitle = null;
     let currentFilmCover = null;
+    let currentSeriesTitle = null;
     let resumeTime = 0;
     let lastProgressSent = 0;
+    let nextEpisodeInfo = null;
 
     function hideControls() {
         controls.classList.add('opacity-0', 'pointer-events-none');
         closeBtn.classList.add('opacity-0', 'pointer-events-none');
+        titleDisplay.classList.add('opacity-0', 'pointer-events-none');
     }
 
     function showControls() {
         controls.classList.remove('opacity-0', 'pointer-events-none');
         closeBtn.classList.remove('opacity-0', 'pointer-events-none');
-        if (!isTouch || video.paused) return;
+        titleDisplay.classList.remove('opacity-0', 'pointer-events-none');
+        if (video.paused) return;
         clearTimeout(hideControlsTimeout);
         hideControlsTimeout = setTimeout(hideControls, 3000);
     }
@@ -46,6 +52,15 @@
         currentFilmSlug = slug;
         currentFilmTitle = title;
         currentFilmCover = cover;
+        currentSeriesTitle = title ? title.split(' - S')[0] : null;
+        titleDisplay.textContent = title || '';
+        if (String(filmId).includes('-')) {
+            const [baseId, episodeId] = String(filmId).split('-');
+            await prepareNextEpisode(baseId, episodeId, slug);
+        } else {
+            nextEpisodeInfo = null;
+            nextEpisodeBtn.classList.add('hidden');
+        }
         const userId = localStorage.getItem('userId');
         if (userId) {
             try {
@@ -100,15 +115,40 @@
         video.removeAttribute('src');
         progressBar.value = 0;
         timeDisplay.textContent = '0:00/0:00';
+        titleDisplay.textContent = '';
         updateWatchButtonLabel();
         currentFilmId = null;
         currentFilmSlug = null;
         currentFilmTitle = null;
         currentFilmCover = null;
+        currentSeriesTitle = null;
         resumeTime = 0;
+        nextEpisodeInfo = null;
+        nextEpisodeBtn.classList.add('hidden');
         hideLoading();
         if (popState && history.state && history.state.player) {
             history.back();
+        }
+    }
+
+    async function prepareNextEpisode(baseId, episodeId, slug) {
+        try {
+            const extended = await fetchExtendedInfo(`${baseId}-${slug}`);
+            const episodes = (extended.episodeList || []).sort(
+                (a, b) => a.season - b.season || a.episode - b.episode
+            );
+            const idx = episodes.findIndex(ep => ep.id == episodeId);
+            const nextEp = idx >= 0 ? episodes[idx + 1] : null;
+            if (nextEp) {
+                nextEpisodeInfo = { baseId, slug, nextEp };
+                nextEpisodeBtn.classList.remove('hidden');
+            } else {
+                nextEpisodeInfo = null;
+                nextEpisodeBtn.classList.add('hidden');
+            }
+        } catch (_) {
+            nextEpisodeInfo = null;
+            nextEpisodeBtn.classList.add('hidden');
         }
     }
 
@@ -178,6 +218,24 @@
     });
 
     fullscreenBtn.addEventListener('click', toggleFullscreen);
+    nextEpisodeBtn.addEventListener('click', async () => {
+        if (!nextEpisodeInfo) return;
+        const { baseId, slug, nextEp } = nextEpisodeInfo;
+        try {
+            const links = await fetchStreamingLinks(baseId, nextEp.id);
+            const hlsLink = links.find(l => l.includes('playlist') || l.includes('.m3u8'));
+            if (!hlsLink) return;
+            const epCover = (nextEp.images && nextEp.images.length)
+                ? `https://cdn.${mainUrl}/images/${nextEp.images[0].filename}`
+                : currentFilmCover;
+            const combinedId = `${baseId}-${nextEp.id}`;
+            const baseTitle = currentSeriesTitle || currentFilmTitle;
+            const epTitle = `${baseTitle} - S${nextEp.season}E${nextEp.episode} - ${nextEp.name}`;
+            showPlayer(hlsLink, combinedId, slug, epTitle, epCover);
+        } catch (err) {
+            console.error('Errore nel recupero dei link', err);
+        }
+    });
     closeBtn.addEventListener('click', () => hidePlayer(true));
 
     modal.addEventListener('click', (e) => {
