@@ -174,7 +174,8 @@ sessioni.
 
 ## TODO
 
-- gestire aggiornamento mantenendo il db
+- aggiungere voce `updatedAt` alla tabella `video_progress` per tracciare effettivamente l'ultimo contenuto guardato
+- implementare eliminazione di tutti i video progress all'eliminazione di un utente
 
 - implementare cronologia (es. download completati, interrotti, ecc..)
 - implementare tracciamento (es. chi scarica cosa, chi guarda cosa, ecc..)
