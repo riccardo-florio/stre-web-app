@@ -416,7 +416,7 @@ function populateSearchResults(results, query, mainUrl) {
                     <span class="text-pretty">Uscita: <span class="font-semibold">${year}</span></span>
                 </div>
                 <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
-                    <button onClick='watchFromSearch(${data.id}, ${JSON.stringify(data.slug)}, ${JSON.stringify(title)}, ${JSON.stringify(imgUrl)})'
+                    <button onClick='watchFromSearch(${data.id}, ${JSON.stringify(data.slug)}, ${JSON.stringify(title)}, ${JSON.stringify(imgUrl)}, ${JSON.stringify(data.type)})'
                     class="bg-gray-200 rounded-[0.5em] text-gray-800 px-4 py-2 font-medium">Guarda</button>
                     <button onClick='searchResultToDownload(${data.id}, ${JSON.stringify(data.slug)}, ${JSON.stringify(title)})'
                     class="bg-blue-500 rounded-[0.5em] text-white px-4 py-2 font-medium">Info</button>
@@ -434,19 +434,48 @@ function populateSearchResultError() {
     resultsCardsContainer.innerHTML = `<p class="text-red-500 text-pretty">Errore nella ricerca. Riprova più tardi.</p>`;
 }
 
-async function watchFromSearch(id, slug, title, cover) {
+async function watchFromSearch(id, slug, title, cover, type) {
     try {
-        const links = await fetchStreamingLinks(id);
-        const hlsLink = links.find(l => l.includes('playlist') || l.includes('.m3u8'));
-        if (hlsLink) {
-            filmId = id;
-            filmTitle = title;
-            filmSlug = slug;
-            filmCover = cover;
-            showPlayer(hlsLink, id, slug, title, cover);
+        let hlsLink = null;
+        let finalId = id;
+        let finalTitle = title;
+        let finalCover = cover;
+        if (type === 'tv') {
+            const extended = await fetchExtendedInfo(`${id}-${slug}`);
+            const firstEp = (extended.episodeList || []).reduce((acc, ep) => {
+                if (!acc) return ep;
+                if (ep.season < acc.season) return ep;
+                if (ep.season === acc.season && ep.episode < acc.episode) return ep;
+                return acc;
+            }, null);
+            if (!firstEp) {
+                alert('Nessun episodio disponibile');
+                return;
+            }
+            const links = await fetchStreamingLinks(id, firstEp.id);
+            hlsLink = links.find(l => l.includes('playlist') || l.includes('.m3u8'));
+            if (!hlsLink) {
+                alert('Nessun link disponibile');
+                return;
+            }
+            finalCover = (firstEp.images && firstEp.images.length)
+                ? `https://cdn.${mainUrl}/images/${firstEp.images[0].filename}`
+                : cover;
+            finalId = `${id}-${firstEp.id}`;
+            finalTitle = `${title} - S${firstEp.season}E${firstEp.episode} - ${firstEp.name}`;
         } else {
-            alert('Nessun link disponibile');
+            const links = await fetchStreamingLinks(id);
+            hlsLink = links.find(l => l.includes('playlist') || l.includes('.m3u8'));
+            if (!hlsLink) {
+                alert('Nessun link disponibile');
+                return;
+            }
         }
+        filmId = finalId;
+        filmTitle = finalTitle;
+        filmSlug = slug;
+        filmCover = finalCover;
+        showPlayer(hlsLink, finalId, slug, finalTitle, finalCover);
     } catch (err) {
         console.error('Errore nel recupero dei link', err);
         alert('Errore nel recupero dei link');
