@@ -473,6 +473,14 @@ async function resumeFromProgress(id, slug, title, cover) {
     }
 }
 
+function parseSeasonEpisode(title) {
+    const match = /S(\d+)E(\d+)/i.exec(title || '');
+    return {
+        season: match ? parseInt(match[1], 10) : 0,
+        episode: match ? parseInt(match[2], 10) : 0,
+    };
+}
+
 async function populateContinueWatching() {
     const section = document.getElementById('continue-watching');
     const container = document.getElementById('continue-cards');
@@ -498,12 +506,23 @@ async function populateContinueWatching() {
             }
         }
     }
+    const deduped = new Map();
+    items.forEach((item, index) => {
+        const [baseId] = (item.film_id || '').split('-');
+        const { season, episode } = parseSeasonEpisode(item.title);
+        const existing = deduped.get(baseId);
+        if (!existing || season > existing.season || (season === existing.season && episode > existing.episode)) {
+            deduped.set(baseId, { ...item, season, episode, index });
+        }
+    });
+    const finalItems = Array.from(deduped.values()).sort((a, b) => a.index - b.index);
+
     container.innerHTML = '';
-    if (!items.length) {
+    if (!finalItems.length) {
         section.classList.add('hidden');
         return;
     }
-    items.forEach(item => {
+    finalItems.forEach(item => {
         const percent = item.duration ? Math.min((item.progress / item.duration) * 100, 100) : 0;
         const card = document.createElement('div');
         card.className = 'w-48 flex-shrink-0 cursor-pointer';
