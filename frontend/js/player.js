@@ -32,7 +32,7 @@
         controls.classList.remove('opacity-0', 'pointer-events-none');
         closeBtn.classList.remove('opacity-0', 'pointer-events-none');
         titleDisplay.classList.remove('opacity-0', 'pointer-events-none');
-        if (!isTouch || video.paused) return;
+        if (video.paused) return;
         clearTimeout(hideControlsTimeout);
         hideControlsTimeout = setTimeout(hideControls, 3000);
     }
