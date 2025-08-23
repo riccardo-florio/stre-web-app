@@ -25,11 +25,13 @@
     function hideControls() {
         controls.classList.add('opacity-0', 'pointer-events-none');
         closeBtn.classList.add('opacity-0', 'pointer-events-none');
+        titleDisplay.classList.add('opacity-0', 'pointer-events-none');
     }
 
     function showControls() {
         controls.classList.remove('opacity-0', 'pointer-events-none');
         closeBtn.classList.remove('opacity-0', 'pointer-events-none');
+        titleDisplay.classList.remove('opacity-0', 'pointer-events-none');
         if (!isTouch || video.paused) return;
         clearTimeout(hideControlsTimeout);
         hideControlsTimeout = setTimeout(hideControls, 3000);
