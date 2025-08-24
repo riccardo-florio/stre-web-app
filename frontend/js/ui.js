@@ -505,14 +505,6 @@ async function resumeFromProgress(id, slug, title, cover) {
     }
 }
 
-function parseSeasonEpisode(title) {
-    const match = /S(\d+)E(\d+)/i.exec(title || '');
-    return {
-        season: match ? parseInt(match[1], 10) : 0,
-        episode: match ? parseInt(match[2], 10) : 0,
-    };
-}
-
 async function populateContinueWatching() {
     const section = document.getElementById('continue-watching');
     const container = document.getElementById('continue-cards');
@@ -533,21 +525,21 @@ async function populateContinueWatching() {
                 const prog = parseFloat(localStorage.getItem(key));
                 if (prog > 0) {
                     const meta = JSON.parse(localStorage.getItem('progress-meta-' + id) || '{}');
-                    items.push({ film_id: id, progress: prog, duration: meta.duration || 0, slug: meta.slug, title: meta.title, cover: meta.cover });
+                    items.push({ film_id: id, progress: prog, duration: meta.duration || 0, slug: meta.slug, title: meta.title, cover: meta.cover, updatedAt: meta.updatedAt });
                 }
             }
         }
     }
     const deduped = new Map();
-    items.forEach((item, index) => {
+    items.forEach((item) => {
         const [baseId] = (item.film_id || '').split('-');
-        const { season, episode } = parseSeasonEpisode(item.title);
+        const ts = Date.parse(item.updatedAt) || 0;
         const existing = deduped.get(baseId);
-        if (!existing || season > existing.season || (season === existing.season && episode > existing.episode)) {
-            deduped.set(baseId, { ...item, season, episode, index });
+        if (!existing || ts > existing.ts) {
+            deduped.set(baseId, { ...item, ts });
         }
     });
-    const finalItems = Array.from(deduped.values()).sort((a, b) => a.index - b.index);
+    const finalItems = Array.from(deduped.values()).sort((a, b) => b.ts - a.ts);
 
     container.innerHTML = '';
     if (!finalItems.length) {
