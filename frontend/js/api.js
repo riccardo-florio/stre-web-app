@@ -1,3 +1,6 @@
+const GITHUB_OWNER = 'riccardo-florio';
+const GITHUB_REPO = 'stre-web-app';
+
 async function fetchUrl() {
     const res = await fetch('/api/get-stre-domain');
     const data = await res.json();
@@ -24,6 +27,12 @@ async function fetchExtendedInfo(slug) {
 
 async function fetchAppVersion() {
     const res = await fetch('/api/get-app-version');
+    const data = await res.json();
+    return data;
+}
+
+async function fetchLatestRelease() {
+    const res = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/releases/latest`);
     const data = await res.json();
     return data;
 }

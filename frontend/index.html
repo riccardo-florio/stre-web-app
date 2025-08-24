@@ -280,6 +280,8 @@
                     onclick="showAdminSection('users')">Utenti</button>
                 <button id="admin-progress-link" class="text-left px-2 py-1 rounded"
                     onclick="showAdminSection('progress')">Video Progress</button>
+                <button id="admin-update-link" class="text-left px-2 py-1 rounded"
+                    onclick="showAdminSection('update')">Aggiornamento</button>
                 <button id="admin-export-db" class="text-left px-2 py-1 rounded"
                     onclick="handleExportDb()">Esporta DB</button>
                 <button type="button" onclick="hideAdminModal()"
@@ -301,6 +303,14 @@
                             class="bg-gray-500 text-white px-3 py-1 rounded">Ricarica</button>
                     </div>
                     <div id="admin-progress" class="overflow-y-auto max-h-[70vh]"></div>
+                </div>
+                <div id="admin-update-section" class="w-full hidden">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-2xl">Aggiornamento</h2>
+                        <button type="button" onclick="populateUpdateSection()"
+                            class="bg-gray-500 text-white px-3 py-1 rounded">Ricarica</button>
+                    </div>
+                    <div id="admin-update" class="overflow-y-auto max-h-[70vh]"></div>
                 </div>
             </div>
         </div>

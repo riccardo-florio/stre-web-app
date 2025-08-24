@@ -95,13 +95,17 @@ function hideAdminModal() {
 function showAdminSection(section) {
     const usersLink = document.getElementById('admin-users-link');
     const progressLink = document.getElementById('admin-progress-link');
+    const updateLink = document.getElementById('admin-update-link');
     const usersSection = document.getElementById('admin-users-section');
     const progressSection = document.getElementById('admin-progress-section');
+    const updateSection = document.getElementById('admin-update-section');
 
     usersLink.classList.remove('bg-gray-200');
     progressLink.classList.remove('bg-gray-200');
+    updateLink.classList.remove('bg-gray-200');
     usersSection.classList.add('hidden');
     progressSection.classList.add('hidden');
+    updateSection.classList.add('hidden');
 
     if (section === 'users') {
         usersLink.classList.add('bg-gray-200');
@@ -111,6 +115,10 @@ function showAdminSection(section) {
         progressLink.classList.add('bg-gray-200');
         progressSection.classList.remove('hidden');
         populateProgressTable();
+    } else if (section === 'update') {
+        updateLink.classList.add('bg-gray-200');
+        updateSection.classList.remove('hidden');
+        populateUpdateSection();
     }
 }
 
@@ -237,6 +245,28 @@ async function populateProgressTable() {
         container.appendChild(table);
     } catch (err) {
         container.innerHTML = `<span class='text-red-600'>${err.message}</span>`;
+    }
+}
+
+async function populateUpdateSection() {
+    const container = document.getElementById('admin-update');
+    container.innerHTML = '';
+    try {
+        const release = await fetchLatestRelease();
+        const published = release.published_at
+            ? new Date(release.published_at).toLocaleString()
+            : '';
+        container.innerHTML = `
+            <div class="flex flex-col gap-2">
+                <span><strong>Versione:</strong> ${release.tag_name || ''}</span>
+                <span><strong>Pubblicata:</strong> ${published}</span>
+                <a href="${release.html_url}" target="_blank" class="text-blue-600 underline">Vedi su GitHub</a>
+                <p class="text-pretty whitespace-pre-line">${release.body || ''}</p>
+            </div>
+        `;
+    } catch (err) {
+        container.innerHTML = `<span class='text-red-600'>Errore nel recupero della release</span>`;
+        console.error('Errore nel recupero della release', err);
     }
 }
 
