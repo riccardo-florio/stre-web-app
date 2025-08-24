@@ -212,6 +212,7 @@ async function populateProgressTable() {
                     <th class="border-b px-2 py-1 text-left">Progresso</th>
                     <th class="border-b px-2 py-1 text-left">Film ID</th>
                     <th class="border-b px-2 py-1 text-left">User ID</th>
+                    <th class="border-b px-2 py-1 text-left">Aggiornato</th>
                     <th class="border-b px-2 py-1 text-left">Azioni</th>
                 </tr>
             </thead>
@@ -220,6 +221,7 @@ async function populateProgressTable() {
         const tbody = table.querySelector('tbody');
         entries.forEach(e => {
             const percent = e.duration ? Math.round((e.progress / e.duration) * 100) : 0;
+            const updatedAt = e.updatedAt ? new Date(e.updatedAt).toLocaleString() : '';
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td class="border-b px-2 py-1">${e.username}</td>
@@ -227,6 +229,7 @@ async function populateProgressTable() {
                 <td class="border-b px-2 py-1">${percent}%</td>
                 <td class="border-b px-2 py-1">${e.film_id}</td>
                 <td class="border-b px-2 py-1">${e.user_id}</td>
+                <td class="border-b px-2 py-1">${updatedAt}</td>
                 <td class="border-b px-2 py-1"><button onclick="deleteProgressHandler(${e.user_id}, '${e.film_id}')" class="bg-red-500 text-white px-2 rounded">Elimina</button></td>
             `;
             tbody.appendChild(row);
@@ -502,14 +505,6 @@ async function resumeFromProgress(id, slug, title, cover) {
     }
 }
 
-function parseSeasonEpisode(title) {
-    const match = /S(\d+)E(\d+)/i.exec(title || '');
-    return {
-        season: match ? parseInt(match[1], 10) : 0,
-        episode: match ? parseInt(match[2], 10) : 0,
-    };
-}
-
 async function populateContinueWatching() {
     const section = document.getElementById('continue-watching');
     const container = document.getElementById('continue-cards');
@@ -530,21 +525,21 @@ async function populateContinueWatching() {
                 const prog = parseFloat(localStorage.getItem(key));
                 if (prog > 0) {
                     const meta = JSON.parse(localStorage.getItem('progress-meta-' + id) || '{}');
-                    items.push({ film_id: id, progress: prog, duration: meta.duration || 0, slug: meta.slug, title: meta.title, cover: meta.cover });
+                    items.push({ film_id: id, progress: prog, duration: meta.duration || 0, slug: meta.slug, title: meta.title, cover: meta.cover, updatedAt: meta.updatedAt });
                 }
             }
         }
     }
     const deduped = new Map();
-    items.forEach((item, index) => {
+    items.forEach((item) => {
         const [baseId] = (item.film_id || '').split('-');
-        const { season, episode } = parseSeasonEpisode(item.title);
+        const ts = Date.parse(item.updatedAt) || 0;
         const existing = deduped.get(baseId);
-        if (!existing || season > existing.season || (season === existing.season && episode > existing.episode)) {
-            deduped.set(baseId, { ...item, season, episode, index });
+        if (!existing || ts > existing.ts) {
+            deduped.set(baseId, { ...item, ts });
         }
     });
-    const finalItems = Array.from(deduped.values()).sort((a, b) => a.index - b.index);
+    const finalItems = Array.from(deduped.values()).sort((a, b) => b.ts - a.ts);
 
     container.innerHTML = '';
     if (!finalItems.length) {

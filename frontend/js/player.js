@@ -190,7 +190,7 @@
                 }
             } else {
                 localStorage.setItem('progress-' + currentFilmId, video.currentTime);
-                localStorage.setItem('progress-meta-' + currentFilmId, JSON.stringify({ slug: currentFilmSlug, title: currentFilmTitle, cover: currentFilmCover, duration: video.duration }));
+                localStorage.setItem('progress-meta-' + currentFilmId, JSON.stringify({ slug: currentFilmSlug, title: currentFilmTitle, cover: currentFilmCover, duration: video.duration, updatedAt: new Date().toISOString() }));
                 if (now - lastProgressSent > 1000) {
                     lastProgressSent = now;
                     populateContinueWatching();

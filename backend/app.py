@@ -4,6 +4,7 @@ from flask_socketio import SocketIO, emit
 import json
 from pathlib import Path
 from uuid import uuid4
+from datetime import datetime
 from models import db, User, VideoProgress
 from sqlalchemy import text
 from utils.app_functions import (
@@ -68,6 +69,13 @@ def ensure_video_progress_columns():
     if "cover" not in columns:
         db.session.execute(
             text("ALTER TABLE video_progress ADD COLUMN cover VARCHAR(255)")
+        )
+    if "updated_at" not in columns:
+        db.session.execute(
+            text("ALTER TABLE video_progress ADD COLUMN updated_at TIMESTAMP")
+        )
+        db.session.execute(
+            text("UPDATE video_progress SET updated_at = CURRENT_TIMESTAMP")
         )
     db.session.commit()
 
@@ -321,6 +329,7 @@ def video_progress(user_id, film_id):
                 "slug": entry.slug,
                 "title": entry.title,
                 "cover": entry.cover,
+                "updatedAt": entry.updated_at.isoformat() if entry.updated_at else None,
             }
         )
 
@@ -350,6 +359,7 @@ def video_progress(user_id, film_id):
             slug=slug,
             title=title,
             cover=cover,
+            updated_at=datetime.utcnow(),
         )
         db.session.add(entry)
     else:
@@ -362,6 +372,7 @@ def video_progress(user_id, film_id):
             entry.cover = cover
         if duration is not None:
             entry.duration = duration
+        entry.updated_at = datetime.utcnow()
     db.session.commit()
     return jsonify({"progress": entry.progress})
 
@@ -388,6 +399,7 @@ def all_progress():
                     "slug": vp.slug,
                     "title": vp.title,
                     "cover": vp.cover,
+                    "updatedAt": vp.updated_at.isoformat() if vp.updated_at else None,
                 }
                 for vp, username in entries
             ]
@@ -411,6 +423,7 @@ def user_progress(user_id):
                     "slug": e.slug,
                     "title": e.title,
                     "cover": e.cover,
+                    "updatedAt": e.updated_at.isoformat() if e.updated_at else None,
                 }
                 for e in entries
                 if e.progress > 0
