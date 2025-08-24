@@ -252,17 +252,30 @@ async function populateUpdateSection() {
     const container = document.getElementById('admin-update');
     container.innerHTML = '';
     try {
-        const release = await fetchLatestRelease();
+        const [release, currentVersion] = await Promise.all([
+            fetchLatestRelease(),
+            fetchAppVersion()
+        ]);
         const published = release.published_at
             ? new Date(release.published_at).toLocaleString()
             : '';
         const bodyHtml = release.body ? marked.parse(release.body) : '';
+        const latestVersion = release.tag_name || '';
+        let statusHtml = '';
+        if (currentVersion === latestVersion) {
+            statusHtml = `<span id="update-status" class="text-green-600">La versione installata (${currentVersion}) è la più recente.</span>`;
+        } else {
+            statusHtml = `<span id="update-status" class="text-red-600">Disponibile aggiornamento alla ${latestVersion} (installata ${currentVersion}).</span>
+                <button id="update-btn" class="bg-blue-500 text-white px-3 py-1 rounded mt-2">Aggiorna</button>`;
+        }
         container.innerHTML = `
             <div class="flex flex-col gap-2">
-                <span><strong>Versione:</strong> ${release.tag_name || ''}</span>
+                <span><strong>Ultima versione:</strong> ${latestVersion}</span>
+                <span><strong>Versione installata:</strong> ${currentVersion}</span>
                 <span><strong>Pubblicata:</strong> ${published}</span>
                 <a href="${release.html_url}" target="_blank" class="text-blue-600 underline">Vedi su GitHub</a>
                 <div class="text-pretty">${bodyHtml}</div>
+                <div class="mt-4 flex flex-col gap-2">${statusHtml}</div>
             </div>
         `;
     } catch (err) {
