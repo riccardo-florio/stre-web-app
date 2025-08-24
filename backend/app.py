@@ -72,9 +72,10 @@ def ensure_video_progress_columns():
         )
     if "updated_at" not in columns:
         db.session.execute(
-            text(
-                "ALTER TABLE video_progress ADD COLUMN updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
-            )
+            text("ALTER TABLE video_progress ADD COLUMN updated_at TIMESTAMP")
+        )
+        db.session.execute(
+            text("UPDATE video_progress SET updated_at = CURRENT_TIMESTAMP")
         )
     db.session.commit()
 

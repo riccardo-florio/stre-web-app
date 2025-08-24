@@ -36,6 +36,7 @@ class VideoProgress(db.Model):
     cover = db.Column(db.String(255), nullable=True)
     updated_at = db.Column(
         db.DateTime,
+        default=func.current_timestamp(),
         server_default=func.current_timestamp(),
         onupdate=func.current_timestamp(),
         nullable=False,
