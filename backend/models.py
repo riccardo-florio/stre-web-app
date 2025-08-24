@@ -1,5 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
+from sqlalchemy import func
 
 # Initialize SQLAlchemy without app, will be bound in app factory
 
@@ -33,5 +34,11 @@ class VideoProgress(db.Model):
     slug = db.Column(db.String(255), nullable=True)
     title = db.Column(db.String(255), nullable=True)
     cover = db.Column(db.String(255), nullable=True)
+    updated_at = db.Column(
+        db.DateTime,
+        server_default=func.current_timestamp(),
+        onupdate=func.current_timestamp(),
+        nullable=False,
+    )
 
     __table_args__ = (db.UniqueConstraint('user_id', 'film_id', name='uniq_user_film'),)
