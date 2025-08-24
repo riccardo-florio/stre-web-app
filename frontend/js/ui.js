@@ -212,6 +212,7 @@ async function populateProgressTable() {
                     <th class="border-b px-2 py-1 text-left">Progresso</th>
                     <th class="border-b px-2 py-1 text-left">Film ID</th>
                     <th class="border-b px-2 py-1 text-left">User ID</th>
+                    <th class="border-b px-2 py-1 text-left">Aggiornato</th>
                     <th class="border-b px-2 py-1 text-left">Azioni</th>
                 </tr>
             </thead>
@@ -220,6 +221,7 @@ async function populateProgressTable() {
         const tbody = table.querySelector('tbody');
         entries.forEach(e => {
             const percent = e.duration ? Math.round((e.progress / e.duration) * 100) : 0;
+            const updatedAt = e.updatedAt ? new Date(e.updatedAt).toLocaleString() : '';
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td class="border-b px-2 py-1">${e.username}</td>
@@ -227,6 +229,7 @@ async function populateProgressTable() {
                 <td class="border-b px-2 py-1">${percent}%</td>
                 <td class="border-b px-2 py-1">${e.film_id}</td>
                 <td class="border-b px-2 py-1">${e.user_id}</td>
+                <td class="border-b px-2 py-1">${updatedAt}</td>
                 <td class="border-b px-2 py-1"><button onclick="deleteProgressHandler(${e.user_id}, '${e.film_id}')" class="bg-red-500 text-white px-2 rounded">Elimina</button></td>
             `;
             tbody.appendChild(row);
