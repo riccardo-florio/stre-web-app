@@ -59,6 +59,12 @@ Se lasci `HOST_DB_DIR` vuoto verrà utilizzato il percorso predefinito `./instan
 Puoi inoltre personalizzare la porta esposta all'host impostando `HOST_PORT`.
 Se non definita, la porta predefinita sarà `5000`.
 
+## Aggiornamento dell'app
+
+Dal pannello di amministrazione è possibile avviare l'aggiornamento dell'applicazione.
+Basta aprire la dashboard admin e premere il pulsante **Aggiorna**: verrà eseguito lo script `update.py`
+che recupera gli ultimi sorgenti dal repository, reinstalla le dipendenze e riavvia automaticamente il server.
+
 ## Come funziona
 
 Al lancio il backend recupera automaticamente il dominio valido di StreamingCommunity ed inizializza l'API:
@@ -178,5 +184,4 @@ sessioni.
 
 - implementare cronologia (es. download completati, interrotti, ecc..)
 - implementare tracciamento (es. chi scarica cosa, chi guarda cosa, ecc..)
-- implementare possibilità di aggiornare l'app dalla ui
 - aggiungere possibilità di usare custom url (non necessario al momento)

@@ -5,6 +5,8 @@ import json
 from pathlib import Path
 from uuid import uuid4
 from datetime import datetime
+import subprocess
+import sys
 from models import db, User, VideoProgress
 from sqlalchemy import text
 from utils.app_functions import (
@@ -442,6 +444,18 @@ def export_db():
     if not db_path.exists():
         return jsonify({"error": "db not found"}), 404
     return send_file(db_path, as_attachment=True, download_name="users.db")
+
+
+@app.route("/api/update", methods=["POST"])
+def trigger_update():
+    """Execute the update script in background."""
+    if not is_admin_request():
+        return jsonify({"error": "forbidden"}), 403
+    script_path = BASE_DIR.parent / "update.py"
+    if not script_path.exists():
+        return jsonify({"error": "update script not found"}), 500
+    subprocess.Popen([sys.executable, str(script_path)])
+    return jsonify({"status": "updating"})
 
 @socketio.on("start_download")
 def handle_start_download(data):

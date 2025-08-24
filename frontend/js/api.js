@@ -156,6 +156,18 @@ async function exportDatabase() {
     return await res.blob();
 }
 
+async function triggerUpdate() {
+    const res = await fetch('/api/update', {
+        method: 'POST',
+        headers: { 'X-Role': localStorage.getItem('role') || '' }
+    });
+    const data = await res.json();
+    if (!res.ok) {
+        throw new Error(data.error || 'Errore nell\'aggiornamento');
+    }
+    return data;
+}
+
 
 async function fetchUser(id) {
     const res = await fetch(`/api/users/${id}`);

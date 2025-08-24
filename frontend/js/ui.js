@@ -266,6 +266,15 @@ async function handleExportDb() {
     }
 }
 
+async function handleUpdate() {
+    try {
+        await triggerUpdate();
+        alert('Aggiornamento avviato, l\'app verrà riavviata.');
+    } catch (err) {
+        alert(err.message);
+    }
+}
+
 async function register(event) {
     event.preventDefault();
     const form = document.getElementById('registration-form');
