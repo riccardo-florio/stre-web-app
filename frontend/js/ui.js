@@ -256,12 +256,13 @@ async function populateUpdateSection() {
         const published = release.published_at
             ? new Date(release.published_at).toLocaleString()
             : '';
+        const bodyHtml = release.body ? marked.parse(release.body) : '';
         container.innerHTML = `
             <div class="flex flex-col gap-2">
                 <span><strong>Versione:</strong> ${release.tag_name || ''}</span>
                 <span><strong>Pubblicata:</strong> ${published}</span>
                 <a href="${release.html_url}" target="_blank" class="text-blue-600 underline">Vedi su GitHub</a>
-                <p class="text-pretty whitespace-pre-line">${release.body || ''}</p>
+                <div class="text-pretty">${bodyHtml}</div>
             </div>
         `;
     } catch (err) {
