@@ -28,13 +28,57 @@ async function fetchAppVersion() {
     return data;
 }
 
-async function fetchStreamingLinks(id, episodeId = null) {
-    const url = episodeId
-        ? `/api/get-streaming-links/${id}?episode_id=${episodeId}`
-        : `/api/get-streaming-links/${id}`;
-    const res = await fetch(url);
-    const data = await res.json();
-    return data;
+// Fetch streaming links directly from the StreamingCommunity domain without
+// hitting the backend API. It builds the iframe URL, parses the returned HTML
+// to obtain playlist information and returns the final playlist URL.
+async function fetchStreamingLinksDirect(contentId, episodeId = null) {
+    const domain = window.mainUrl || await fetchUrl();
+    const qs = episodeId ? `?episode_id=${episodeId}` : '';
+    const pageUrl = `https://${domain}/it/iframe/${contentId}${qs}`;
+
+    const proxyBase = window.scProxy || null;
+
+    async function corsFetch(url) {
+        try {
+            const res = await fetch(url);
+            if (!res.ok) throw new Error('HTTP error');
+            return res;
+        } catch (err) {
+            if (proxyBase) {
+                const proxyRes = await fetch(proxyBase + encodeURIComponent(url));
+                if (!proxyRes.ok) throw new Error('Proxy HTTP error');
+                return proxyRes;
+            }
+            throw new Error('CORS blocked and no proxy configured');
+        }
+    }
+
+    const pageRes = await corsFetch(pageUrl);
+    const pageHtml = await pageRes.text();
+
+    const iframeMatch = pageHtml.match(/<iframe[^>]+src\s*=\s*["']([^"']+)/i);
+    if (!iframeMatch) throw new Error('Iframe not found');
+    const iframeUrl = iframeMatch[1];
+
+    const iframeRes = await corsFetch(iframeUrl);
+    const iframeHtml = await iframeRes.text();
+
+    const paramsMatch = iframeHtml.match(/window\.masterPlaylist[^:]+params:[^{]+({[^<]+?})/);
+    const urlMatch = iframeHtml.match(/window\.masterPlaylist[^<]+url:[^<]+'([^<]+?)'/);
+    const fhdMatch = iframeHtml.match(/window\.canPlayFHD\s*=\s*(\w+)/);
+    const streamsMatch = iframeHtml.match(/window\.streams[^=]+=[^[]+(\[.*?\])/);
+
+    if (!paramsMatch || !urlMatch) throw new Error('Playlist info missing');
+
+    const paramsRaw = paramsMatch[1].replace(/'/g, '"').replace(/,[^"}]+}/, '}');
+    const playlistParams = JSON.parse(paramsRaw);
+
+    // Parse streams even if not directly used, to mimic backend behaviour
+    try { JSON.parse(streamsMatch ? streamsMatch[1] : '[]'); } catch (_) {}
+
+    const playlistUrl = urlMatch[1];
+    const canPlayFHD = fhdMatch ? fhdMatch[1] === 'true' : false;
+    return `${playlistUrl}${playlistUrl.includes('?') ? '&' : '?'}expires=${playlistParams.expires}&token=${playlistParams.token}${canPlayFHD ? '&h=1' : ''}`;
 }
 
 async function fetchSignIn(nome, cognome, username, email, password) {
