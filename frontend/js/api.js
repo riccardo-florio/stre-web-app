@@ -28,15 +28,6 @@ async function fetchAppVersion() {
     return data;
 }
 
-async function fetchStreamingLinks(id, episodeId = null) {
-    const url = episodeId
-        ? `/api/get-streaming-links/${id}?episode_id=${episodeId}`
-        : `/api/get-streaming-links/${id}`;
-    const res = await fetch(url);
-    const data = await res.json();
-    return data;
-}
-
 // Fetch streaming links directly from the StreamingCommunity domain without
 // hitting the backend API. It builds the iframe URL, parses the returned HTML
 // to obtain playlist information and returns the final playlist URL.
@@ -53,14 +44,12 @@ async function fetchStreamingLinksDirect(contentId, episodeId = null) {
             if (!res.ok) throw new Error('HTTP error');
             return res;
         } catch (err) {
-            if (!proxyBase) throw err;
-            try {
+            if (proxyBase) {
                 const proxyRes = await fetch(proxyBase + encodeURIComponent(url));
                 if (!proxyRes.ok) throw new Error('Proxy HTTP error');
                 return proxyRes;
-            } catch (proxyErr) {
-                throw proxyErr;
             }
+            throw new Error('CORS blocked and no proxy configured');
         }
     }
 
@@ -89,7 +78,6 @@ async function fetchStreamingLinksDirect(contentId, episodeId = null) {
 
     const playlistUrl = urlMatch[1];
     const canPlayFHD = fhdMatch ? fhdMatch[1] === 'true' : false;
-
     return `${playlistUrl}${playlistUrl.includes('?') ? '&' : '?'}expires=${playlistParams.expires}&token=${playlistParams.token}${canPlayFHD ? '&h=1' : ''}`;
 }
 
