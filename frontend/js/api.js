@@ -45,15 +45,22 @@ async function fetchStreamingLinksDirect(contentId, episodeId = null) {
     const qs = episodeId ? `?episode_id=${episodeId}` : '';
     const pageUrl = `https://${domain}/it/iframe/${contentId}${qs}`;
 
-    const proxyBase = window.scProxy || 'https://scproxy.example.workers.dev/?url=';
+    const proxyBase = window.scProxy || null;
 
     async function corsFetch(url) {
         try {
             const res = await fetch(url);
             if (!res.ok) throw new Error('HTTP error');
             return res;
-        } catch (_) {
-            return fetch(proxyBase + encodeURIComponent(url));
+        } catch (err) {
+            if (!proxyBase) throw err;
+            try {
+                const proxyRes = await fetch(proxyBase + encodeURIComponent(url));
+                if (!proxyRes.ok) throw new Error('Proxy HTTP error');
+                return proxyRes;
+            } catch (proxyErr) {
+                throw proxyErr;
+            }
         }
     }
 
