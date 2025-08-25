@@ -133,10 +133,14 @@ class API:
         self.session = requests.Session()
         self.session.verify = False
 
-    def _wbpage_as_text(self, url):
+    def _wbpage_as_text(self, url, headers=None):
+        """Return the text of a webpage handling common errors."""
+        request_headers = {"user-agent": self.user_agent}
+        if headers:
+            request_headers.update(headers)
         try:
             response = self.session.get(
-                url, headers={"user-agent": self.user_agent}, timeout=REQ_TIMEOUT
+                url, headers=request_headers, timeout=REQ_TIMEOUT
             )
         except requests.exceptions.Timeout as e:
             raise WebPageTimeOutError(url) from e
@@ -373,7 +377,7 @@ class API:
             "recommendations": correlates_list,
         }
 
-    def get_links(self, content_id, episode_id=None, get_m3u=False):
+    def get_links(self, content_id, episode_id=None, get_m3u=False, client_ip=None):
         """
         Estrai la playlist m3u8
         Get the m3u8 playlist
@@ -389,6 +393,9 @@ class API:
             get_m3u (bool):
                 Se si desidera direttamente il file m3u
                 If you want the m3u file
+            client_ip (str | none):
+                L'IP del client da inoltrare nell'header "X-Forwarded-For".
+                Client IP to forward through the "X-Forwarded-For" header.
 
         Returns:
             tuple:
@@ -402,22 +409,22 @@ class API:
         ```
 
         """
-        headers = {
-            "user-agent": self.user_agent,
-        }
+        headers = {"user-agent": self.user_agent}
+        if client_ip:
+            headers["X-Forwarded-For"] = client_ip
         
         episode_id_qs = f"?episode_id={episode_id}" if episode_id else ""
         sc_iframe_url = f"{self._url.geturl()}/it/iframe/{content_id}{episode_id_qs}"
         
 
         # Extract the video page url
-        video_page_url = self._wbpage_as_text(sc_iframe_url)
+        video_page_url = self._wbpage_as_text(sc_iframe_url, headers=headers)
 
         # Get the iframe url and iframe page
         iframe_url = self._html_regex(
             r'<iframe[^>]+src\s*=\s*"([^"]+)', video_page_url, "iframe url"
         )
-        iframe_page = self._wbpage_as_text(iframe_url)
+        iframe_page = self._wbpage_as_text(iframe_url, headers=headers)
 
         # Extract the playlist params and url from the page js
         playlist_params = json.loads(

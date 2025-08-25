@@ -164,7 +164,13 @@ def get_full_info(slug):
 @app.route("/api/get-streaming-links/<content_id>")
 def get_streaming_links(content_id):
     episode_id = request.args.get("episode_id")
-    results = get_links(stre.fixed_sc, content_id, episode_id)
+    forwarded_for = request.headers.get("X-Forwarded-For")
+    client_ip = (
+        forwarded_for.split(",")[0].strip() if forwarded_for else request.remote_addr
+    )
+    results = get_links(
+        stre.fixed_sc, content_id, episode_id, client_ip=client_ip
+    )
     return jsonify(results)
 
 

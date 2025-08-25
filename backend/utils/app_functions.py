@@ -79,8 +79,8 @@ def get_extended_info(sc, slug):
     results = sc.load(slug)
     return results
 
-def get_links(sc, content_id, episode_id=None):
-    results = sc.get_links(content_id, episode_id)
+def get_links(sc, content_id, episode_id=None, client_ip=None):
+    results = sc.get_links(content_id, episode_id, client_ip=client_ip)
     return results
 
 VERSION_FILE = ".version"
