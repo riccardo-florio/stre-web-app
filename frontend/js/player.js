@@ -222,8 +222,7 @@
         if (!nextEpisodeInfo) return;
         const { baseId, slug, nextEp } = nextEpisodeInfo;
         try {
-            const links = await fetchStreamingLinks(baseId, nextEp.id);
-            const hlsLink = links.find(l => l.includes('playlist') || l.includes('.m3u8'));
+            const hlsLink = await fetchStreamingLinksDirect(baseId, nextEp.id);
             if (!hlsLink) return;
             const epCover = (nextEp.images && nextEp.images.length)
                 ? `https://cdn.${mainUrl}/images/${nextEp.images[0].filename}`

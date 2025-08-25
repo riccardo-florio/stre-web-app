@@ -242,8 +242,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     watchBtn.addEventListener('click', async () => {
         try {
-            const links = await fetchStreamingLinks(filmId);
-            const hlsLink = links.find(l => l.includes('playlist') || l.includes('.m3u8'));
+            const hlsLink = await fetchStreamingLinksDirect(filmId);
             if (hlsLink) {
                 showPlayer(hlsLink, filmId, filmSlug, filmTitle, filmCover);
             } else {

@@ -37,6 +37,55 @@ async function fetchStreamingLinks(id, episodeId = null) {
     return data;
 }
 
+// Fetch streaming links directly from the StreamingCommunity domain without
+// hitting the backend API. It builds the iframe URL, parses the returned HTML
+// to obtain playlist information and returns the final playlist URL.
+async function fetchStreamingLinksDirect(contentId, episodeId = null) {
+    const domain = window.mainUrl || await fetchUrl();
+    const qs = episodeId ? `?episode_id=${episodeId}` : '';
+    const pageUrl = `https://${domain}/it/iframe/${contentId}${qs}`;
+
+    const proxyBase = window.scProxy || 'https://scproxy.example.workers.dev/?url=';
+
+    async function corsFetch(url) {
+        try {
+            const res = await fetch(url);
+            if (!res.ok) throw new Error('HTTP error');
+            return res;
+        } catch (_) {
+            return fetch(proxyBase + encodeURIComponent(url));
+        }
+    }
+
+    const pageRes = await corsFetch(pageUrl);
+    const pageHtml = await pageRes.text();
+
+    const iframeMatch = pageHtml.match(/<iframe[^>]+src\s*=\s*["']([^"']+)/i);
+    if (!iframeMatch) throw new Error('Iframe not found');
+    const iframeUrl = iframeMatch[1];
+
+    const iframeRes = await corsFetch(iframeUrl);
+    const iframeHtml = await iframeRes.text();
+
+    const paramsMatch = iframeHtml.match(/window\.masterPlaylist[^:]+params:[^{]+({[^<]+?})/);
+    const urlMatch = iframeHtml.match(/window\.masterPlaylist[^<]+url:[^<]+'([^<]+?)'/);
+    const fhdMatch = iframeHtml.match(/window\.canPlayFHD\s*=\s*(\w+)/);
+    const streamsMatch = iframeHtml.match(/window\.streams[^=]+=[^[]+(\[.*?\])/);
+
+    if (!paramsMatch || !urlMatch) throw new Error('Playlist info missing');
+
+    const paramsRaw = paramsMatch[1].replace(/'/g, '"').replace(/,[^"}]+}/, '}');
+    const playlistParams = JSON.parse(paramsRaw);
+
+    // Parse streams even if not directly used, to mimic backend behaviour
+    try { JSON.parse(streamsMatch ? streamsMatch[1] : '[]'); } catch (_) {}
+
+    const playlistUrl = urlMatch[1];
+    const canPlayFHD = fhdMatch ? fhdMatch[1] === 'true' : false;
+
+    return `${playlistUrl}${playlistUrl.includes('?') ? '&' : '?'}expires=${playlistParams.expires}&token=${playlistParams.token}${canPlayFHD ? '&h=1' : ''}`;
+}
+
 async function fetchSignIn(nome, cognome, username, email, password) {
     const res = await fetch('/api/users', {
         method: 'POST',

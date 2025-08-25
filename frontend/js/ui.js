@@ -455,8 +455,7 @@ async function watchFromSearch(id, slug, title, cover, type) {
                 alert('Nessun episodio disponibile');
                 return;
             }
-            const links = await fetchStreamingLinks(id, firstEp.id);
-            hlsLink = links.find(l => l.includes('playlist') || l.includes('.m3u8'));
+            hlsLink = await fetchStreamingLinksDirect(id, firstEp.id);
             if (!hlsLink) {
                 alert('Nessun link disponibile');
                 return;
@@ -467,8 +466,7 @@ async function watchFromSearch(id, slug, title, cover, type) {
             finalId = `${id}-${firstEp.id}`;
             finalTitle = `${title} - S${firstEp.season}E${firstEp.episode} - ${firstEp.name}`;
         } else {
-            const links = await fetchStreamingLinks(id);
-            hlsLink = links.find(l => l.includes('playlist') || l.includes('.m3u8'));
+            hlsLink = await fetchStreamingLinksDirect(id);
             if (!hlsLink) {
                 alert('Nessun link disponibile');
                 return;
@@ -488,8 +486,7 @@ async function watchFromSearch(id, slug, title, cover, type) {
 async function resumeFromProgress(id, slug, title, cover) {
     try {
         const [baseId, episodeId] = id.split('-');
-        const links = await fetchStreamingLinks(baseId, episodeId || null);
-        const hlsLink = links.find(l => l.includes('playlist') || l.includes('.m3u8'));
+        const hlsLink = await fetchStreamingLinksDirect(baseId, episodeId || null);
         if (hlsLink) {
             filmId = id;
             filmTitle = title;
@@ -643,8 +640,7 @@ async function populateDownloadSection(slug, title) {
                 watchEpBtn.textContent = 'Guarda';
                 watchEpBtn.onclick = async () => {
                     try {
-                        const links = await fetchStreamingLinks(filmId, ep.id);
-                        const hlsLink = links.find(l => l.includes('playlist') || l.includes('.m3u8'));
+                        const hlsLink = await fetchStreamingLinksDirect(filmId, ep.id);
                         if (hlsLink) {
                             const epCover = (ep.images && ep.images.length)
                                 ? `https://cdn.${mainUrl}/images/${ep.images[0].filename}`
