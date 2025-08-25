@@ -2,6 +2,8 @@ from flask import Flask, send_from_directory, send_file, jsonify, Response, requ
 from asyncio import sleep
 from flask_socketio import SocketIO, emit
 import json
+import subprocess
+import sys
 from pathlib import Path
 from uuid import uuid4
 from datetime import datetime
@@ -132,6 +134,12 @@ def get_main_domain():
 @app.route("/api/get-app-version")
 def get_app_version():
     return jsonify(get_git_version())
+
+
+@app.route("/api/update-app", methods=["POST"])
+def update_app():
+    subprocess.Popen([sys.executable, "update.py"], cwd=BASE_DIR)
+    return jsonify({"status": "updating"}), 202
 
 @app.route("/api/refresh-domain", methods=["POST"])
 def refresh_domain():
