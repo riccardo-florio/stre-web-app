@@ -37,6 +37,12 @@ async function fetchLatestRelease() {
     return data;
 }
 
+async function updateApp() {
+    const res = await fetch('/api/update-app', { method: 'POST' });
+    const data = await res.json();
+    return data;
+}
+
 async function fetchStreamingLinks(id, episodeId = null) {
     const url = episodeId
         ? `/api/get-streaming-links/${id}?episode_id=${episodeId}`

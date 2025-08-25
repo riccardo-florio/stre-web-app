@@ -278,9 +278,29 @@ async function populateUpdateSection() {
                 <div class="mt-4 flex flex-col gap-2">${statusHtml}</div>
             </div>
         `;
+        const btn = document.getElementById('update-btn');
+        if (btn) {
+            btn.addEventListener('click', handleUpdateApp);
+        }
     } catch (err) {
         container.innerHTML = `<span class='text-red-600'>Errore nel recupero della release</span>`;
         console.error('Errore nel recupero della release', err);
+    }
+}
+
+async function handleUpdateApp() {
+    const btn = document.getElementById('update-btn');
+    if (btn) btn.disabled = true;
+    try {
+        await updateApp();
+        const status = document.getElementById('update-status');
+        if (status) {
+            status.textContent = 'Aggiornamento avviato...';
+            status.className = 'text-blue-600';
+        }
+    } catch (err) {
+        alert('Errore nell\'avvio dell\'aggiornamento');
+        if (btn) btn.disabled = false;
     }
 }
 
